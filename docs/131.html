@@ -1,0 +1,674 @@
+<html>
+<head>
+<title>Online Search Quality Evaluation With Kibana – Introduction</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">使用Kibana进行在线搜索质量评估——简介</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2023/03/online-search-quality-evaluation-with-kibana-introduction.html#0001-01-01">https://web.archive.org/web/sease.io/2023/03/online-search-quality-evaluation-with-kibana-introduction.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-800c86a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="800c86a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b29aae8 ot-flex-column-vertical" data-id="b29aae8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-87aac35 elementor-widget elementor-widget-text-editor" data-id="87aac35" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">嗨读者们！</p>
+<p class="has-text-align-justify translated">这篇文章的目的是向<strong>展示如何使用Kibana来有效地监控和分析在线搜索质量评估的结果</strong>，让用户更容易确定需要改进的地方。</p>
+<p class="has-text-align-justify translated">这篇博文提供了对在线搜索质量评估和A/B测试的一般理解，解释了为什么这些很重要。然后将介绍在实施这些评估中使用Kibana(及其背后的动机)。最后总结了使用Kibana进行在线搜索质量评估的优缺点。</p>
+<p class="has-text-align-justify translated">第二篇博文将会发布，重点是Kibana提供的具体特性和工具。它将提供如何创建可视化和仪表板的实际例子，以帮助比较不同的排名模型。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dea4072 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dea4072" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8076ae0 ot-flex-column-vertical" data-id="8076ae0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-89aed76 elementor-widget elementor-widget-iheading" data-id="89aed76" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// WHAT TO EXPECT TO FIND IN THIS BLOG POST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-03ac880 elementor-widget elementor-widget-text-editor" data-id="03ac880" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul>
+<li class="translated"><a href="#OnlineEvaluation">什么是网上评价？</a></li>
+<li class="translated"><a href="#ab"> A/B测试</a><br/>–<a href="#signal">信号测量</a>–<a href="#experiment">实验设计</a></li>
+<li class="translated"><a href="#implementation"> Kibana实现</a><br/>–<a href="#steps">实现步骤</a><br/>–<a href="#scenario">场景</a></li>
+<li class="translated">基巴纳的优点&amp;缺点</li>
+</ul>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7b66602 elementor-widget elementor-widget-spacer" data-id="7b66602" data-element_type="widget" id="OnlineEvaluation" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b130905 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b130905" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-604c6ea ot-flex-column-vertical" data-id="604c6ea" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-73705dc elementor-widget elementor-widget-iheading" data-id="73705dc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">什么是网上测评？</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-c753f31 elementor-widget elementor-widget-text-editor" data-id="c753f31" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">搜索质量评估是信息检索的一个分支，旨在评估您的搜索系统在满足用户信息需求方面有多好。有几种方法可以衡量搜索引擎的质量:从相关性的角度来看，搜索引擎应该返回与用户查询相关的结果，这可以通过离线和在线评估来衡量，这两种评估对企业来说都是至关重要的。</p>
+<p class="has-text-align-justify translated">首先，重要的是要做一个好的<strong>离线</strong>搜索质量评估，通过评估一个候选发布在网上的表现来尽可能多的验证它。</p>
+<p class="has-text-align-justify translated">一个已发布版本的成败最终取决于在线测试，在这里你可以实时(在生产中)测量你的业务的重要指标。</p>
+<p class="has-text-align-justify translated">在线评估仍然是证明您的模型在现实世界中表现如何的最佳方式，它可以为您提供必要的信息来评估、改进和更好地了解您的模型的行为。</p>
+<p class="translated">如果你感兴趣，可以看看我们之前讨论搜索质量评估的博客文章:</p>
+<ul>
+<li class="translated"><a href="https://web.archive.org/web/20230327130054/https://sease.io/2020/04/the-importance-of-online-testing-in-learning-to-rank-part-1.html">在线测试在学习排名中的重要性第一部分</a></li>
+<li class="translated"><a href="https://web.archive.org/web/20230327130054/https://sease.io/2020/05/online-testing-for-learning-to-rank-interleaving.html">学习排名在线测试:交错</a></li>
+<li class="translated"><a href="https://web.archive.org/web/20230327130054/https://sease.io/2021/01/offline-search-quality-evaluation-rated-ranking-evaluator-rre.html">离线搜索质量评价:评分排名评价员(RRE) </a></li>
+</ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-128a648 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="128a648" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-697c1bd ot-flex-column-vertical" data-id="697c1bd" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4687fa6 elementor-widget elementor-widget-spacer" data-id="4687fa6" data-element_type="widget" id="ab" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-38d3ac8 elementor-widget elementor-widget-iheading" data-id="38d3ac8" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">A/B测试</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-2f254af elementor-widget elementor-widget-text-editor" data-id="2f254af" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">一般来说，当一个新模型在离线测试中表现出令人满意的性能，并被认为是一个很好的候选时，直观的解决方案可能涉及用新模型替换以前的模型。然而，这种方法可能涉及潜在的风险，并不被认为是最佳的。作为最佳实践，建议对新旧模型进行在线比较，以评估它们在现实条件下的性能。怎么会？</p>
+<p class="has-text-align-justify translated">业界广泛传播的两种在线测试是A/B测试和交错测试。我们的实现使用了A/B测试，因此只简要讨论这种方法。</p>
+<p class="has-text-align-justify translated">从下图中可以很容易地看出，A/B测试包括通过将观众分成两组(每个模型一组)来比较两个模型，通常是50/50:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a089d85 elementor-widget elementor-widget-image" data-id="a089d85" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="58395" data-permalink="https://web.archive.org/web/20230327130054/https://sease.io/2023/03/online-search-quality-evaluation-with-kibana-introduction.html/pasted-image-0" data-orig-file="https://web.archive.org/web/20230327130054/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?fit=1146%2C638&amp;ssl=1" data-orig-size="1146,638" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="search quality evaluation kibana" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230327130054/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?fit=300%2C167&amp;ssl=1" data-large-file="https://web.archive.org/web/20230327130054/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?fit=1024%2C570&amp;ssl=1" decoding="async" width="1024" height="570" src="../Images/39444ea4a2497830cbbf19b4922215c9.png" class="attachment-large size-large wp-image-58395" alt="" loading="lazy" srcset="https://web.archive.org/web/20230327130054im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?w=1146&amp;ssl=1 1146w, https://web.archive.org/web/20230327130054im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?resize=300%2C167&amp;ssl=1 300w, https://web.archive.org/web/20230327130054im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?resize=1024%2C570&amp;ssl=1 1024w, https://web.archive.org/web/20230327130054im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?resize=768%2C428&amp;ssl=1 768w, https://web.archive.org/web/20230327130054im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?resize=720%2C401&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230327130054im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/pasted-image-0.png?fit=1024%2C570&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-d561e68 elementor-widget elementor-widget-text-editor" data-id="d561e68" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">与交错相比，A/B测试更容易实现，但需要更高的流量和时间，并且可能在整个实验期间将一组用户暴露于不良的排名模型。</p>
+<p class="translated">如果你想了解更多关于A/B测试的知识，可以看看这篇博文中关于<a href="https://web.archive.org/web/20230327130054/https://sease.io/2020/04/the-importance-of-online-testing-in-learning-to-rank-part-1.html">在线测试在学习排名</a>中的重要性的相关部分。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3df1fc6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3df1fc6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f685502 ot-flex-column-vertical" data-id="f685502" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9e93991 elementor-widget elementor-widget-spacer" data-id="9e93991" data-element_type="widget" id="signal" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-4588511 elementor-widget elementor-widget-iheading" data-id="4588511" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h3 class="main-heading translated">测量信号</h3>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-7cdd279 elementor-widget elementor-widget-text-editor" data-id="7cdd279" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">在线评估可以考虑几个指标，每个指标代表搜索质量的一个特定方面:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-d27e675 elementor-widget elementor-widget-iheading" data-id="d27e675" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>Click-Through Rate (CTR)</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-50c9a5f elementor-widget elementor-widget-text-editor" data-id="50c9a5f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">最普通也是最重要的。这是一个指标，计算方法是将文档/产品的点击数除以其收到的印象数或浏览量。我们的目标是优化CTR这意味着当用户搜索某样东西时，我们希望搜索结果会提示他们与搜索引擎进行交互，例如通过点击商品/产品，甚至下载歌曲，将酒店添加到收藏夹，或任何其他类型的交互。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-c8173b9 elementor-widget elementor-widget-iheading" data-id="c8173b9" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>Sale/Revenue Rate</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-5daf403 elementor-widget elementor-widget-text-editor" data-id="5daf403" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果您处于电子商务环境中，监控和优化销售和收入等业务指标至关重要；简单地实现高点击率并不能保证有效的搜索引擎性能，因为缺乏相应的销售或收入可能表明用户体验或底层搜索算法的其他问题。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-3d72a9e elementor-widget elementor-widget-iheading" data-id="3d72a9e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>DWELL Time</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-f3b6026 elementor-widget elementor-widget-text-editor" data-id="f3b6026" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">它是用户点击查询结果后在搜索引擎结果页面上花费的时间长度。该指标反映了用户在多长时间内发现内容有用或信息丰富，因此长时间表明点击的内容与用户相关。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7bc60ff elementor-widget elementor-widget-iheading" data-id="7bc60ff" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>Query Reformulations</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-9d2cd60 elementor-widget elementor-widget-text-editor" data-id="9d2cd60" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">查询重构的数量指的是用户修改原始搜索查询(即，重写相同的查询)以改进搜索引擎返回的结果的次数。一般来说，目标应该是用尽可能少的查询重构来达到令人满意的信息检索水平。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-1788d2e elementor-widget elementor-widget-iheading" data-id="1788d2e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>Bounce Rates</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-5868eff elementor-widget elementor-widget-text-editor" data-id="5868eff" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">搜索引擎中的跳出率是指仅访问一个页面后就离开搜索结果页面的用户的百分比。高跳出率可能表明搜索结果与用户的需求不相关或者用户体验差。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-81d72a7 elementor-widget elementor-widget-text-editor" data-id="81d72a7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">建议从最接近你的搜索引擎的信号开始，然后逐步监控全部。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-28a9aca ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="28a9aca" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6d0fd59 ot-flex-column-vertical" data-id="6d0fd59" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b1271a2 elementor-widget elementor-widget-spacer" data-id="b1271a2" data-element_type="widget" id="experiment" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-2c2400b elementor-widget elementor-widget-iheading" data-id="2c2400b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h3 class="main-heading translated">试验设计</h3>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-32406ad elementor-widget elementor-widget-text-editor" data-id="32406ad" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">某些方面可能受益于进一步的考虑，以优化实验的设计和执行，导致更有见地和更可靠的结果；例如，考虑使用不同设备对结果的影响，评估实验的最佳时间长度以确保充分的数据收集，或者确定最合适的模型数量以考虑可以帮助最大化实验的效率和有效性。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a500ad3 elementor-widget elementor-widget-iheading" data-id="a500ad3" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>1. TESTING DIFFERENT PLATFORMS</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-7217404 elementor-widget elementor-widget-text-editor" data-id="7217404" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在现实场景中，系统部署在不同的平台上:桌面、移动和平板电脑。在每个平台上独立测试模型是一个很好的实践，因为度量标准和目标受众可能因平台而异，并影响结果。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-6579d75 elementor-widget elementor-widget-iheading" data-id="6579d75" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>2. HOW LONG TO TEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-6f5da35 elementor-widget elementor-widget-text-editor" data-id="6f5da35" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">当结果的统计显著性足够高时，应停止测试。一般来说，模型的测试时间不应少于两周。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b129265 elementor-widget elementor-widget-iheading" data-id="b129265" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>3. HOW MANY MODELS</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-92bac9e elementor-widget elementor-widget-text-editor" data-id="92bac9e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">可以同时比较多个模型，从两个到多个。要比较的系统数量取决于可用的流量。然而，比较的系统越多，就越难确定谁是赢家。一般建议尽可能简化比较过程。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-10420b7 elementor-widget elementor-widget-text-editor" data-id="10420b7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">另一个需要考虑的重要方面是<strong>噪声</strong>。例如，当比较模型时，许多公司评估点击或销售的总数，没有意识到只关注来自他们在线评估的搜索引擎结果页面的交互(数据)而不考虑来自不同页面或来源的交互是重要的。我们的建议总是尽可能地消除或减少噪音。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3433d80 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3433d80" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8833ad9 ot-flex-column-vertical" data-id="8833ad9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b2e54b0 elementor-widget elementor-widget-iheading" data-id="b2e54b0" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// WANT TO KNOW MORE ABOUT HOW SEARCH QUALITY EVALUATION WORKS?</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-556dc52 elementor-widget elementor-widget-text-editor" data-id="556dc52" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">搜索结果的质量对任何搜索工程师和产品经理来说都是一件大事。<br/>我们花了很多精力来改进衡量这些指标的方法，并以不同的方式开展这些研究:</p>					</div>
+						</div>
+				</div>
+				<section class="elementor-section elementor-inner-section elementor-element elementor-element-50cf29d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="50cf29d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-a39f46b ot-flex-column-vertical" data-id="a39f46b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0064d70 elementor-widget elementor-widget-iserv_box_2" data-id="0064d70" data-element_type="widget" data-widget_type="iserv_box_2.default">
+				<div class="elementor-widget-container">
+			
+		<div class="serv-box-2 s2">
+			<span class="big-number">01</span>
+			<div class="icon-main">
+		        			    		        	        </div>
+	        <div class="content-box">
+	            <h5 class="translated">搜索质量评估培训</h5>
+				<div>We offer different Search Quality Evaluation Training sessions.</div>
+				<a href="https://web.archive.org/web/20230327130054/https://sease.io/training/search-quality-evaluation-trainings" class="btn-details"><i class="flaticon-right-arrow-1"/> LEARN MORE</a>
+	        </div>
+	    </div>
+
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+				<div class="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-706718a ot-flex-column-vertical" data-id="706718a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d5daeb4 elementor-widget elementor-widget-iserv_box_2" data-id="d5daeb4" data-element_type="widget" data-widget_type="iserv_box_2.default">
+				<div class="elementor-widget-container">
+			
+		<div class="serv-box-2 s2">
+			<span class="big-number">02</span>
+			<div class="icon-main">
+		        			    		        	        </div>
+	        <div class="content-box">
+	            <h5 class="translated">搜索结果质量的免费工具</h5>
+				<div>We develop a free tool for evaluate the quality of your search engine.</div>
+				<a href="https://web.archive.org/web/20230327130054/https://sease.io/rated-ranking-evaluator-enterprise" class="btn-details"><i class="flaticon-right-arrow-1"/> DOWNLOAD IT</a>
+	        </div>
+	    </div>
+
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+				<div class="elementor-column elementor-col-33 elementor-inner-column elementor-element elementor-element-76e032f ot-flex-column-vertical" data-id="76e032f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b8ee40b elementor-widget elementor-widget-iserv_box_2" data-id="b8ee40b" data-element_type="widget" data-widget_type="iserv_box_2.default">
+				<div class="elementor-widget-container">
+			
+		<div class="serv-box-2 s2">
+			<span class="big-number">03</span>
+			<div class="icon-main">
+		        			    		        	        </div>
+	        <div class="content-box">
+	            <h5 class="translated">关于搜索质量评估的博客帖子</h5>
+				<div>We publish weekly blog posts and a lot of them are about this topic!</div>
+				<a href="https://web.archive.org/web/20230327130054/https://sease.io/tag/search-quality-evaluation" class="btn-details"><i class="flaticon-right-arrow-1"/> CHECK THEM</a>
+	        </div>
+	    </div>
+
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-03a8fe0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="03a8fe0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-be05504 ot-flex-column-vertical" data-id="be05504" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f1788ce elementor-widget elementor-widget-spacer" data-id="f1788ce" data-element_type="widget" id="implementation" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-77b6019 elementor-widget elementor-widget-iheading" data-id="77b6019" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">基巴纳实施</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-75159f7 elementor-widget elementor-widget-text-editor" data-id="75159f7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">现在，让我们深入研究我们的Kibana实现。</p>
+<p class="has-text-align-justify translated"><strong> Kibana </strong>是一个数据可视化和探索平台，它提供了一个web界面，用于交互、搜索、分析和可视化存储在Elasticsearch中的数据，使用户可以轻松创建和保存自定义仪表板，并执行高级数据分析和报告。</p>
+<p class="translated">选择这种实现方式背后的<em> <strong>主要因素</strong> </em>有哪些？</p>
+<p class="has-text-align-justify translated">尽管在线评估工具具有其他优势，但目前在可使用的指标和数据方面存在一些限制:</p>
+<ul>
+<li class="translated">寻找和使用用于优化模型的相同指标是一项挑战</li>
+<li class="translated">很难消除外部因素或损坏的数据</li>
+</ul>
+<p class="translated">这就是为什么我们选择使用Kibana来实现我们的在线评估。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-27253e6 elementor-widget elementor-widget-spacer" data-id="27253e6" data-element_type="widget" id="steps" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-1ab87e7 elementor-widget elementor-widget-iheading" data-id="1ab87e7" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h3 class="main-heading translated">实施步骤</h3>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-1579622 elementor-widget elementor-widget-text-editor" data-id="1579622" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">下面是用Kibana实现这种在线搜索质量评估的管道:</p>
+<ol>
+<li class="translated">创建一个Elasticsearch实例并注册Kibana。</li>
+<li class="translated">创建一个索引，如果可能，指定一个显式映射。</li>
+<li class="translated">设置并开始A/B测试。</li>
+<li class="translated">收集用户交互数据并建立索引。</li>
+<li class="translated">在Kibana中创建一个<a href="https://web.archive.org/web/20230327130054/https://www.elastic.co/guide/en/kibana/current/data-views.html">数据视图</a>，以访问您想要探索的Elasticsearch数据。</li>
+<li class="translated">利用Kibana工具创建可视化和仪表板来比较不同的模型。</li>
+</ol>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a7be14c elementor-widget elementor-widget-spacer" data-id="a7be14c" data-element_type="widget" id="scenario" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-1cef8e9 elementor-widget elementor-widget-iheading" data-id="1cef8e9" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h3 class="main-heading translated">方案</h3>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-2a8678d elementor-widget elementor-widget-text-editor" data-id="2a8678d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">在这种情况下，我们假设在<em>图书电子商务场景</em>中，我们每天收集用户交互，以了解用户如何与搜索引擎交互，例如:</p>
+<ul>
+<li class="translated"><strong> bookId </strong>:标识特定产品</li>
+<li class="translated"><strong> testGroup </strong>:识别分配给用户组的型号(名称)</li>
+<li class="translated"><strong> queryId </strong>:识别用户查询</li>
+<li class="translated"><strong>时间戳</strong>:执行时间分析</li>
+<li class="translated"><strong>互动类型</strong>(印象、点击、添加到购物车、销售)，了解发生的互动类型。我们还包括了4个单布尔字段(包含0或1，取决于出现的次数),它们只是用于创建特定可视化的计算目的:<ul>
+<li class="translated"><strong>印象</strong></li>
+<li class="translated"><strong>点击</strong></li>
+<li class="translated"><strong>添加图标</strong></li>
+<li class="translated"><strong>特卖</strong></li>
+</ul>
+</li>
+<li class="translated"><strong> queryResultCount </strong>(查询命中)，根据给定查询返回的搜索结果数量进行分析</li>
+</ul>
+<p class="translated">注意:请随意考虑和添加任何对您的案例和领域有益的附加功能。</p>
+<p class="has-text-align-justify translated">我们在Elasticseach索引中索引这些数据，并利用Kibana通过创建特定的可视化(基于过滤数据)来探索这些数据并评估模型(通过<code>testGroup</code>字段标识)的性能。</p>
+<p class="translated">请参考<a href="https://web.archive.org/web/20230327130054/https://sease.io/wp-admin/post.php?post=57612&amp;action=edit&amp;calypsoify=1">第2部分</a>中的“可视化示例”描述。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d710bf9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d710bf9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3a9eeb8 ot-flex-column-vertical" data-id="3a9eeb8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-25c835b elementor-widget elementor-widget-spacer" data-id="25c835b" data-element_type="widget" id="pros" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-a4b3b86 elementor-widget elementor-widget-iheading" data-id="a4b3b86" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">基巴纳利弊</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-d598fe1 elementor-widget elementor-widget-text-editor" data-id="d598fe1" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">乐总结了第一篇博客的优缺点。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-05768a9 elementor-widget elementor-widget-iheading" data-id="05768a9" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>PROS</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-739ec69 elementor-widget elementor-widget-text-editor" data-id="739ec69" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul>
+<li class="translated">Kibana有一个简单直观的图形用户界面。</li>
+<li class="translated">它能够创建详细的报告仪表板(将几个可视化集合在一起)。</li>
+<li class="translated">它能够过滤不想要的数据(损坏的交互/测试交互/不想要的源)。</li>
+<li class="translated">可以使用过滤器面板指定要突出显示的数据。</li>
+<li class="translated">如果您索引新数据，可视化效果会自动更新。</li>
+<li class="translated">它提供了使用<strong>‘Export objects API’</strong>导出(和导入)可视化和仪表板的可能性，允许在未来的项目中复制自定义评估。</li>
+</ul>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-5fe20d5 elementor-widget elementor-widget-iheading" data-id="5fe20d5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>CONS</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-a96767b elementor-widget elementor-widget-text-editor" data-id="a96767b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul>
+<li class="translated"><strong> VEGA </strong>非常强大，但使用起来并不那么直观和简单(<em>“推荐给擅长手动编写Elasticsearch查询的高级用户”</em>)。</li>
+<li class="translated">如果测试了一个新模型(模型名称改变)或者数据视图被重命名，您将需要手动更新所有可视化中的过滤器。</li>
+</ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-363b710a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="363b710a" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1c178af2 ot-flex-column-vertical" data-id="1c178af2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4bb386cc elementor-widget elementor-widget-iheading" data-id="4bb386cc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">还在纠结用Kibana做在线搜索质量评估？</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-7eb48d05 elementor-widget elementor-widget-text-editor" data-id="7eb48d05" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">别担心，我们是来帮忙的！<br/>我们的团队提供<span style="color: #ffcc00;"> <strong>咨询服务</strong> </span>帮助您提高搜索结果质量，充分利用您的系统。立即联系我们，了解更多信息！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7391f88b elementor-widget elementor-widget-ibutton" data-id="7391f88b" data-element_type="widget" data-widget_type="ibutton.default">
+				<div class="elementor-widget-container">
+					<div class="ot-button">
+			<a href="https://web.archive.org/web/20230327130054/mailto:info@sease.io" class="octf-btn octf-btn-primary">Send us an e-mail</a>
+	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3f1afc90 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3f1afc90" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7efe4472 ot-flex-column-vertical" data-id="7efe4472" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-47738e11 elementor-widget elementor-widget-iheading" data-id="47738e11" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-6f358898 elementor-widget elementor-widget-text-editor" data-id="6f358898" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这个关于Kibana在线搜索质量评估的帖子吗？不要忘记订阅我们的时事通讯，以便在信息检索世界中保持最新状态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-636fb25d elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="636fb25d" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.9.2 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20230327130054/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1679922055"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

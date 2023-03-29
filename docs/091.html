@@ -1,0 +1,632 @@
+<html>
+<head>
+<title>Have Neural Networks Killed the Inverted Index?</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">神经网络杀死倒排索引了吗？</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2022/04/have-neural-networks-killed-the-inverted-index.html#0001-01-01">https://web.archive.org/web/sease.io/2022/04/have-neural-networks-killed-the-inverted-index.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-73ab0d5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="73ab0d5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b4fb8ab ot-flex-column-vertical" data-id="b4fb8ab" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-934a7e6 elementor-widget elementor-widget-text-editor" data-id="934a7e6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在第一篇致力于使用深度学习来提高搜索相关性的博客文章中，我们已经了解了<a href="https://web.archive.org/web/20220930010934/https://sease.io/2021/12/using-bert-to-improve-search-relevance.html">如何利用BERT来执行文档重新排序</a>。不幸的是，那篇博客文章中提出的交叉熵架构仍然太昂贵，无法在大量文档上运行，因此我们仍然需要依靠一种解决方案来执行一定数量的候选项的检索。</p>
+<p class="translated"><!-- wp:paragraph -->T3<!-- wp:paragraph -->T5】</p>
+<p class="translated">在这一集里，我们将谈论deep impact<a href="https://web.archive.org/web/20220930010934/https://arxiv.org/pdf/2104.12016.pdf">【1】</a>，这是一种新的文档术语加权方案，适用于使用标准倒排索引的高效检索。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f294cac ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f294cac" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b212d08 ot-flex-column-vertical" data-id="b212d08" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-16cd208 elementor-widget elementor-widget-iheading" data-id="16cd208" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">动机</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0133f3e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0133f3e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0119c1c ot-flex-column-vertical" data-id="0119c1c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bb80dea elementor-widget elementor-widget-text-editor" data-id="bb80dea" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">正如我们在本系列的前一篇博文中看到的，DocT5Query是一个<a href="https://web.archive.org/web/20220930010934/https://sease.io/2022/01/tackling-vocabulary-mismatch-with-document-expansion.html">文档扩展</a>方法，用扩展术语来丰富原始文档集合。这可以被看作是一种双重的方法。通过添加已经是文档一部分的术语，它重写了它们的频率。此外，为了解决词汇不匹配的问题，它将原本不属于文档的新术语注入到段落中。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fea4572 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fea4572" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8e8f76b ot-flex-column-vertical" data-id="8e8f76b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-938581c elementor-widget elementor-widget-text-editor" data-id="938581c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"align":"center","id":45576,"width":512,"height":143,"sizeSlug":"large","linkDestination":"none"} -->T11】</p>
+<figure class="wp-block-image aligncenter size-large is-resized"><img data-attachment-id="45576" data-permalink="https://web.archive.org/web/20220930010934/https://sease.io/2022/04/have-neural-networks-killed-the-inverted-index.html/doct5q" data-orig-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?fit=2709%2C753&amp;ssl=1" data-orig-size="2709,753" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;1&quot;}" data-image-title="doct5q" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?fit=300%2C83&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?fit=1024%2C285&amp;ssl=1" loading="lazy" class="wp-image-45576 aligncenter" src="../Images/2f6283f7d8ff594b92e1a1362b2fe26b.png" alt="" width="512" height="143" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?w=2709&amp;ssl=1 2709w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?resize=300%2C83&amp;ssl=1 300w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?resize=1024%2C285&amp;ssl=1 1024w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?resize=768%2C213&amp;ssl=1 768w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?resize=1536%2C427&amp;ssl=1 1536w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?resize=2048%2C569&amp;ssl=1 2048w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?resize=720%2C200&amp;ssl=1 720w" sizes="(max-width: 512px) 100vw, 512px" data-original-src="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/doct5q.jpg?resize=512%2C143&amp;ssl=1"/>
+<figcaption>Different contributions to effectiveness metrics of DocT5Query on the MSMARCO passage ranking collection.</figcaption>
+</figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b618a2d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b618a2d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2246aef ot-flex-column-vertical" data-id="2246aef" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-413135a elementor-widget elementor-widget-text-editor" data-id="413135a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">上表总结了DocT5Query应用于MS MARCO passage排名集合<a href="https://web.archive.org/web/20220930010934/https://microsoft.github.io/msmarco/Datasets">【2】</a>时的效果，并隔离了两个贡献。正如我们所看到的，注射对回忆有更好的影响。这可以解释为，新注入的术语允许查询匹配更多相关的文档，而重写组件提供了更好的结果排序。</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated">显然，在重写文档术语频率的方式上，重写并不遵循任何特定的策略，但它主要取决于DocT5Query方法预测的查询。这激发了DeepImpact方法，其中首先利用DocT5Query注入新术语，然后学习旧术语和新注入术语的正确影响分数(而不是像BM25那样依赖简单的频率)。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2bbc170 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2bbc170" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d1028d8 ot-flex-column-vertical" data-id="d1028d8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3ab81d8 elementor-widget elementor-widget-iheading" data-id="3ab81d8" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">体系结构</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-41df3a7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="41df3a7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-dcdd089 ot-flex-column-vertical" data-id="dcdd089" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-34650b5 elementor-widget elementor-widget-text-editor" data-id="34650b5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">DeepImpact的整体架构如下图所示。它由一个语境化的语言模型和一个多层感知器(MLP)组成，具有ReLU激活，为文档中的每个唯一术语产生单值分数，代表其影响。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ceaf975 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ceaf975" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b51d573 ot-flex-column-vertical" data-id="b51d573" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-acd97da elementor-widget elementor-widget-text-editor" data-id="acd97da" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":45572,"sizeSlug":"large","linkDestination":"none"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="45572" data-permalink="https://web.archive.org/web/20220930010934/https://sease.io/2022/04/have-neural-networks-killed-the-inverted-index.html/arch" data-orig-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?fit=2210%2C1814&amp;ssl=1" data-orig-size="2210,1814" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;1&quot;}" data-image-title="arch" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?fit=300%2C246&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?fit=1024%2C841&amp;ssl=1" loading="lazy" width="2210" height="1814" class="wp-image-45572" src="../Images/1438368d8e729feee44b8866c6ae11e7.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?w=2210&amp;ssl=1 2210w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?resize=300%2C246&amp;ssl=1 300w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?resize=1024%2C841&amp;ssl=1 1024w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?resize=768%2C630&amp;ssl=1 768w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?resize=1536%2C1261&amp;ssl=1 1536w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?resize=2048%2C1681&amp;ssl=1 2048w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?resize=720%2C591&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/arch.jpg?resize=1024%2C841&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c979708 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c979708" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d13e207 ot-flex-column-vertical" data-id="d13e207" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-85d1fd3 elementor-widget elementor-widget-text-editor" data-id="85d1fd3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">查询-文档分数被计算为由与查询中的关键词词汇匹配的文档术语的模型预测的影响分数的总和。</p>
+<p class="translated"><strong>训练</strong>:使用三元组来训练模型，三元组由每个样本的一个查询、一个相关段落和一个假定的非相关段落组成。对于每一个三元组，通过将每一个文档转换成得分列表，并且只对与匹配查询的文档术语相对应的得分求和，来计算相应的两个文档的两个得分。然后，通过在文档的计算得分上的成对softmax交叉熵损失来优化模型。</p>
+<p class="translated"><strong>索引生成</strong>:在训练阶段之后，DeepImpact可以利用学习到的术语加权方案来预测文档中每个标记的语义重要性，而无需进行查询。每个文档被表示为一个术语-分数对的列表，它们被转换成一个倒排索引。分数首先被量化，然后被存储作为术语频率的替换。</p>
+<p class="translated">【T6<!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated"><strong>查询处理</strong>:然后可以像往常一样部署和搜索索引以进行有效的查询处理，但是，不是依赖于术语频率来计算BM25分数，而是可以通过对每个术语影响贡献求和来计算查询文档分数。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3dcff8d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3dcff8d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1589a9f ot-flex-column-vertical" data-id="1589a9f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-56b19ef elementor-widget elementor-widget-iheading" data-id="56b19ef" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">时间表</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-88494ed ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="88494ed" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-55c836e ot-flex-column-vertical" data-id="55c836e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-82611ab elementor-widget elementor-widget-text-editor" data-id="82611ab" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">流行的BM25排名函数可以追溯到1994年，当时它是由Robertson等人<a href="https://web.archive.org/web/20220930010934/https://trec.nist.gov/pubs/trec3/papers/city.ps.gz">【3】</a>首次提出的。由于其多重优势，它是事实上的标准。首先，它不需要任何特定的训练，因为它通过查看术语在文档中的频率相对于它们在文本集合中的总频率来计算相关性。此外，它非常有效，因为计算查询-文档相关性分数可以通过少量的算术运算来完成。</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated">BM25的统治地位在很长一段时间内都是无可争议的，只是最近，随着深度学习的出现，事情似乎开始发生变化。2019年DeepCT和DocT5Query问世。前者也是术语加权方案，但是除了不是非常有效之外，还需要每个单词的基本事实术语权重，不能自动调整用于识别相关文档的下游目标的训练。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1730eec ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1730eec" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b797ff6 ot-flex-column-vertical" data-id="b797ff6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4c7667d elementor-widget elementor-widget-text-editor" data-id="4c7667d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":45578,"sizeSlug":"large","linkDestination":"none"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="45578" data-permalink="https://web.archive.org/web/20220930010934/https://sease.io/2022/04/have-neural-networks-killed-the-inverted-index.html/timeline" data-orig-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?fit=3838%2C1076&amp;ssl=1" data-orig-size="3838,1076" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;1&quot;}" data-image-title="timeline" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?fit=300%2C84&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?fit=1024%2C287&amp;ssl=1" loading="lazy" width="3838" height="1076" class="wp-image-45578" src="../Images/25db0a82cc70dad95c7d889e9f69c399.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?w=3838&amp;ssl=1 3838w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?resize=300%2C84&amp;ssl=1 300w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?resize=1024%2C287&amp;ssl=1 1024w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?resize=768%2C215&amp;ssl=1 768w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?resize=1536%2C431&amp;ssl=1 1536w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?resize=2048%2C574&amp;ssl=1 2048w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?resize=720%2C202&amp;ssl=1 720w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?w=3000&amp;ssl=1 3000w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/timeline.jpg?resize=1024%2C287&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-48cc90f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="48cc90f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-889489c ot-flex-column-vertical" data-id="889489c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6611a94 elementor-widget elementor-widget-text-editor" data-id="6611a94" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">DeepImpact解决了这个问题，因为它依赖于成对交叉熵损失，类似于此处介绍的<a href="https://web.archive.org/web/20220930010934/https://sease.io/2021/12/using-bert-to-improve-search-relevance.html">微调方法。不是像在DeepCT中那样在不考虑术语在文档中的共现的情况下学习独立的术语级得分，或者像在DocT5Query中那样依赖于不变的BM25得分，DeepImpact直接优化查询术语影响的总和，以最大化查询的相关和非相关段落之间的得分差异。</a></p>
+<p class="translated">在DeepImpact发布几个月后，其他的方法被提出，比如uniCOIL<a href="https://web.archive.org/web/20220930010934/https://arxiv.org/abs/2106.14807">【4】</a>和spladev 2<a href="https://web.archive.org/web/20220930010934/https://arxiv.org/abs/2109.10086">【5】</a>。正如我们将要看到的，这些方法比DeepImpact更有效，但它们的模型架构也更复杂。这两种方法不仅使用文档影响来计算相关性分数，还利用了查询词权重。此外，除了文档扩展之外，SPLADEv2还使用查询扩展，并提出用知识提取来训练模型。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph -->T11】</p>
+<p class="translated">我们可以将DeepImpact、uniCOIL和SPLADEv2归入同一个类别，我们将其命名为学习术语影响(LTI)框架。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-64740b5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="64740b5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f0ebb26 ot-flex-column-vertical" data-id="f0ebb26" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4c7997b elementor-widget elementor-widget-iheading" data-id="4c7997b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">结果</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8b09c32 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8b09c32" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c447197 ot-flex-column-vertical" data-id="c447197" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-53140e3 elementor-widget elementor-widget-text-editor" data-id="53140e3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">下图显示了上述所有方法在MARCO Dev女士查询上的比较，我们可以立即看到，LTI方法远远优于所有以前的方法。SPLADEv2出现两次，因为一个是用知识提炼训练的模型。考虑到知识提炼可以应用于任何LTI方法，为了公平的比较，我们应该在单独的图中查看有和没有知识提炼的结果。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5efbd0a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5efbd0a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-71ffb12 ot-flex-column-vertical" data-id="71ffb12" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ef4ecb8 elementor-widget elementor-widget-text-editor" data-id="ef4ecb8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":45574,"sizeSlug":"large","linkDestination":"none"} -->T13】</p>
+<figure class="wp-block-image size-large"><img data-attachment-id="45574" data-permalink="https://web.archive.org/web/20220930010934/https://sease.io/2022/04/have-neural-networks-killed-the-inverted-index.html/plot-deepimpact" data-orig-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?fit=1873%2C1384&amp;ssl=1" data-orig-size="1873,1384" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="plot-deepimpact" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?fit=300%2C222&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?fit=1024%2C757&amp;ssl=1" loading="lazy" width="1873" height="1384" class="wp-image-45574" src="../Images/c2bfe529884fc084f1248b2d46333028.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?w=1873&amp;ssl=1 1873w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?resize=300%2C222&amp;ssl=1 300w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?resize=1024%2C757&amp;ssl=1 1024w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?resize=768%2C567&amp;ssl=1 768w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?resize=1536%2C1135&amp;ssl=1 1536w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?resize=720%2C532&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/01/plot-deepimpact.png?resize=1024%2C757&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9f91d28 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9f91d28" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-11a1f08 ot-flex-column-vertical" data-id="11a1f08" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-aa42cc4 elementor-widget elementor-widget-text-editor" data-id="aa42cc4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">uniCOIL和SPLADEv2都依赖于更复杂的架构，这使它们更有效，但同时也更慢。特别是，SPLADEv2比DeepImpact慢十倍以上，这对于大规模生产系统来说是一种不可行的方法。</p>
+<p class="translated">此外，值得一提的是，当这些方法用于一组非常不同的查询(如TREC DL 2019查询日志)时，uniCOIL和SPLADEv2获得的质量改善不太明显(甚至不存在)。我们可以看到SPLADEv2变得比其他两种方法更差，而uniCOIL仅比DeepImpact好一点，但速度慢了2倍多。</p>
+<p class="translated"><!-- wp:paragraph -->T15<!-- wp:paragraph -->T17<!-- wp:paragraph -->T19】</p>
+<p class="translated">这种行为可能源于这样一个事实，即由于uniCOIL和SPLADEv2是更复杂的模型，它们倾向于过度拟合数据，从而降低了对新数据进行归纳的能力。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5a0a52f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5a0a52f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a080ab2 ot-flex-column-vertical" data-id="a080ab2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-17a0e7d elementor-widget elementor-widget-text-editor" data-id="17a0e7d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":45745,"sizeSlug":"large","linkDestination":"none"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="45745" data-permalink="https://web.archive.org/web/20220930010934/https://sease.io/2022/04/have-neural-networks-killed-the-inverted-index.html/trec2019" data-orig-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?fit=3778%2C1502&amp;ssl=1" data-orig-size="3778,1502" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;1&quot;}" data-image-title="trec2019" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?fit=300%2C119&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930010934/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?fit=1024%2C407&amp;ssl=1" loading="lazy" width="3778" height="1502" class="wp-image-45745" src="../Images/30bf8dd9a58063f5551c3ea60856c08d.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?w=3778&amp;ssl=1 3778w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?resize=300%2C119&amp;ssl=1 300w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?resize=1024%2C407&amp;ssl=1 1024w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?resize=768%2C305&amp;ssl=1 768w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?resize=1536%2C611&amp;ssl=1 1536w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?resize=2048%2C814&amp;ssl=1 2048w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?resize=720%2C286&amp;ssl=1 720w, https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?w=3000&amp;ssl=1 3000w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20220930010934im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/02/trec2019.jpg?resize=1024%2C407&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e594b8a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e594b8a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-99f6295 ot-flex-column-vertical" data-id="99f6295" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-89adc4d elementor-widget elementor-widget-iheading" data-id="89adc4d" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">结论</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9e35f70 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9e35f70" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c9df8f4 ot-flex-column-vertical" data-id="c9df8f4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6108ec6 elementor-widget elementor-widget-text-editor" data-id="6108ec6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在这篇博客文章中，我们研究了DeepImpact，这是一种新的第一阶段检索方法，它利用传统倒排索引和上下文化语言模型的组合来实现高效检索。通过估计语义重要性，DeepImpact为文档集合的每个标记生成一个单值影响分数。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-84db9ae ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="84db9ae" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0eda3ea ot-flex-column-vertical" data-id="0eda3ea" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-acb1744 elementor-widget elementor-widget-iheading" data-id="acb1744" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">履行</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-28af28a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="28af28a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7c1a638 ot-flex-column-vertical" data-id="7c1a638" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-eb59db7 elementor-widget elementor-widget-text-editor" data-id="eb59db7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在本节中，我们将看到DeepImpact的简化实现。具体来说，我们将看到如何定义模型以及成对训练步骤是什么样子的。</p>
+<p class="translated"><!-- wp:paragraph -->T3<!-- wp:paragraph -->T5】</p>
+<p class="translated">特别是，我们将看到如何定义模型以及如何计算查询文档相关性分数。我们将使用py torch<a href="https://web.archive.org/web/20220930010934/https://pytorch.org/">【6】</a>和hugging face Transformers<a href="https://web.archive.org/web/20220930010934/https://github.com/huggingface/transformers">【7】</a>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f3f0a19 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f3f0a19" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c700142 ot-flex-column-vertical" data-id="c700142" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-37411e0 elementor-widget elementor-widget-iheading" data-id="37411e0" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">模型</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8f06f2e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8f06f2e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1d8626b ot-flex-column-vertical" data-id="1d8626b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ec36aef elementor-widget elementor-widget-text-editor" data-id="ec36aef" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在下面的代码片段中，我们将定义我们的模型。我们从transformers库提供的BertPreTrainedModel类中派生出我们的模型。语境化语言模型编码器只是一个BertModel，而影响分数编码器被定义为两个线性层的序列，其中有ReLU激活，中间有一个dropout层。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c1fd1a6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c1fd1a6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-17fac73 ot-flex-column-vertical" data-id="17fac73" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4c113b3 elementor-widget elementor-widget-text-editor" data-id="4c113b3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre><code>from transformers import *
+
+class DeepImpact(BertPreTrainedModel):
+    def __init__(self, config):
+        super(DeepImpact, self).__init__(config)
+        self.bert = BertModel(config)
+        self.impact_score_encoder = nn.Sequential(
+            nn.Linear(config.hidden_size, config.hidden_size),
+            nn.ReLU(),
+            nn.Dropout(config.hidden_dropout_prob),
+            nn.Linear(config.hidden_size, 1),
+            nn.ReLU()
+        )
+        self.init_weights()</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3ffea63 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3ffea63" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-94c7ef6 ot-flex-column-vertical" data-id="94c7ef6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-793ba9a elementor-widget elementor-widget-iheading" data-id="793ba9a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">影响分数计算</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-970ff56 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="970ff56" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-272cae5 ot-flex-column-vertical" data-id="272cae5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ba2af81 elementor-widget elementor-widget-text-editor" data-id="ba2af81" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">为了计算查询-文档相关性分数，我们需要计算一个query_mask，它是一个位向量，其位被设置为文档术语与查询匹配的位置。编码文档(由input_ids、attention_mask和token_type_ids组成)经过BERT和影响分数编码器。最后，使用查询掩码过滤为文档中的所有术语生成的分数，以便只对匹配术语的分数求和。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-19329bf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="19329bf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3c43c88 ot-flex-column-vertical" data-id="3c43c88" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3fcbdc3 elementor-widget elementor-widget-text-editor" data-id="3fcbdc3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre><code>def forward(self, input_ids, attention_mask, token_type_ids, query_mask):
+    outputs = self.bert.forward(input_ids, attention_mask=attention_mask, 
+token_type_ids=token_type_ids)[0]
+    doc_scores = self.impact_score_encoder(outputs)
+    return (query_mask * doc_scores).sum(dim=1)</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-77bc85c2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="77bc85c2" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5df29f79 ot-flex-column-vertical" data-id="5df29f79" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7b10df20 elementor-widget elementor-widget-iheading" data-id="7b10df20" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-40c81eba elementor-widget elementor-widget-text-editor" data-id="40c81eba" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们在搜索培训中做<a href="https://web.archive.org/web/20220930010934/https://sease.io/artificial-intelligence-in-search-training">人工智能吗？<br/>我们也提供这方面的咨询，</a><a href="https://web.archive.org/web/20220930010934/https://sease.io/contacts">如果你想借助人工智能的力量让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-17c521fe ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="17c521fe" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-62d01325 ot-flex-column-vertical" data-id="62d01325" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6a30289c elementor-widget elementor-widget-iheading" data-id="6a30289c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-13badd1a elementor-widget elementor-widget-text-editor" data-id="13badd1a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于神经网络杀死了倒排索引的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-26c9a444 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="26c9a444" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220930010934/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664500174"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

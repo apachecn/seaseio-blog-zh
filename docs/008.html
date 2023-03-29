@@ -1,0 +1,518 @@
+<html>
+<head>
+<title>Lucene Document Classification</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">Lucene文档分类</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2015/07/lucene-document-classification.html#0001-01-01">https://web.archive.org/web/sease.io/2015/07/lucene-document-classification.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-5c478d0b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5c478d0b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-57a5dc09 ot-flex-column-vertical" data-id="57a5dc09" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6b58b886 elementor-widget elementor-widget-iheading" data-id="6b58b886" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">介绍</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4cf50da3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4cf50da3" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5a3290a5 ot-flex-column-vertical" data-id="5a3290a5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6e0931ee elementor-widget elementor-widget-text-editor" data-id="6e0931ee" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这篇博文描述了Lucene分类模块中使用的使文本分类适应文档(多字段)分类的方法。</p><p class="translated">机器学习和搜索一直是紧密联系在一起的。 <br/> <span style="font-family: inherit;">机器学习可以在很多方面帮助改善搜索体验，从文档语料库中提取更多信息，自动分类并聚类。</span> <br/> <span style="font-family: inherit;">另一方面，搜索相关的数据结构在内容上与用来解决问题的ML模型非常相似，所以我们可以用它们来构建自己的算法。</span> <br/> <span style="font-family: inherit;">但是让我们按顺序来……</span><br/><span style="font-family: inherit;">在这篇文章中，我们将探讨自动分类对于简化用户搜索体验有多重要，以及如何能够直接从Lucene、从我们已经存在的索引、没有任何外部依赖或训练模型中获得一个简单的、开箱即用的无痛分类。</span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3283593b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3283593b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c458c3e ot-flex-column-vertical" data-id="c458c3e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-362a19c1 elementor-widget elementor-widget-iheading" data-id="362a19c1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">分类</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-49b0715e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="49b0715e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5425c7ca ot-flex-column-vertical" data-id="5425c7ca" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3a166f05 elementor-widget elementor-widget-text-editor" data-id="3a166f05" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><span style="font-family: inherit;">来自维基百科:</span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-39ed41b0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="39ed41b0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1dac1e86 ot-flex-column-vertical" data-id="1dac1e86" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-10a8ed05 elementor-widget elementor-widget-text-editor" data-id="10a8ed05" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><span style="font-family: inherit;"><span style="line-height: 22px;"/><strong>机器学习中的</strong><span style="line-height: 22px;"/><strong>统计</strong><span style="line-height: 22px;"/><strong>分类</strong> <span style="line-height: 22px;"> <strong> </strong>的问题是识别到一组</span>类别<span style="line-height: 22px;">(子群体)中的一个新的</span> <strong>观察</strong> <span style="line-height: 22px;"> <strong> </strong>所属，在此基础上建立一个</span> <strong>训练集一个例子是将给定的电子邮件分配到</strong></span><strong>垃圾邮件</strong>或<strong>非垃圾邮件</strong><span style="line-height: 22px;">类别中，或者根据观察到的患者特征(性别、血压、某些症状的存在与否等)将诊断分配给给给定的患者。).</span>T51】</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-402997bd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="402997bd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7ffc8c68 ot-flex-column-vertical" data-id="7ffc8c68" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d5c5fc3 elementor-widget elementor-widget-text-editor" data-id="d5c5fc3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">分类是一个众所周知的问题，每天都很容易验证分类器的效用。 <br/> <span style="font-family: inherit;">在与搜索引擎打交道时，我们的文档有一个类别(一般由人类指定)是如此常见。能够自动提取缺少类别的文档的类别不是很有用吗？根据经验自动对文档进行分类，这难道不是一件有趣的事情吗？(这意味着使用我们的搜索系统中已经分类的所有文档)</span> <br/> <span style="font-family: inherit;">如果没有任何外部工具，没有任何额外的昂贵的模型培训活动，这样做难道不会令人惊讶吗？</span> <br/> <span style="font-family: inherit;">我们的搜索系统里已经有很多信息了，让我们利用起来吧！</span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3aad20bf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3aad20bf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-656e63fa ot-flex-column-vertical" data-id="656e63fa" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5982743d elementor-widget elementor-widget-iheading" data-id="5982743d" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">Lucene分类模块</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6436e3cb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6436e3cb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-70f1bafb ot-flex-column-vertical" data-id="70f1bafb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-614b0714 elementor-widget elementor-widget-text-editor" data-id="614b0714" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><span style="font-family: inherit;">为了能够提供分类能力，我们的系统通常需要一个经过训练的模型。</span> <br/> <span style="font-family: inherit;">分类是由监督机器学习算法解决的问题，这意味着人类需要提供一个训练集。</span> <br/>分类训练集是一组文档，手动标记有正确的类别。<br/>这是分类系统将用于对即将到来的未见过的文档进行分类的“经验”。<br/>建立一个经过训练的模型是昂贵的，并且需要存储在特定的数据结构中。<br/>当我们的索引中已经有数百万的文档，已经被人类分类并准备好被搜索时，真的有必要建立一个外部训练的模型吗？Lucene索引已经有了非常有趣的数据结构，它将术语与文档(倒排索引)、字段与术语(术语向量)以及我们需要的关于术语频率和文档频率的所有信息联系起来。<br/>在没有任何外部工具或数据结构的情况下，在我们的搜索引擎内，一个已经标记了特定领域的适当类别的文档语料库可以成为构建我们的分类<b>的真正有用的资源。</b> <br/> <span style="font-family: inherit;">基于这些观察，</span>Apache Lucene<a href="https://web.archive.org/web/20220929232419/https://lucene.apache.org/core/" target="_blank" rel="noopener"/><span style="font-family: inherit;">开源项目<strong><span style="line-height: 24px;">4.2版本引入了一个文档分类</span> </strong>模块来管理使用索引数据结构的文本分类。</span> <br/> <span style="font-family: inherit;">这个模块的外观是文本分类器，一个简单的接口(有3个可用的实现):</span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4cd4bcd8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4cd4bcd8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2aad29e6 ot-flex-column-vertical" data-id="2aad29e6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-680e94a6 elementor-widget elementor-widget-text-editor" data-id="680e94a6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><span style="font-family: Courier New, Courier, monospace;">公共接口分类器{ </span> <span style="color: #6aa84f;"> /** *给定的文本字符串分配一个类(带分数* <br/> * @param text一个包含要分类的文本的字符串*<br/>@ return a { @ link classification result }保存分配的T类型的类和分数* </span></p><p style="padding-left: 40px;" class="translated">ClassificationResult assign class(字符串文本)引发IOException</p><p style="padding-left: 40px;" class="translated"><span style="color: #6aa84f;"> /** *获取分配给给定文本字符串的所有类(按分数降序排列)。<br/> @param text包含待分类文本的字符串*<br/>@返回{@link ClassificationResult}的完整列表，包括类别和分数。如果分类器不能生成列表，则返回null。*/ </span></p><p style="padding-left: 40px;" class="translated">List getClasses(字符串文本)引发IOException</p><p style="padding-left: 40px;" class="translated"><span style="color: #6aa84f;"> /** *获取分配给给定文本字符串的第一个max类(按分数降序排列)。<br/> @param text包含待分类文本的字符串* <br/> @param max返回列表元素的个数*<br/>@返回{@link ClassificationResult}的完整列表，包括类别和分数。切割“最大”数量的元素。如果分类器不能生成列表，则返回null。*/ </span></p><p style="padding-left: 40px;" class="translated">List getClasses(String text，int max)抛出IOException<br/> }</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e5fc745 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e5fc745" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-78954939 ot-flex-column-vertical" data-id="78954939" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7f7b57a8 elementor-widget elementor-widget-text-editor" data-id="7f7b57a8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><p class="translated"><span style="font-family: inherit;">可用的实现有:</span></p></div><ul><li class="translated"><b>knarestneighborclassifier</b>–基于MoreLikeThis的k近邻分类器<a href="https://web.archive.org/web/20220929232419/https://en.wikipedia.org/wiki/K-nearest_neighbors)" target="_blank" rel="noopener">【2】</a></li></ul><ul><li class="translated">【based NaiveBayes分类器——一个基于Lucene的简单NaiveBayes分类器<a href="https://web.archive.org/web/20220929232419/https://en.wikipedia.org/wiki/Naive_Bayes_classifier" target="_blank" rel="noopener">【3】</a></li></ul><ul><li class="translated"><b>booleanpectronclassifier</b>–基于感知器<a href="https://web.archive.org/web/20220929232419/https://en.wikipedia.org/wiki/Perceptron" target="_blank" rel="noopener">【4】</a>的布尔分类器。使用TermsEnum.totalTermFreq在每个字段和每个文档的基础上计算权重，然后将相应的FST用于类别分配。</li></ul><p class="translated">让我们详细看看前两个:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-587b4ed3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="587b4ed3" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-220ce594 ot-flex-column-vertical" data-id="220ce594" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7540d233 elementor-widget elementor-widget-iheading" data-id="7540d233" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">KNearestNeighborClassifier</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4ea63435 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4ea63435" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-231601de ot-flex-column-vertical" data-id="231601de" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-700eb611 elementor-widget elementor-widget-text-editor" data-id="700eb611" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><span style="font-family: inherit;">This classifier is based on the Lucene </span>More like This <a href="https://web.archive.org/web/20220929232419/https://solr.apache.org/guide/6_6/morelikethis.html" target="_blank" rel="noopener">[5]</a><span style="font-family: inherit;">. </span></div><div><span style="font-family: inherit;">A feature able to retrieve similar documents to a seed one ( or a seed text) calculating the similarity between the docs on a field base.</span></div><div><span style="font-family: inherit;">It takes in input the list of fields to take in consideration ( with relative boost factor to increase the importance of some field over the others).</span></div><div><span style="font-family: inherit;"> </span></div><div><span style="font-family: inherit;">The idea behind this algorithm is simple :</span></div><div><span style="font-family: inherit;"> – given a set of relevant fields for our classification</span></div><div><span style="font-family: inherit;"> – given a field containing the class of the document</span></div><div><span style="font-family: inherit;">It retrieves all the similar documents to the Text in input using the MLT.</span></div><div><span style="font-family: inherit;"> </span></div><div><span style="font-family: inherit;">Only the documents with the class field valorised, are taken in consideration.</span></div><div><span style="font-family: inherit;">The <b>top k documents</b> in result are evaluated, and the class extracted from all of them.</span></div><div><span style="font-family: inherit;">Then a ranking of the retrieved classes is made, based on the frequency of the class in the top K documents.</span></div><div><span style="font-family: inherit;">Currently the algorithm takes in consideration only the frequency of the class to calculate its score.</span></div><div><span style="font-family: inherit;">One limitation is that is not taking in consideration the ranking of the class.</span></div><div><span style="font-family: inherit;">This means that if in the top K, we have the first k/2 documents of class C1 and the second k/2 document of class C2, both the classes will have the same score </span>(LUCENE-6654) <a href="https://web.archive.org/web/20220929232419/https://issues.apache.org/jira/browse/LUCENE-6654" target="_blank" rel="noopener">[6]</a><span style="font-family: inherit;">.</span></div><div> </div><div>This classifier works on top of the Index, let’s quickly have an overview of the constructor parameters : <span style="color: #3d3d3d; font-family: Menlo; font-size: 12pt; font-style: italic; font-weight: bold;"> </span></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2b29bce7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2b29bce7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-32ae07ca ot-flex-column-vertical" data-id="32ae07ca" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4510daad elementor-widget elementor-widget-text-editor" data-id="4510daad" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table class="tg"><tbody><tr><th class="tg-s8ba translated">参数</th><th class="tg-s8ba translated">描述</th></tr><tr><td class="tg-vc88 translated">叶片阅读器</td><td class="tg-vyw9 translated">将用于读取索引数据结构和对文档进行分类的索引读取器</td></tr><tr><td class="tg-vc88 translated">分析者</td><td class="tg-vyw9 translated">用于分析输入的不可见文本的分析器</td></tr><tr><td class="tg-vc88 translated">询问</td><td class="tg-vyw9 translated">应用于索引文档的过滤器。只有满足查询的那些将被用于分类</td></tr><tr><td class="tg-vc88 translated">k</td><td class="tg-vyw9 translated">在MLT结果中选择的用于查找最近邻的顶级文档的数量</td></tr><tr><td class="tg-vc88 translated">minDocsFreq</td><td class="tg-vyw9 translated">只有当一个术语(来自输入文本)至少出现在索引中的这个最小数量的文档中时，算法才会考虑该术语</td></tr><tr><td class="tg-vc88 translated">minTermFreq</td><td class="tg-vyw9 translated">(来自输入文本的)术语只有在输入中出现至少这个最小次数时，算法才会考虑</td></tr><tr><td class="tg-vc88 translated">类别字段名称</td><td class="tg-vyw9 translated">包含文档类别的字段。它必须出现在索引文档中。<b>必须存储</b></td></tr><tr><td class="tg-vc88 translated">文本字段名称</td><td class="tg-vyw9 translated">进行分类时要考虑的字段列表。它们必须出现在索引文档中</td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2fc11fa5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2fc11fa5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-53aed3e ot-flex-column-vertical" data-id="53aed3e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5a8d2f40 elementor-widget elementor-widget-text-editor" data-id="5a8d2f40" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><span style="font-family: inherit;"> <b>注意</b> : <code style="color: #333333; line-height: 21.333333969116px;">MoreLikeThis</code> <span style="line-height: 21.3333px;">基于文档中的术语构造Lucene查询。这是通过从已定义的字段列表中提取术语来实现的(下面的</span>文本字段<br/>名称<span style="line-height: 21.3333px;">参数)。</span> </span> <br/> <span style="font-family: inherit;"> <span style="line-height: 21.3333px;">你通常会读到，为了获得最佳结果，字段应该存储术语向量<b>。</b> </span> </span> <br/> <strong> <span style="line-height: 21.3333px;">在我们的例子中，文本要分门别类是看不见的，它是不加索引的文档。</span> </strong> <br/> <strong> <span style="line-height: 21.3333px;">所以根本不用术语Vector。</span> </strong></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1b9db953 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1b9db953" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5489976a ot-flex-column-vertical" data-id="5489976a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3a3b2307 elementor-widget elementor-widget-iheading" data-id="3a3b2307" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">SimpleNaiveBayesClassifier</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5adf91be ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5adf91be" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-46d88f43 ot-flex-column-vertical" data-id="46d88f43" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-26141de2 elementor-widget elementor-widget-text-editor" data-id="26141de2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>This Classifier is based on a simplistic implementation of a Naive Bayes Classifier <a href="https://web.archive.org/web/20220929232419/https://en.wikipedia.org/wiki/Naive_Bayes_classifier" target="_blank" rel="noopener">[3]</a>.</div><div>It uses the Index to get the Term frequencies of the terms, the Doc frequencies and the unique terms.</div><div>First of all it extract all the possible classes, this is obtained getting all the terms for the class field.</div><div>Then , each class is scored based on</div><div>– how frequent is the class in all the classified documents in the index</div><div>– how much likely the tokenized text is to belong to the class</div><div>The details of the algorithm go beyond the scope of this blog post.</div><div> </div><div>This classifier works on top of the Index, let’s quickly have an overview of the constructor parameters :</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-13ae82a9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="13ae82a9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-12c597aa ot-flex-column-vertical" data-id="12c597aa" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6d489033 elementor-widget elementor-widget-text-editor" data-id="6d489033" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table class="tg" style="height: 274px;" width="840"><tbody><tr><th class="tg-s8ba translated">参数</th><th class="tg-s8ba translated">描述</th></tr><tr><td class="tg-vc88 translated">叶片阅读器</td><td class="tg-vyw9 translated">将用于读取索引数据结构和对文档进行分类的索引读取器</td></tr><tr><td class="tg-vc88 translated">分析者</td><td class="tg-vyw9 translated">用于分析输入的不可见文本的分析器</td></tr><tr><td class="tg-vc88 translated">询问</td><td class="tg-vyw9 translated">应用于索引文档的过滤器。只有满足查询的那些将被用于分类</td></tr><tr><td class="tg-vc88 translated">类别字段名称</td><td class="tg-vyw9 translated">包含文档类别的字段。它必须出现在索引文档中</td></tr><tr><td class="tg-vc88 translated">文本字段名称</td><td class="tg-vyw9 translated">进行分类时要考虑的字段列表。它们必须出现在索引文档中</td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-335564d8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="335564d8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2b1b2568 ot-flex-column-vertical" data-id="2b1b2568" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6b4ae847 elementor-widget elementor-widget-text-editor" data-id="6b4ae847" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b>注</b> : <span style="line-height: 21.333333969116px;"> <span style="font-family: monospace;">朴素贝叶斯</span> <span style="font-family: inherit;">分类器</span> <span style="font-family: monospace;"> </span> <span style="font-family: inherit;">作用于索引中的<b>术语</b>。这意味着它从索引中提取类字段的标记。<b>每个令牌将被视为类别</b>，并将看到相关的分数。</span>T44】</span></p><div><p class="translated"><span style="line-height: 21.333333969116px;"> <span style="font-family: inherit;">这意味着你必须在为classField选择的分析中小心谨慎，最好使用一个包含该类的not </span> tokenizer字段(如有必要，一个copy field)</span></p></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-825e6fe ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="825e6fe" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4666537f ot-flex-column-vertical" data-id="4666537f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7570b91c elementor-widget elementor-widget-iheading" data-id="7570b91c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">文档分类扩展</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-30b3c5ee ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="30b3c5ee" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2061fe08 ot-flex-column-vertical" data-id="2061fe08" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7146b5fd elementor-widget elementor-widget-text-editor" data-id="7146b5fd" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><span style="font-family: inherit;">The original Text Classifiers are perfectly fine, but what about Document classification ?</span></div><div><span style="font-family: inherit;">In a lot of cases the information we want to classify is actually composed of a set of fields with one or more value each one.</span></div><div><span style="font-family: inherit;">Each field content contributes to the classification ( with a different weight to be precise).</span></div><div><span style="font-family: inherit;">Given a simple News article, the title is much more important for the classification in comparison with the text and the author.</span></div><div><span style="font-family: inherit;">But even if not so relevant even the author can have a little part in the class assignation.</span></div><div><span style="font-family: inherit;">Lucene atomic unit of information is the <b>Document. </b></span></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-674b8755 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="674b8755" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4c7eb264 ot-flex-column-vertical" data-id="4c7eb264" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-78d429cc elementor-widget elementor-widget-text-editor" data-id="78d429cc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><span style="background-color: white;"> <span style="font-family: inherit;">文档是索引和搜索的单位。文档是一组字段。每个字段都有一个名称和一个文本值。</span> </span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-37fd9de3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="37fd9de3" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4b30511b ot-flex-column-vertical" data-id="4b30511b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-70ec9eba elementor-widget elementor-widget-text-editor" data-id="70ec9eba" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这种数据结构是新一代分类器的完美输入，新一代分类器将受益于增强信息来分配相关类别。 <br/> <span style="font-family: inherit;">每当一个简单的文本有歧义时，包括其他字段在内的分析就大大提高了分类的精度。</span> <br/> <span style="font-family: inherit;">详细内容:</span></p><ul><li style="list-style-type: none;"><ul><li class="translated"><span style="font-family: inherit;">输入文档中的<b>字段</b>内容将与索引中的数据结构进行比较，仅与该<b>字段</b> </span>相关</li><li class="translated"><span style="font-family: inherit;">输入字段将根据其自身的<b>分析链</b>进行分析，从而实现更大的灵活性和精确性</span></li><li class="translated"><span style="font-family: inherit;">一个<b>输入字段可以被放大</b>，以影响更多的分类。这样，输入文档的不同部分将具有不同的相关性来发现文档的类别。</span></li></ul></li></ul><div><span style="font-family: inherit;">A new interface is provided :</span></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7dd86718 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7dd86718" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-58de3b78 ot-flex-column-vertical" data-id="58de3b78" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ab7eba elementor-widget elementor-widget-text-editor" data-id="ab7eba" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><span style="font-family: Courier New, Courier, monospace;"> <span style="font-weight: bold;">公共接口</span>文档分类器&lt; T &gt; <br/> </span></p><p style="padding-left: 40px;" class="translated"><span style="font-family: Courier New, Courier, monospace;"><span style="font-family: Courier New, Courier, monospace;"><span style="color: #6aa84f;"><span style="font-style: italic;">/* *</span><span style="font-style: italic;">*给给定的分配一个类(带分数){</span><span style="font-style: italic; font-weight: bold;">@ link</span><span style="font-style: italic;">org . Apache . Lucene . document }</span><span style="font-style: italic;">*</span><span style="font-style: italic;">*</span><span style="font-style: italic; font-weight: bold;">@ param</span><span style="font-style: italic; font-weight: bold;">document</span><span style="font-style: italic;">a {</span><span style="font-style: italic; font-weight: bold;">@ link</span><span style="font-style: italic;">org . Apache字段被视为分类的要素。</span><span style="font-style: italic;">*</span><span style="font-style: italic; font-weight: bold;">@ return</span><span style="font-style: italic;">a {</span><span style="font-style: italic; font-weight: bold;">@ link</span><span style="font-style: italic;">org . Apache . Lucene . classification . result }保存分配的类的类型</span><span style="font-style: italic;"/><span style="font-style: italic;">T和分数</span></span><span style="font-style: italic;"><span style="color: #6aa84f;">*/</span></span></span></span></p><p style="padding-left: 40px;" class="translated"><span style="font-family: Courier New, Courier, monospace;">classification result&lt;T&gt;assign class(Document Document)<span style="font-weight: bold;">抛出</span>io exception；</span></p><p style="padding-left: 40px;" class="translated"><span style="font-family: Courier New, Courier, monospace;"> <span style="color: #6aa84f;"> <span style="font-style: italic;"> /** </span> <span style="font-style: italic;"> *获取分配给given的所有类(按分数降序排列){</span><span style="font-style: italic; font-weight: bold;">@ link</span><span style="font-style: italic;">org . Apache . Lucene . document }。</span><span style="font-style: italic;">*</span><span style="font-style: italic;">*</span><span style="font-style: italic; font-weight: bold;">@ param</span><span style="font-style: italic; font-weight: bold;">文档</span><span style="font-style: italic;">a {</span><span style="font-style: italic; font-weight: bold;">@ link</span><span style="font-style: italic;">org . Apache . Lucene . document }待分类。字段被视为分类的要素。</span><span style="font-style: italic;">*</span><span style="font-style: italic; font-weight: bold;">@ return</span><span style="font-style: italic;">完整列表{</span><span style="font-style: italic; font-weight: bold;">@ link</span><span style="font-style: italic;">org . Apache . Lucene . classification . result }、班级和分数。如果分类器不能列表，则返回空值</span> <span style="font-style: italic;">。</span></span><span style="font-style: italic;"><span style="color: #6aa84f;">/</span></span></span></p><p style="padding-left: 40px;" class="translated"><span style="font-family: Courier New, Courier, monospace;">列表&lt;分类结果&lt;T&gt;&gt;get classes(Document Document)<span style="font-weight: bold;">抛出</span>io exception；</span></p><p style="padding-left: 40px;" class="translated"><span style="color: #6aa84f;"> <span style="font-family: Courier New, Courier, monospace;"> <span style="font-style: italic;"> /** </span> <span style="font-style: italic;"> *将第一个</span> <span style="font-style: italic;"> max </span> <span style="font-style: italic;">类(按分数降序排序)赋给给定的文本字符串。</span><span style="font-style: italic;">*</span><span style="font-style: italic;">*</span><span style="font-style: italic; font-weight: bold;">@ param</span><span style="font-style: italic; font-weight: bold;">文档</span><span style="font-style: italic;">a {</span><span style="font-style: italic; font-weight: bold;">@ link</span><span style="font-style: italic;">org . Apache . Lucene . document }待分类。字段被视为分类的要素。</span><span style="font-style: italic;">*</span><span style="font-style: italic; font-weight: bold;">@ param</span><span style="font-style: italic; font-weight: bold;">max</span><span style="font-style: italic;">返回列表元素的个数</span><span style="font-style: italic;">*</span><span style="font-style: italic; font-weight: bold;">@ return</span><span style="font-style: italic;">{</span><span style="font-style: italic; font-weight: bold;">@ link</span><span style="font-style: italic;">org . Apache . Lucene . classification . result }的整个列表，类和分数。切割“最大”数量的元素。如果分类器不能列表，则返回</span> <span style="font-style: italic;"> null </span> <span style="font-style: italic;">。</span> <span style="font-style: italic;"> */ </span> </span> </span></p><p style="padding-left: 40px;" class="translated"><span style="font-family: Courier New, Courier, monospace;">列表&lt;分类结果&lt;T&gt;&gt;get classes(Document Document，<span style="font-weight: bold;"> int </span> max) <span style="font-weight: bold;">抛出</span>io exception；</span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-565a9787 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="565a9787" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-55747689 ot-flex-column-vertical" data-id="55747689" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-34726af elementor-widget elementor-widget-text-editor" data-id="34726af" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">扩展了2个分类器以提供新功能:</p><ul><li class="translated"><b>knarestneighbordocumentclassifier</b></li><li class="translated"><b>SimpleNaiveBayesDocumentClassifier</b></li></ul><p class="translated">第一个实现可作为本期《吉拉》的投稿:</p><p class="translated"><i><a href="https://web.archive.org/web/20220929232419/https://issues.apache.org/jira/browse/LUCENE-6631">LUCENE-6631</a>T63】</i></p><p class="translated">现在有了一个新的接口，将它与Apache Solr集成会容易得多。</p><p class="translated">请继续关注Solr分类集成。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4738b7ce ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4738b7ce" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4cbaa041 ot-flex-column-vertical" data-id="4cbaa041" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-79b773ee elementor-widget elementor-widget-iheading" data-id="79b773ee" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-5cc79794 elementor-widget elementor-widget-text-editor" data-id="5cc79794" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20220929232419/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220929232419/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训？<br/>我们也提供这些主题的咨询，<a href="https://web.archive.org/web/20220929232419/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a86ac1d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a86ac1d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8e05a3c ot-flex-column-vertical" data-id="8e05a3c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2aa26e8 elementor-widget elementor-widget-iheading" data-id="2aa26e8" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// stay always up to date</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-8a0e528 elementor-widget elementor-widget-text-editor" data-id="8a0e528" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p id="block-434ee23e-2c34-49c7-88d2-26830d4a1537" class="translated">你喜欢这个关于Lucene文档分类的帖子吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e2cea58 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="e2cea58" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929232419/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664493859"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

@@ -1,0 +1,718 @@
+<html>
+<head>
+<title>Synonyms and Stopwords: Vademecum</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">同义词和停用词:Vademecum</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2018/09/synonyms-and-stopwords-vademecum.html#0001-01-01">https://web.archive.org/web/sease.io/2018/09/synonyms-and-stopwords-vademecum.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-74b273a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="74b273a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-581e7f9 ot-flex-column-vertical" data-id="581e7f9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-84ec4fc elementor-widget elementor-widget-text-editor" data-id="84ec4fc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在本帖中，我们将讨论另外两个同义词的情况，并且我们将尝试以一种精确的形式总结所有以前的技巧。沿袭之前帖子<a href="https://web.archive.org/web/20220929230116/https://sease.io/2018/07/apache-solr-elasticsearch-auto-phrasing-out-of-the-box.html" target="_blank" rel="noopener" data-wplink-edit="true">【1】</a><a href="https://web.archive.org/web/20220929230116/https://sease.io/2018/07/combining-synonyms-and-stopwords.html" target="_blank" rel="noopener" data-wplink-edit="true">【2】</a><a href="https://web.archive.org/web/20220929230116/https://sease.io/2018/08/still-synonyms-stopwords-mamma-mia.html" target="_blank" rel="noopener" data-wplink-edit="true">【3】</a>的做法，一切都可以同时适用于<strong> Apache Solr </strong>和<strong> Elasticsearch </strong>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5a06082 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5a06082" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7a90502 ot-flex-column-vertical" data-id="7a90502" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b8fc370 elementor-widget elementor-widget-iheading" data-id="b8fc370" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">前提</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8779084 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8779084" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0509050 ot-flex-column-vertical" data-id="0509050" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c39afdd elementor-widget elementor-widget-text-editor" data-id="c39afdd" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul><li style="list-style-type: none;"><ul><li class="translated"><strong>查询时的同义词和停用词</strong>:这不仅仅是一个“理论上的”约束；想象一下，如果您必须管理一个属于具有许多中小型索引的同一客户的部署上下文:您不能在每次同义词或停用词发生变化时从头开始重新构建所有内容。</li><li class="translated"><strong>同义词，而不是上义词或下义词</strong>:或者更好的说法是，我们不是在讨论同义词词典所说的更宽泛、更狭窄或相关的术语。虽然下面的一些内容在这些上下文中也是有效的，但上位词、下位词或相关概念引入的更宽或更窄的范围可能会对评分阶段产生一些奇怪的副作用。</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7ad5387 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7ad5387" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6f90cf7 ot-flex-column-vertical" data-id="6f90cf7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6012cfc elementor-widget elementor-widget-iheading" data-id="6012cfc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">测试数据</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2e427d5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2e427d5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8c120b9 ot-flex-column-vertical" data-id="8c120b9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1dd04b8 elementor-widget elementor-widget-text-editor" data-id="1dd04b8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">先说测试数据。</p><ul><li style="list-style-type: none;"><ul><li class="translated"><strong>同义词</strong> = ["超出保修期，oow "，"转接电话号码，端口号"]</li><li class="translated"><strong>停用词</strong> = ["of "，" my"]</li><li class="translated"><strong>查询分析器</strong> = [ "standard_tokenizer "、"小写过滤器"、"同义词(图形)过滤器"、"停用词过滤器"]</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-cccb972 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="cccb972" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b2f7307 ot-flex-column-vertical" data-id="b2f7307" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4fccb31 elementor-widget elementor-widget-iheading" data-id="4fccb31" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">#1:我如何定义多术语概念？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-28c0554 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="28c0554" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c88c2b6 ot-flex-column-vertical" data-id="c88c2b6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-179dea4 elementor-widget elementor-widget-text-editor" data-id="179dea4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果您想从整体上管理一个多术语概念，不管它有没有同义词，您都可以使用同义词文件。这里有几个例子:第一个是有一个同义词的概念，第二个没有任何同义词:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-50b85aa ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="50b85aa" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ed05a44 ot-flex-column-vertical" data-id="ed05a44" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d6e626d elementor-widget elementor-widget-text-editor" data-id="d6e626d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;">Multimedia Messaging Service,Multimedia Text Message,MMS
+Apache Cassandra, Apache Cassandra</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5600381 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5600381" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-008790d ot-flex-column-vertical" data-id="008790d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9f4e719 elementor-widget elementor-widget-text-editor" data-id="9f4e719" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如您所见，当一个概念没有任何可用的同义词时，我们可以重复它。</p><p class="translated">仅限Solr用户:不要忘记以下事情:</p><ul><li style="list-style-type: none;"><ul><li class="translated">请求处理器应该使用edismax或lucene查询解析器，并且必须将<strong> SplitOnWhiteSpace </strong>标志(<strong> sow </strong>)设置为<strong> true </strong></li><li class="translated">包含同义词图表过滤器的字段类型必须将<strong>自动生成系列</strong>设置为<strong>真</strong></li></ul></li></ul><p class="translated">你可以在这里阅读更多关于这种方法的内容。</p><p style="padding-left: 40px;" class="translated">注意:这将一直工作到Lucene <em> SynonymMap </em>使用<em>列表/数组</em>来收集与给定概念相关的同义词。当并且如果实现将切换到类似<em> Set的方法</em>，这个技巧很有可能会停止工作。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-430d117 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="430d117" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8bb3901 ot-flex-column-vertical" data-id="8bb3901" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-60702b7 elementor-widget elementor-widget-text-editor" data-id="60702b7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这是一个痛苦的故事。但他告诉我们，他是个好人，他是个好人。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4ca29ce ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4ca29ce" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1dd9510 ot-flex-column-vertical" data-id="1dd9510" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a187e72 elementor-widget elementor-widget-iheading" data-id="a187e72" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">#2:如果查询包含带停用词的多术语概念，该怎么办？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-55ef588 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="55ef588" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cf3833a ot-flex-column-vertical" data-id="cf3833a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3e1a01a elementor-widget elementor-widget-text-editor" data-id="3e1a01a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">想象这样一个查询</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b04bd23 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b04bd23" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4b659e6 ot-flex-column-vertical" data-id="4b659e6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8f7eb8e elementor-widget elementor-widget-text-editor" data-id="8f7eb8e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: border-box; overflow: auto; font-family: 'Courier 10 Pitch', Courier, monospace; font-size: 15px; background: #eeeeee; line-height: 1.71429; margin-bottom: 1.6em; max-width: 100%; padding: 1.6em; color: #6d6d6d; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;">q=my car is <em style="box-sizing: border-box; font-style: italic;">out <strong style="box-sizing: border-box; font-weight: bold;">of</strong> warranty. </em>What can I do?</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-50fa587 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="50fa587" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-035d8b4 ot-flex-column-vertical" data-id="035d8b4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-603ab86 elementor-widget elementor-widget-text-editor" data-id="603ab86" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">那么，使用上面的配置，在同义词检测之后删除停用词会对生成的查询产生奇怪的影响:“what”术语被错误地添加到同义词短语查询中:“out？保修什么”。</p><p class="translated">虽然这个问题影响到了<em>FilteringTokenFilter</em>(<em>stop filter</em>的超类)，因此它的范围更广，但是对于这个特定的问题，我们提出了一个解决方案<a href="https://web.archive.org/web/20220929230116/https://sease.io/2018/07/combining-synonyms-and-stopwords.html" target="_blank" rel="noopener">【2】</a>，它由一个专门的<em> StopFilter </em>组成，这个解决方案知道同义词标记。结果是，作为先前检测到的同义词的一部分的术语不会被删除，即使它们是停用词。我们字段的查询分析器变成了这样:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c3822e1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c3822e1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9738a14 ot-flex-column-vertical" data-id="9738a14" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-999b259 elementor-widget elementor-widget-text-editor" data-id="999b259" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;">&lt;tokenizer class="solr.StandardTokenizerFactory"/&gt;
+&lt;filter class="solr.LowerCaseFilterFactory"/&gt;
+&lt;filter class="solr.SynonymGraphFilterFactory" 
+        synonyms="synonyms.txt" 
+        ignoreCase="false" 
+        expand="true"/&gt;
+&lt;filter class="<strong>io.sease.SynonymAwareStopFilterFactory</strong>" 
+        words="stopwords.txt" 
+        ignoreCase="true"/&gt;</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1e37890 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1e37890" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-be09cb6 ot-flex-column-vertical" data-id="be09cb6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0ed2cca elementor-widget elementor-widget-iheading" data-id="0ed2cca" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">#3:如果文档包含带有“入侵者”停用词的多术语概念怎么办？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f2fa986 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f2fa986" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-dbf8559 ot-flex-column-vertical" data-id="dbf8559" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ab43472 elementor-widget elementor-widget-text-editor" data-id="ab43472" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我们有这样一份文件:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0af3567 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0af3567" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fa1e02b ot-flex-column-vertical" data-id="fa1e02b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5fc4955 elementor-widget elementor-widget-text-editor" data-id="5fc4955" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;">{
+  "id": 1,
+  "title": "how do I <em>transfer</em> my <em>phone number</em>?"
+}</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7b05671 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7b05671" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5668ce5 ot-flex-column-vertical" data-id="5668ce5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9eae116 elementor-widget elementor-widget-text-editor" data-id="9eae116" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">和查询:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6501353 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6501353" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-217ab22 ot-flex-column-vertical" data-id="217ab22" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f09e076 elementor-widget elementor-widget-text-editor" data-id="f09e076" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: border-box; overflow: auto; font-family: 'Courier 10 Pitch', Courier, monospace; font-size: 15px; background: #eeeeee; line-height: 1.71429; margin-bottom: 1.6em; max-width: 100%; padding: 1.6em; color: #6d6d6d; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;">q=<em style="box-sizing: border-box; font-style: italic;">transfer phone number</em> procedure</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-820e56e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="820e56e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9441c09 ot-flex-column-vertical" data-id="9441c09" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-aceca97 elementor-widget elementor-widget-text-editor" data-id="aceca97" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在查询时，同义词被正确地检测到，短语子句被生成，但不幸的是，它与上面的文档不匹配，因为中间的“my”停用词:</p><p class="translated">您可以在此处阅读<a href="https://web.archive.org/web/20220929230116/https://sease.io/2018/08/still-synonyms-stopwords-mamma-mia.html" target="_blank" rel="noopener">【3】</a>该场景的建议解决方案，它基本上由两步查询计划组成:在第一步中，检测到的同义词生成短语子句，而在第二步中，它们在术语子句中被解构。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-36b909c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="36b909c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6dd081a ot-flex-column-vertical" data-id="6dd081a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cccc328 elementor-widget elementor-widget-iheading" data-id="cccc328" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">#4:如果查询包含带有“入侵者”停用词的多术语概念，该怎么办？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-37a99c8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="37a99c8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-479b682 ot-flex-column-vertical" data-id="479b682" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5abc3b0 elementor-widget elementor-widget-text-editor" data-id="5abc3b0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">而我们现在的情况正好相反。我们有这样一份文件:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3082da8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3082da8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b237c6b ot-flex-column-vertical" data-id="b237c6b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8dfa061 elementor-widget elementor-widget-text-editor" data-id="8dfa061" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;">{ 
+  "id": 1, 
+  "title": "<em>transfer phone number</em> procedure" 
+}</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-37980a7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="37980a7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-752f74b ot-flex-column-vertical" data-id="752f74b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-aaff79d elementor-widget elementor-widget-text-editor" data-id="aaff79d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">和查询:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dbf2d9b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dbf2d9b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8434272 ot-flex-column-vertical" data-id="8434272" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-11994c9 elementor-widget elementor-widget-text-editor" data-id="11994c9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: border-box; overflow: auto; font-family: 'Courier 10 Pitch', Courier, monospace; font-size: 15px; background: #eeeeee; line-height: 1.71429; margin-bottom: 1.6em; max-width: 100%; padding: 1.6em; color: #6d6d6d; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;">q=how do I <em style="box-sizing: border-box; font-style: italic;">transfer</em> my <em style="box-sizing: border-box; font-style: italic;">phone numbe</em>r?</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f14598c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f14598c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-82a0da2 ot-flex-column-vertical" data-id="82a0da2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ca98617 elementor-widget elementor-widget-text-editor" data-id="ca98617" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">正如您所看到的，在查询时没有检测到同义词，因为术语之间有“my”停用词。虽然上面的文档可能仍然是生成的查询的响应的一部分，但是这里我们将重点放在丢失同义词的检测上。</p><p class="translated">一个可能的解决方案是在停用字词过滤器前后加倍同义词过滤器:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-142e255 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="142e255" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d8821de ot-flex-column-vertical" data-id="d8821de" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f495d67 elementor-widget elementor-widget-text-editor" data-id="f495d67" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;">&lt;fieldtype 
+       name="<strong>text_with_synonyms_phrases</strong>" 
+       class="solr.TextField" <strong>autoGeneratePhraseQueries</strong>="<strong>true</strong>"&gt;
+       
+       &lt;analyzer type="<strong>index</strong>"&gt;
+           &lt;tokenizer class="solr.StandardTokenizerFactory"/&gt;
+           &lt;filter class="solr.LowerCaseFilterFactory"/&gt;
+       &lt;/analyzer&gt;
+       &lt;analyzer type="<strong>query</strong>"&gt;
+           &lt;tokenizer class="solr.StandardTokenizerFactory"/&gt;
+           &lt;filter class="solr.LowerCaseFilterFactory"/&gt;
+           &lt;filter class="<strong>solr.SynonymGraphFilterFactory</strong>" 
+                   synonyms="synonyms.txt" 
+                   ignoreCase="true" 
+                   expand="true"/&gt;
+           &lt;filter class="<strong>io.sease.SynonymAwareStopFilterFactory</strong>" 
+                   words="stopwords.txt" 
+                   ignoreCase="true"/&gt;
+           &lt;filter class="<strong>solr.SynonymGraphFilterFactory</strong>" 
+                   synonyms="synonyms.txt" 
+                   ignoreCase="true" 
+                   expand="true"/&gt;
+       &lt;/analyzer&gt;
+&lt;/fieldtype&gt;</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fc37242 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fc37242" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6e898c4 ot-flex-column-vertical" data-id="6e898c4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8323a8a elementor-widget elementor-widget-text-editor" data-id="8323a8a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在第一次迭代中，同义词没有被检测到，然后<em>停止过滤器</em>移除“我的”停止字，因此在第二次迭代中，同义词将被正确识别。注意<em> StopFilter </em>仍然是我们在#2中介绍的自定义类，因为我们也想涵盖那个场景。</p><p class="translated">这种方法的缺点是什么？这在我的具体案例中是有效的，但是请注意，<em> SynonymGraphFilter </em>文档中有明确的警告:</p><p style="padding-left: 40px;" class="translated">注意:这不能消耗传入的图形；结果将是不确定的。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0a50446 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0a50446" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e3fcf8b ot-flex-column-vertical" data-id="e3fcf8b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-900949e elementor-widget elementor-widget-iheading" data-id="900949e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">#5(未解决)如果查询包含多个术语概念，不止一个“入侵者”停用词，该怎么办？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-85babdc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="85babdc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a04ecc0 ot-flex-column-vertical" data-id="a04ecc0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-de281ed elementor-widget elementor-widget-text-editor" data-id="de281ed" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这是最坏的情况，我们有这样一个查询:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b22b2f7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b22b2f7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-af188d9 ot-flex-column-vertical" data-id="af188d9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0f70ac2 elementor-widget elementor-widget-text-editor" data-id="0f70ac2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: border-box; overflow: auto; font-family: 'Courier 10 Pitch', Courier, monospace; font-size: 15px; background: #eeeeee; line-height: 1.71429; margin-bottom: 1.6em; max-width: 100%; padding: 1.6em; color: #6d6d6d; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;">q=out of my warranty</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d502922 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d502922" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-221493d ot-flex-column-vertical" data-id="221493d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-df947e5 elementor-widget elementor-widget-text-editor" data-id="df947e5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">也就是说:我们有两个术语被声明为停用词，但是第一个(of)可能是同义词的一部分(超出保修范围)，而第二个(my)不是。</p><p class="translated">我们仍在处理这个案子，所以很遗憾这里没有提议，如果你有一些想法或反馈，我们热烈欢迎。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-42851e50 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="42851e50" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1dcb0d45 ot-flex-column-vertical" data-id="1dcb0d45" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-37b89adc elementor-widget elementor-widget-iheading" data-id="37b89adc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-74f0706b elementor-widget elementor-widget-text-editor" data-id="74f0706b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20220929230116/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220929230116/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训？<br/>我们也提供这些主题的咨询，<a href="https://web.archive.org/web/20220929230116/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-465f9461 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="465f9461" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8f10648 ot-flex-column-vertical" data-id="8f10648" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-105fed15 elementor-widget elementor-widget-iheading" data-id="105fed15" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-7c2a89b7 elementor-widget elementor-widget-text-editor" data-id="7c2a89b7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这个关于同义词+停用词的帖子吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-379d0cce elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="379d0cce" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929230116/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664492475"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

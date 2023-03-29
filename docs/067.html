@@ -1,0 +1,314 @@
+<html>
+<head>
+<title>Artificial Intelligence Applied to Search: Introduction</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">人工智能在搜索中的应用:简介</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2021/07/artificial-intelligence-applied-to-search-introduction.html#0001-01-01">https://web.archive.org/web/sease.io/2021/07/artificial-intelligence-applied-to-search-introduction.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-6cc6149 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6cc6149" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2643f0a ot-flex-column-vertical" data-id="2643f0a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-07f1dd2 elementor-widget elementor-widget-text-editor" data-id="07f1dd2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这项调查的主要目的是探索在开源世界中应用于搜索的人工智能的艺术状态。我们从<strong>介绍</strong>开始，解释人工智能在信息检索中的意义以及它如何改进搜索系统。第二集探索了所有的工具<strong> Apache Lucene </strong>在你的搜索应用中实现这些奇迹。<br/>在第三集里，我们停留在Apache Software Foundation的世界里，转到<strong> Apache Solr </strong>，探索我们能实现什么以及如何实现。<br/>在本系列的最后一集，我们将讨论<strong> Elasticsearch </strong>，评估当前的开发状态、官方可用的功能以及第三方插件提供的新增功能。<br/>那么，事不宜迟，我们开始吧！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e1f605e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e1f605e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0183b7d ot-flex-column-vertical" data-id="0183b7d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f182896 elementor-widget elementor-widget-iheading" data-id="f182896" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">人工智能对搜索有何影响？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0a946c5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0a946c5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-70c73c1 ot-flex-column-vertical" data-id="70c73c1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0edd7ae elementor-widget elementor-widget-text-editor" data-id="0edd7ae" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><strong>人工智能</strong> ( <strong> AI </strong>)是由<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Machine">机器</a>展示的<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Intelligence">智能</a>，不像人类和<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Animal_cognition">动物</a>展示的<strong>自然智能</strong> <a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Human_intelligence">，涉及意识和情感性。</a></p>
+<p style="text-align: right;" class="translated"><a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Artificial_intelligence">维基百科</a></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-47eb9de ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="47eb9de" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-38f8f48 ot-flex-column-vertical" data-id="38f8f48" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-55d5fc5 elementor-widget elementor-widget-text-editor" data-id="55d5fc5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">由于计算能力在最近几年强劲而稳定地发展，人工智能最近出现了复苏，现在它被用于许多领域，包括软件工程和信息检索(管理搜索引擎和类似系统的科学)。作为一个复杂和通用的主题，人工智能存在许多子领域，每个子领域都处理不同的技术考虑、目标和使用的工具。<br/>我们将特别关注机器学习:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b59f807 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b59f807" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5568505 ot-flex-column-vertical" data-id="5568505" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8bf91ed elementor-widget elementor-widget-text-editor" data-id="8bf91ed" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><strong>机器学习</strong> ( <strong> ML </strong>)是对计算机<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Algorithm">算法</a>的研究，通过经验和数据的使用自动改进。它被视为<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Artificial_intelligence">人工智能</a>的一部分。机器学习算法基于样本数据建立一个模型，称为“<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Training_data">训练数据</a>”，以便在没有明确编程的情况下进行预测或决策。</p>
+<p style="text-align: right;" class="translated"><a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Machine_learning">维基百科</a></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-29447db ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="29447db" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-eaaef40 ot-flex-column-vertical" data-id="eaaef40" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-46798f0 elementor-widget elementor-widget-text-editor" data-id="46798f0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">那么AI和机器学习可能帮助解决搜索中的哪些问题呢？<br data-rich-text-line-break="true"/>其实很多，我们来看一些例子:</p>
+<p style="padding-left: 40px;" class="translated">–<strong>自然语言处理</strong> - &gt;为了更好地理解和模拟用户信息需求和信息集，针对特定信息段的文本分割<br data-rich-text-line-break="true"/>–<strong>图像/视频识别</strong> - &gt;为了提取特征和搜索多媒体信息集<br data-rich-text-line-break="true"/>–<strong>知识表示</strong> - &gt;为了构建更好的数据结构和搜索算法(例如基于向量的算法)，为了识别含义、同义词以及术语和概念之间的关系，拼写检查<br data-rich-text-line-break="true"/>–<strong/></p>
+<p class="translated">为了解决这些问题并为您的搜索引擎带来有趣的新功能，<strong>深度学习</strong>来拯救您:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e10cd42 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e10cd42" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-344eada ot-flex-column-vertical" data-id="344eada" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-365c1fc elementor-widget elementor-widget-text-editor" data-id="365c1fc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><strong>深度学习</strong>(也被称为<strong>深度结构化学习</strong>)是基于<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Artificial_neural_networks">人工神经网络</a>和<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Representation_learning">表示学习</a>的<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Machine_learning">机器学习</a>方法的更广泛家族的一部分。学习可以是<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Supervised_learning">有监督</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Semi-supervised_learning">半监督</a>或<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Unsupervised_learning">无监督</a>。<br/>深度学习架构如<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Deep_learning#Deep_neural_networks">深度神经网络</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Deep_belief_network">深度信念网络</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/w/index.php?title=Graph_neural_network&amp;action=edit&amp;redlink=1">图形神经网络</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Recurrent_neural_networks">递归神经网络</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Convolutional_neural_networks">卷积神经网络</a>已经应用于<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Computer_vision">计算机视觉</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Speech_recognition">语音识别</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Natural_language_processing">自然语言处理</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Machine_translation">机器翻译</a>、<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Bioinformatics">生物信息学</a><a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Bioinformatics">等领域</a></p>
+<p style="text-align: right;" class="translated"><a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Deep_learning">维基百科</a></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d854ded ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d854ded" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-982563b ot-flex-column-vertical" data-id="982563b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f4de356 elementor-widget elementor-widget-text-editor" data-id="f4de356" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"align":"center","id":41864,"width":559,"height":235,"sizeSlug":"large","linkDestination":"none"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image aligncenter size-large is-resized"><img data-attachment-id="41864" data-permalink="https://web.archive.org/web/20221209140135/https://sease.io/2021/07/artificial-intelligence-applied-to-search-introduction.html/ai-vs-ml-vs-deep-learning" data-orig-file="https://web.archive.org/web/20221209140135/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?fit=2048%2C861&amp;ssl=1" data-orig-size="2048,861" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="AI-vs-ML-vs-Deep-Learning" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221209140135/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?fit=300%2C126&amp;ssl=1" data-large-file="https://web.archive.org/web/20221209140135/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?fit=1024%2C431&amp;ssl=1" decoding="async" loading="lazy" class="wp-image-41864 aligncenter" src="../Images/6eb1a0e918317d2a4114d316bea6d93d.png" alt="" width="559" height="235" data-recalc-dims="1" srcset="https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?w=2048&amp;ssl=1 2048w, https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?resize=300%2C126&amp;ssl=1 300w, https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?resize=1024%2C431&amp;ssl=1 1024w, https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?resize=768%2C323&amp;ssl=1 768w, https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?resize=1536%2C646&amp;ssl=1 1536w, https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?resize=720%2C303&amp;ssl=1 720w" sizes="(max-width: 559px) 100vw, 559px" data-original-src="https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/06/AI-vs-ML-vs-Deep-Learning.png?resize=559%2C235&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5d83e38 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5d83e38" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-53b3914 ot-flex-column-vertical" data-id="53b3914" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2ef2804 elementor-widget elementor-widget-text-editor" data-id="2ef2804" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">应用<strong>深度学习</strong>技术解决搜索问题通常被称为<strong>神经搜索</strong>(从<strong>神经信息检索</strong>学术领域衍生出来的一个行业)。<br/>我们不会探索神经网络如何工作的细节，也不会探索我们通过这种多方面的技术可以实现的所有可能性，所以让我们专注于深度学习对搜索的贡献:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><strong>更好的文本表示</strong>:从<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Bag-of-words_model">单词袋</a>模型(其中术语是字符序列)转移到多维数字(矢量化)方法，能够将术语建模为彼此链接的语义信息单元，具有含义<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Word_embedding">【1】</a></li>
+<li class="translated"><strong>文本生成</strong>:语言建模技术蓬勃发展，并成为主流新闻，这要归功于在生成文本方面的杰出成果，这些文本几乎与人工生成的文本无法区分<a href="https://web.archive.org/web/20221209140135/https://www.techradar.com/news/china-outstrips-gpt-3-with-even-more-ambitious-ai-language-model">【2】</a><a href="https://web.archive.org/web/20221209140135/https://medium.com/dataseries/six-times-bigger-than-gpt-3-inside-googles-trillion-parameter-switch-transformer-model-6f7a93c6aae">【3】</a><a href="https://web.archive.org/web/20221209140135/https://www.theguardian.com/commentisfree/2020/sep/08/robot-wrote-this-article-gpt-3">【4】</a><br/>生成文本在许多信息检索领域都很有用:查询自动完成、查询拼写检查、文档摘要、 搜索结果可解释性(总结文档有助于满足用户信息需求的信息)… <br/>这一领域的改进可能会带来全新类型的信息检索系统，这些系统的行为就像人类专家一样:系统不仅会返回一系列文档来满足您的信息需求，还会合成一个由支持证据(文档)支持的全面的自然语言响应。</li>
+<li class="translated"><strong>更好的图像/视频表示</strong>:从图像和视频中提取语义特征(比如涉及的对象和实体，而不仅仅是像素和颜色相关的信息)。<a href="https://web.archive.org/web/20221209140135/https://towardsdatascience.com/deep-learning-based-reverse-image-search-for-industrial-applications-33ba4b0d32c4">【5】</a><br/>使用大型预训练模型，针对您的用例进行微调(可能使用迁移学习技术)，有助于构建高级多媒体检索的基础，减少持续监督的元数据标记工作。</li>
+<li class="translated"><strong>学习排序</strong>:目前绝大多数搜索引擎从信息语料库中识别出一组候选文档(<em>匹配</em>，并按相关性排序，以满足用户信息需求(<strong>排序</strong>)。<br/>首先在排序列表中提供最有用的结果是最基本的:利用深度学习，可以从过去的交互/判断中训练高级相关性排序模型，以对给定查询的文档进行排序(两者都表示为数字向量)<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Learning_to_rank">【6】</a></li>
+<li class="translated">更好的机器翻译:拥有一台能够像人类专家一样翻译语言的计算机一直是一个挑战。深度学习成功取代了基于规则的系统和基于统计短语的方法等方法。<a href="https://web.archive.org/web/20221209140135/https://en.wikipedia.org/wiki/Neural_machine_translation">【7】</a><a href="https://web.archive.org/web/20221209140135/https://arxiv.org/pdf/2002.07526.pdf">【8】</a><br/>这为多语言搜索带来了巨大的好处:你可以用一种语言进行查询，并更高效地找到许多不同语言的文档。<a href="https://web.archive.org/web/20221209140135/https://www.amazon.science/publications/query-transformation-for-multi-lingual-product-search">【9】</a></li>
+</ul>
+</li>
+</ul>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:list --> <!-- /wp:list --> <!-- wp:paragraph --></p>
+<p class="translated">从这个介绍中，我们注意到许多深度学习对搜索的贡献需要在我们的搜索引擎中支持多维数字向量。那么，如何用目前可用的开源技术实现这样的奇迹呢？<br/>官方支持什么？哪里需要第三方插件？本系列的下一集将从这个角度探索Apache Lucene！敬请期待！</p>
+<p class="translated">[3]<a href="https://web.archive.org/web/20221209140135/https://medium.com/dataseries/six-times-bigger-than-gpt-3-inside-googles-trillion-parameter-switch-transformer-model-6f7a93c6aae" data-rich-text-format-boundary="true">https://medium . com/data series/six-times-big-than-GPT-3-inside-Googles-万亿参数-开关-变压器-模型-6f7a93c6aae </a>，<a href="https://web.archive.org/web/20221209140135/https://arxiv.org/pdf/2101.03961.pdf">https://arxiv.org/pdf/2101.03961.pdf</a>，</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b7ff27a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b7ff27a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8349993 ot-flex-column-vertical" data-id="8349993" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<section class="elementor-section elementor-inner-section elementor-element elementor-element-4338772 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4338772" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-d6b6ef4 ot-flex-column-vertical" data-id="d6b6ef4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7147c3e elementor-widget elementor-widget-image" data-id="7147c3e" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+													<a href="https://web.archive.org/web/20221209140135/https://www.manning.com/books/deep-learning-for-search">
+							<img data-attachment-id="41964" data-permalink="https://web.archive.org/web/20221209140135/https://sease.io/2021/07/artificial-intelligence-applied-to-search-introduction.html/teofili-dls-hi" data-orig-file="https://web.archive.org/web/20221209140135/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Teofili-DLS-HI.jpg?fit=264%2C331&amp;ssl=1" data-orig-size="264,331" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Teofili-DLS-HI" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221209140135/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Teofili-DLS-HI.jpg?fit=239%2C300&amp;ssl=1" data-large-file="https://web.archive.org/web/20221209140135/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Teofili-DLS-HI.jpg?fit=264%2C331&amp;ssl=1" decoding="async" width="264" height="331" src="../Images/d7b33807b6156f31760dcdfd2dc2db1f.png" class="attachment-large size-large wp-image-41964" alt="" loading="lazy" srcset="https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Teofili-DLS-HI.jpg?w=264&amp;ssl=1 264w, https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Teofili-DLS-HI.jpg?resize=239%2C300&amp;ssl=1 239w" sizes="(max-width: 264px) 100vw, 264px" data-original-src="https://web.archive.org/web/20221209140135im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Teofili-DLS-HI.jpg?fit=264%2C331&amp;ssl=1"/>								</a>
+														</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+				<div class="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-54e95d8 ot-flex-column-vertical" data-id="54e95d8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-de47986 elementor-widget elementor-widget-iheading" data-id="de47986" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// deep learning in search</span>
+	        <h3 class="main-heading translated">如果你喜欢这篇文章，你可能会对托马索·特奥菲利的这本书感兴趣</h3>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ac0648e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ac0648e" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-92a1e26 ot-flex-column-vertical" data-id="92a1e26" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7dc19e7 elementor-widget elementor-widget-iheading" data-id="7dc19e7" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-84c4125 elementor-widget elementor-widget-text-editor" data-id="84c4125" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们在搜索培训中做<a href="https://web.archive.org/web/20221209140135/https://sease.io/learning-to-rank-training">学习排名</a>和<a href="https://web.archive.org/web/20221209140135/https://sease.io/artificial-intelligence-in-search-training">人工智能？<br/>我们也提供这些主题的咨询，</a><a href="https://web.archive.org/web/20221209140135/https://sease.io/contacts">如果你想用人工智能的力量把你的搜索引擎带到一个新的水平，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-db910e9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="db910e9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2bb5ca51 ot-flex-column-vertical" data-id="2bb5ca51" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-623e7db2 elementor-widget elementor-widget-iheading" data-id="623e7db2" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-6cb1e713 elementor-widget elementor-widget-text-editor" data-id="6cb1e713" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这个关于人工智能应用于搜索的帖子吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-190f969f elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="190f969f" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.11 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20221209140135/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1670594496"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

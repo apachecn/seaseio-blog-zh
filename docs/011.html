@@ -1,0 +1,705 @@
+<html>
+<head>
+<title>Apache Solr: orchestrating Known item and Full-text search</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">Apache Solr:编排已知项目和全文搜索</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2018/05/known-item-search-apache-solr.html#0001-01-01">https://web.archive.org/web/sease.io/2018/05/known-item-search-apache-solr.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-866ea43 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="866ea43" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0d1cea2 ot-flex-column-vertical" data-id="0d1cea2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-079ae10 elementor-widget elementor-widget-iheading" data-id="079ae10" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">方案</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a8eddb0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a8eddb0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-91934a2 ot-flex-column-vertical" data-id="91934a2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-fdcf358 elementor-widget elementor-widget-text-editor" data-id="fdcf358" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你是XYZ有限公司的搜索工程师，该公司销售电子元件。XYZ向您提供了过去六个月的申请日志，以及一些业务需求。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4186d31 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4186d31" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cb90bf7 ot-flex-column-vertical" data-id="cb90bf7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-19a4bf2 elementor-widget elementor-widget-iheading" data-id="19a4bf2" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">两种客户，两种需求，两种搜索</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c85b4a8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c85b4a8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ab39e35 ot-flex-column-vertical" data-id="ab39e35" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-921939e elementor-widget elementor-widget-text-editor" data-id="921939e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">日志分析表明，XYZ主要有两类客户:第一类是“专家”用户(例如电工、经销商、商店)，其成员通过产品标识符、代码(例如SKU、型号代码、像Y-M8GB、140-213/A和ABD9881这样的想法)来查询系统；很明显，至少看起来是这样，他们已经知道自己想要什么，寻找什么。但是，您会注意到很多这样的查询没有结果。经过调查，问题似乎是代码和标识符很难记住:查询使用许多不同的形式指向同一产品。例如:</p><ul><li style="list-style-type: none;"><ul><li class="translated">y-m8gb(小写)</li><li class="translated">YM8GB(无分隔符)</li><li class="translated">YM-8GB(分隔符在错误的位置)</li><li class="translated">Y/M8GB(错误的分隔符)</li><li class="translated">Y M8GB(空白代替分隔符)</li><li class="translated">y M8/gb(以上情况的组合)</li></ul></li></ul><p class="translated">在集合中只有一个相关文档的这种场景，通常被称为“已知项目搜索”:我们的第一个需求是确保这个<em>“产品标识符意图”</em>得到满足。</p><p class="translated">另一组客户是最终用户，就像我和你一样。由于不太熟悉代码或型号代码等产品规格，这里的行为有所不同:他们使用简单的关键字搜索，试图通过输入代表名称、品牌、制造商的术语来匹配产品。接下来是第二个需求，可以总结如下:人们必须能够通过输入普通的自由文本查询来找到产品。</p><p class="translated">可以想象，在这种情况下，搜索需求与其他场景不同:这里的重点是“以术语为中心”，因此涉及到我们需要应用的文本分析的不同考虑。</p><p class="translated">虽然专家组查询应该指向一个且只有一个产品(我们处于非黑即白的场景:匹配或不匹配)，但另一方面的需求要求系统根据输入的术语提供一个“相关”文档的列表。</p><p class="translated"><em>在继续之前，一个重要的事情/假设:为了说明的目的，我们将认为这两个查询/用户组<u>是不相交的</u>:也就是说，一个给定的用户只属于所提到的组中的一个，而不是两个。更好的是，给定的用户查询将包含产品标识符</em> <strong> <em>或</em> </strong> <em>术语，而不是两者都包含。</em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5d0c0aa ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5d0c0aa" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3700022 ot-flex-column-vertical" data-id="3700022" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2c7abc8 elementor-widget elementor-widget-iheading" data-id="2c7abc8" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">模式和配置说明</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-45f70de ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="45f70de" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-35e231d ot-flex-column-vertical" data-id="35e231d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-394cb69 elementor-widget elementor-widget-iheading" data-id="394cb69" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">专家组和“已知物品搜索”</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1765615 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1765615" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cfc5fa1 ot-flex-column-vertical" data-id="cfc5fa1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d5ce3c1 elementor-widget elementor-widget-text-editor" data-id="d5ce3c1" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">“product identifier”意图(假定隐含在该组的查询行为中)可以通过应用以下分析器在索引和查询时捕获，该分析器基本上将传入值视为一个整体，将其规范化为小写，删除所有分隔符，最后在单个输出标记中折叠所有内容。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2d333fb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2d333fb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ddd1c32 ot-flex-column-vertical" data-id="ddd1c32" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d1ed444 elementor-widget elementor-widget-text-editor" data-id="d1ed444" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="ql-syntax" style="line-height: 1.71429; color: #6d6d6d;" spellcheck="false">&lt;fieldtype name=<span class="hljs-string">"identifier"</span> <span class="hljs-class">class</span>=<span class="hljs-string">"solr.TextField"</span> omitNorms=<span class="hljs-string">"true"</span>&gt;
+    &lt;analyzer&gt;
+        &lt;tokenizer <span class="hljs-class">class</span>=<span class="hljs-string">"solr.KeywordTokenizerFactory"</span> /&gt;
+        &lt;filter <span class="hljs-class">class</span>=<span class="hljs-string">"solr.LowerCaseFilterFactory"</span> /&gt;
+        &lt;filter <span class="hljs-class">class</span>=<span class="hljs-string">"solr.WordDelimiterGraphFilterFactory"</span>
+                generateWordParts=<span class="hljs-string">"0"</span>
+                generateNumberParts=<span class="hljs-string">"0"</span>
+                catenateWords=<span class="hljs-string">"0"</span>
+                catenateNumbers=<span class="hljs-string">"0"</span>
+                catenateAll=<span class="hljs-string">"1"</span>
+                splitOnCaseChange=<span class="hljs-string">"0"</span> /&gt;
+    &lt;/analyzer&gt;
+&lt;/fieldtype&gt;
+&lt;field name=<span class="hljs-string">"product_id"</span> <span class="hljs-class">type</span>=<span class="hljs-string">"identifier"</span> indexed=<span class="hljs-string">"true"</span> ... /&gt;</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7c99da4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7c99da4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-350be84 ot-flex-column-vertical" data-id="350be84" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5968402 elementor-widget elementor-widget-text-editor" data-id="5968402" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在下表中，您可以通过一些示例看到分析器的运行情况:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ce2b16c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ce2b16c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b3ff15d ot-flex-column-vertical" data-id="b3ff15d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d505675 elementor-widget elementor-widget-text-editor" data-id="d505675" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="658" data-permalink="https://web.archive.org/web/20220925171301/https://sease.io/2018/05/known-item-search-apache-solr.html/aamaaqdgaagaaqaaaaaaabakaaaajdc3otq3m2fkltg1mdqtndbmyy1injrilwq0nwe2ognjmzzhoq" data-orig-file="https://web.archive.org/web/20220925171301/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAABAkAAAAJDc3OTQ3M2FkLTg1MDQtNDBmYy1iNjRiLWQ0NWE2OGNjMzZhOQ.png?fit=438%2C490&amp;ssl=1" data-orig-size="438,490" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="AAMAAQDGAAgAAQAAAAAAABAkAAAAJDc3OTQ3M2FkLTg1MDQtNDBmYy1iNjRiLWQ0NWE2OGNjMzZhOQ" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220925171301/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAABAkAAAAJDc3OTQ3M2FkLTg1MDQtNDBmYy1iNjRiLWQ0NWE2OGNjMzZhOQ.png?fit=268%2C300&amp;ssl=1" data-large-file="https://web.archive.org/web/20220925171301/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAABAkAAAAJDc3OTQ3M2FkLTg1MDQtNDBmYy1iNjRiLWQ0NWE2OGNjMzZhOQ.png?fit=438%2C490&amp;ssl=1" loading="lazy" class="size-medium wp-image-658 alignleft" src="../Images/c9bd28917f98644e7e4b2cea84538abe.png" alt="" width="268" height="300" data-recalc-dims="1" srcset="https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAABAkAAAAJDc3OTQ3M2FkLTg1MDQtNDBmYy1iNjRiLWQ0NWE2OGNjMzZhOQ.png?w=438&amp;ssl=1 438w, https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAABAkAAAAJDc3OTQ3M2FkLTg1MDQtNDBmYy1iNjRiLWQ0NWE2OGNjMzZhOQ.png?resize=268%2C300&amp;ssl=1 268w" sizes="(max-width: 268px) 100vw, 268px" data-original-src="https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAABAkAAAAJDc3OTQ3M2FkLTg1MDQtNDBmYy1iNjRiLWQ0NWE2OGNjMzZhOQ.png?resize=268%2C300&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f357c17 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f357c17" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2c3429d ot-flex-column-vertical" data-id="2c3429d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a44610f elementor-widget elementor-widget-text-editor" data-id="a44610f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如您所见，分析器没有声明一个<em>类型的</em>属性，因为它应该在索引和查询时都被应用。但是，传入的值有所不同:在索引时，分析器处理的是字段内容(即传入文档的字段值)，而在查询时，流经管道的值由用户输入的一个或多个术语组成(简单地说，是一个查询)。</p><p class="translated">虽然在索引时一切都按预期工作，但在查询时，上面的分析器需要Solr 6.5中引入的一个特性:空格上的“<strong/>分割”标志<a href="https://web.archive.org/web/20220925171301/https://lucidworks.com/2017/04/18/multi-word-synonyms-solr-adds-query-time-support" target="_blank" rel="noopener">【1】</a>。当它被设置为“false”时(正如我们在这个上下文中所需要的)，它使得传入的查询文本在被发送到分析器时被保存为一个完整的单元。</p><p class="translated">在Solr 6.5之前，我们没有这样的控制，分析器接收一个“用空格预先标记”的标记；换句话说，查询时分析的工作单元是单个术语:分析器链(包括标记器本身)被调用来处理由前置空格标记化输出的每个术语。因此，我们的分析器在查询时不能像预期的那样工作:如果我们从上表中选择例子#5和#6，您可以看到用户输入了一个空格。将“空白分割”标志设置为true(显式地，或者使用存储在索引中的Solr &lt; 6.5), the pre-tokenization described above produces two tokens:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f9277e8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f9277e8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7f15a78 ot-flex-column-vertical" data-id="7f15a78" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-07f59f0 elementor-widget elementor-widget-text-editor" data-id="07f59f0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul><li style="list-style-type: none;"><ul><li class="translated">#5 = {“Y”, ”M8GB”}</li><li class="translated">#6 = {“y”, “M8/gb”}</li></ul></li></ul><p class="translated">so our analyzer would receive 2 tokens (for each case) and there won’t be any match with the single term <strong> ym8gb </strong>。因此，在Solr 6.5之前，我们有两种方法来处理这个需求:</p><ul><li style="list-style-type: none;"><ul><li class="translated"><strong>客户端</strong>:用双引号将整个查询括起来，用“\”转义空格，或者用像“-”这样的分隔符替换它们。很简单，但是它需要对客户端代码进行控制，而这并不总是可行的。</li><li class="translated"><strong> Solr side </strong>:对传入的查询应用与上面相同的转换，但这次是在查询解析器级别。如果你了解一些Lucene / Solr的内部知识，这很容易。此外，它需要一个在Solr中安装定制插件的上下文。使用UpdateRequestProcessor也可以获得类似的效果，它将创建一个与原始字段值相同但没有任何空白的新字段。</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1d1970c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1d1970c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5a1fc07 ot-flex-column-vertical" data-id="5a1fc07" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-fbb8b9c elementor-widget elementor-widget-iheading" data-id="fbb8b9c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">最终用户组和全文搜索查询</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ec4f386 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ec4f386" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-730409d ot-flex-column-vertical" data-id="730409d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c91026a elementor-widget elementor-widget-text-editor" data-id="c91026a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在这种情况下，我们在一个“普通的”全文搜索上下文中，其中分析确定了几个目标字段:产品名称和品牌。</p><p class="translated">与前面的场景不同，这里我们没有一个惟一的、确定的方法来满足搜索需求。这取决于很多因素:目录、术语分布、实现者体验、用户搜索体验方面的客户期望。所有这些都会导致不同的答案。举个例子，这里有一个可能的选择:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6fe18cd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6fe18cd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ba1daec ot-flex-column-vertical" data-id="ba1daec" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-47f75b2 elementor-widget elementor-widget-text-editor" data-id="47f75b2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="ql-syntax" style="line-height: 1.71429; color: #6d6d6d;" spellcheck="false">&lt;fieldType name=<span class="hljs-string">"brand"</span> <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.TextField"</span> omitNorms=<span class="hljs-string">"true"</span>&gt;
+    &lt;analyzer&gt;
+        &lt;charFilter 
+                <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.MappingCharFilterFactory"</span> 
+                mapping=<span class="hljs-string">"mapping-FoldToASCII.txt"</span>/&gt;
+        &lt;tokenizer <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.StandardTokenizerFactory"</span>/&gt;
+        &lt;filter <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.LowerCaseFilterFactory"</span>/&gt;
+        &lt;filter <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.StopFilterFactory"</span> 
+                ignoreCase=<span class="hljs-string">"true"</span> 
+                words=<span class="hljs-string">"lang/en/brand_stopwords.txt"</span>/&gt;
+    &lt;/analyzer&gt;
+&lt;/fieldType&gt;
+
+&lt;fieldType name=<span class="hljs-string">"name"</span> <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.TextField"</span>&gt;
+    &lt;analyzer&gt;
+        &lt;charFilter 
+                  <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.MappingCharFilterFactory"</span> 
+                  mapping=<span class="hljs-string">"mapping-FoldToASCII.txt"</span>/&gt;
+        &lt;tokenizer <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.StandardTokenizerFactory"</span>/&gt;
+        &lt;filter <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.LowerCaseFilterFactory"</span>/&gt;
+        &lt;filter 
+                <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.StopFilterFactory"</span> 
+                ignoreCase=<span class="hljs-string">"false"</span> 
+                words=<span class="hljs-string">"lang/en/product_name_stopwords.txt"</span>/&gt;
+        &lt;filter <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.EnglishPossessiveFilterFactory"</span>/&gt;
+        &lt;filter <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.EnglishMinimalStemFilterFactory"</span>/&gt;
+        &lt;filter <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.RemoveDuplicatesTokenFilterFactory"</span>/&gt;
+        &lt;filter <span class="hljs-keyword">class</span>=<span class="hljs-string">"solr.LengthFilterFactory"</span> min=<span class="hljs-string">"2"</span> max=<span class="hljs-string">"50"</span> /&gt;
+    &lt;/analyzer&gt;
+&lt;/fieldType&gt;</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-40d84c4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="40d84c4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-07ba968 ot-flex-column-vertical" data-id="07ba968" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8ad0fd9 elementor-widget elementor-widget-text-editor" data-id="8ad0fd9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这里的重点不是模式设计本身:要强调的重要一点是，这个需求需要一个与前面描述的“已知项搜索”完全不同的配置。</p><p class="translated">具体来说，让我们假设我们最终遵循“以术语为中心”的方法来满足第二个需求。在这种情况下，该方法需要为“在空白上分割”参数设置一个不同的值，该值必须设置为true。</p><p class="translated">“<strong> sow </strong>参数可以在<em> SearchHandler </em>级别设置，因此在查询时应用。可以在<em> solrconfig.xml </em>中声明它，并且根据配置，可以使用一个命名的(HTTP)查询参数覆盖它。</p><p class="translated">“空白分割”预标记化将我们带到了一个与“已知项目搜索”完全不同的场景，相反，我们“应该”进行以字段为中心的搜索；“应该”是用双引号引起来的，因为从一方面来说，如果我们实际上使用的是以字段为中心的搜索，那么从另一方面来说，我们就处于一种边缘情况，即我们用一个查询术语查询一个字段(本文中的第一个分析器<strong>总是</strong>输出一个术语)。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-cfd7493 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="cfd7493" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cb7045b ot-flex-column-vertical" data-id="cb7045b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3c6a647 elementor-widget elementor-widget-iheading" data-id="3c6a647" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">实施</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0365a88 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0365a88" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0dcd5ce ot-flex-column-vertical" data-id="0dcd5ce" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-500c72b elementor-widget elementor-widget-iheading" data-id="500c72b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">在哪里？</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-30e6890 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="30e6890" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9306c80 ot-flex-column-vertical" data-id="9306c80" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-71654da elementor-widget elementor-widget-text-editor" data-id="71654da" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">尽管人们可能认为首先要考虑的是如何组合这两种不同的查询策略，但在此之前，我们需要回答的问题是<strong>在哪里实现解决方案</strong>？显然，无论我们决定采用哪种方式，我们都必须实施一个(搜索)工作流，该工作流可以概括为下图:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bbd55ee ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bbd55ee" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ea91dd2 ot-flex-column-vertical" data-id="ea91dd2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ede66f7 elementor-widget elementor-widget-text-editor" data-id="ede66f7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="659" data-permalink="https://web.archive.org/web/20220925171301/https://sease.io/2018/05/known-item-search-apache-solr.html/aamaaqdgaagaaqaaaaaaaa9maaaajgqxytuzmjbklwiynmmtndbizi1iymi3ltkxzdljmtnhnthmna" data-orig-file="https://web.archive.org/web/20220925171301/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?fit=1604%2C482&amp;ssl=1" data-orig-size="1604,482" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220925171301/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?fit=300%2C90&amp;ssl=1" data-large-file="https://web.archive.org/web/20220925171301/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?fit=1024%2C308&amp;ssl=1" loading="lazy" class="aligncenter wp-image-659" src="../Images/e444ad7a9ef53d1dc3565fd887ab6f50.png" alt="Known Item Search in Apache Solr" width="473" height="142" data-recalc-dims="1" srcset="https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?w=1604&amp;ssl=1 1604w, https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?resize=300%2C90&amp;ssl=1 300w, https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?resize=768%2C231&amp;ssl=1 768w, https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?resize=1024%2C308&amp;ssl=1 1024w, https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?resize=1080%2C325&amp;ssl=1 1080w" sizes="(max-width: 473px) 100vw, 473px" data-original-src="https://web.archive.org/web/20220925171301im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMAAQDGAAgAAQAAAAAAAA9MAAAAJGQxYTUzMjBkLWIyNmMtNDBiZi1iYmI3LTkxZDljMTNhNThmNA.png?resize=473%2C142&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f9f2d48 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f9f2d48" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c2d0d29 ot-flex-column-vertical" data-id="c2d0d29" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8f2c576 elementor-widget elementor-widget-text-editor" data-id="8f2c576" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在Solr方面，每个“搜索”任务需要在不同的<em> SearchHandler </em>中执行，所以回到我们的问题:我们想在哪里实现这样的工作流？我们有三种选择:外部、中间或内部Solr。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7a3f98b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7a3f98b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f139724 ot-flex-column-vertical" data-id="f139724" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a4b7ce5 elementor-widget elementor-widget-iheading" data-id="a4b7ce5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">#1:客户端实施</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2fbaf35 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2fbaf35" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d653705 ot-flex-column-vertical" data-id="d653705" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9b2648c elementor-widget elementor-widget-text-editor" data-id="9b2648c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">第一种选择是在客户端应用程序中实现上面描述的流程。这假设您在这方面拥有所需的控制和编程技能。如果这个假设成立，那么编写工作流就相对容易了:您可以选择一个适用于您的语言的客户端API绑定，然后实现上面说明的double +条件搜索。</p><ul><li style="list-style-type: none;"><ul><li class="translated"><strong>优点</strong>:容易实现。它需要最低限度的Solr(功能)知识。</li><li class="translated"><strong>缺点</strong>:搜索工作流程/逻辑移到了客户端。编程是必需的，因此您必须处于这样一种环境中，在这种环境中可以完成编程，并且客户端应用程序代码在您的控制之下。</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4c96459 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4c96459" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a491800 ot-flex-column-vertical" data-id="a491800" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5a3d876 elementor-widget elementor-widget-iheading" data-id="5a3d876" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">#2:中间人</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-48d75ad ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="48d75ad" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6385d2f ot-flex-column-vertical" data-id="6385d2f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5ca232e elementor-widget elementor-widget-text-editor" data-id="5ca232e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">将东西移出客户端领域，这是另一个流行的选择，仍然可以被视为客户端的替代方案(从Solr的角度来看)，是一个代理/适配器/外观。无论你想给这个东西取什么名字，它都是一个新的模块，位于客户端应用程序和Solr之间；它将拦截所有请求，并通过编排Solr中公开的搜索端点来实现定制逻辑。</p><p class="translated">作为一个新模块，它有几个优点:</p><ul><li style="list-style-type: none;"><ul><li class="translated">它可以用你喜欢的语言来编码</li><li class="translated">它与客户端应用程序以及Solr完全分离</li></ul></li></ul><p class="translated">但出于同样的原因，它也有一些缺点:</p><ul><li style="list-style-type: none;"><ul><li class="translated">它必须被创建:设计、实现、测试、安装和维护</li><li class="translated">它是您系统中的一个新部分，这必然会增加架构的整体复杂性</li><li class="translated">Solr公开了许多(索引和搜索)服务。使用这个选项，所有这些服务都应该被代理，因此导致了许多不必要的委托(即，委托服务不会给执行链增加任何价值)。</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4f84f7c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4f84f7c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-898651b ot-flex-column-vertical" data-id="898651b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4deb5f1 elementor-widget elementor-widget-iheading" data-id="4deb5f1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">#3:在Solr</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1a842bc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1a842bc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-eccb1df ot-flex-column-vertical" data-id="eccb1df" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f293e00 elementor-widget elementor-widget-text-editor" data-id="f293e00" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">最后一个选项将工作流实现(和搜索逻辑)移动到了我认为应该是Solr的地方。</p><p class="translated">请注意，这种选择通常不仅仅是一种“哲学”上的选择:如果你是一名搜索工程师，你很可能会被雇佣来设计、实现和调整“搜索部分”。这意味着，出于许多原因，您完全有可能将客户端应用程序视为一个外部(子)系统，在这里您没有任何控制。</p><p class="translated">这种方法的主要缺点是，正如您可以想象的那样，它需要编程技能和Solr内部知识。</p><p class="translated">在Solr中，搜索请求由一个<em> SearchHandler </em>使用，这个组件负责执行与给定搜索端点相关的逻辑。在我们的示例中，我们有以下符合这两个要求的搜索处理程序:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9a677e6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9a677e6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5231d4d ot-flex-column-vertical" data-id="5231d4d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-57d1bb3 elementor-widget elementor-widget-text-editor" data-id="57d1bb3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;" spellcheck="false">&lt;!-- Known Item search --&gt;
+&lt;requestHandler name="/known_item_search" class="solr.SearchHandler"&gt;
+   &lt;lst name="invariants"&gt;
+        &lt;str name="defType"&gt;lucene&lt;/str&gt;
+        &lt;bool name="sow"&gt;false&lt;/bool&gt; &lt;!-- No whitespace split --&gt;
+        &lt;str name="df"&gt;product_id&lt;/str&gt;
+   &lt;/lst&gt;
+&lt;/requestHandler&gt;
+
+&lt;!-- Full-text search --&gt;
+&lt;requestHandler name="/full-text-search" class="solr.SearchHandler"&gt;
+    &lt;lst name="invariants"&gt;
+         &lt;bool name="sow"&gt;true&lt;/bool&gt; &lt;!--Whitespace split --&gt;
+         &lt;str name="defType"&gt;edismax&lt;/str&gt;
+         &lt;str name="df"&gt;product_name&lt;/str&gt;
+         &lt;str name="qf"&gt;
+            product^0.7
+            brand^1.5</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-37b6009 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="37b6009" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fc443bc ot-flex-column-vertical" data-id="fc443bc" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7bf4cd6 elementor-widget elementor-widget-text-editor" data-id="7bf4cd6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">除此之外，我们还需要第三个组件，负责协调上面的两个搜索处理程序。我将这个组件称为<em>“复合请求处理器”。</em></p><p class="translated">复合处理程序还将提供由客户端调用的公共搜索端点。一旦接收到请求，复合请求处理程序就实现搜索工作流:它调用组成其链的所有处理程序，当一个调用目标产生预期的结果时，它将停止。</p><p class="translated">复合处理程序配置如下所示:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-701b6f4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="701b6f4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-690d8e3 ot-flex-column-vertical" data-id="690d8e3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-91ffb31 elementor-widget elementor-widget-text-editor" data-id="91ffb31" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="ql-syntax" style="line-height: 1.71429; color: #6d6d6d;" spellcheck="false"><span class="hljs-tag">&lt;<span class="hljs-name">requestHandler</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"/search"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"....."</span>&gt;
+    &lt;<span class="hljs-name">str</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"chain"</span>&gt;</span>/know_item_search,/full_text_search<span class="hljs-tag">&lt;/<span class="hljs-name">str</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">requestHandler</span>&gt;</span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bdef573 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bdef573" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-807340c ot-flex-column-vertical" data-id="807340c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d5cf49d elementor-widget elementor-widget-text-editor" data-id="d5cf49d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在客户端，只需要一个请求，因为整个工作流将通过复合请求处理程序在Solr中实现。换句话说，想象一个带有搜索栏的GUI，当搜索按钮被按下时，客户端应用程序将必须检索用户输入的术语，并且只发送一个请求(到复合处理程序端点)，而不管用户的意图如何(即，不管用户属于哪个组)。</p><p class="translated">本节介绍的复合请求处理器已经实现了，你可以在我们的Github账号中找到，这里是<a href="https://web.archive.org/web/20220925171301/https://github.com/SeaseLtd/invisible-queries-request-handler">【2】</a>。</p><p class="translated">享受吧，像往常一样，任何反馈都是热烈欢迎的！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1a09cfc3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1a09cfc3" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-49d13d15 ot-flex-column-vertical" data-id="49d13d15" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6edd938f elementor-widget elementor-widget-iheading" data-id="6edd938f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-c4b5075 elementor-widget elementor-widget-text-editor" data-id="c4b5075" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220925171301/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220925171301/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训吗？<br/>我们还提供这些主题的咨询，<a href="https://web.archive.org/web/20220925171301/https://sease.io/contacts">如果您想让您的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7f541bd7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7f541bd7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-148645d7 ot-flex-column-vertical" data-id="148645d7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-492a5acc elementor-widget elementor-widget-iheading" data-id="492a5acc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-1b964400 elementor-widget elementor-widget-text-editor" data-id="1b964400" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Apache Solr:编排已知项目和全文搜索的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7c7eacf2 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="7c7eacf2" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220925171301/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664125980"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

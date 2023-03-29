@@ -1,0 +1,695 @@
+<html>
+<head>
+<title>A Learning to Rank Project on a Daily Song Ranking Problem – Part 4</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">每日歌曲排序问题的学习排序项目-第4部分</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html#0001-01-01">https://web.archive.org/web/sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-732348b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="732348b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7f19d53 ot-flex-column-vertical" data-id="7f19d53" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9d6b79b elementor-widget elementor-widget-text-editor" data-id="9d6b79b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">你真的以为一切都结束了吗？好消息！<br/>关于每日歌曲排名问题的学习排名项目已有第四集。如果你对将机器学习与搜索相结合感兴趣，在这篇博客文章中，我们将继续探索学习按国家和日期对顶级k歌检索进行排序的技术。</p>
+<p class="has-text-align-justify translated">和往常一样，为了有一个整体的画面，我建议你看一下以前的剧集，在那里你将学习:<br/> <a href="https://web.archive.org/web/20221130073030/https://sease.io/2020/12/a-learning-to-rank-project-on-a-daily-song-ranking-problem.html">第1部分</a>——如何从可用的数据开始并使用开源库<br/> <a href="https://web.archive.org/web/20221130073030/https://sease.io/2021/02/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-2.html">建立和构建一个学习分级(LTR)系统第2部分</a>——如何通过使用强大的库SHAP <br/> <a href="https://web.archive.org/web/20221130073030/https://sease.io/2021/03/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-3.html">解释模型的行为第3部分</a>——如何创建查询ID并在分割训练集和测试集时要小心</p>
+<p class="translated">在这篇博文中，我将尝试回答以下问题:</p>
+<ol>
+<li style="list-style-type: none;">
+ 
+<ol>
+<li class="translated"><strong>在使用查询级特性创建查询Id之后，删除它们有意义吗？</strong></li>
+<li class="translated"><strong>如果我删除欠采样查询会发生什么？</strong></li>
+<li class="translated"><strong>如果我将欠采样查询分组到一个不太细粒度的<strong>query</strong>y Id中，会发生什么？</strong></li>
+</ol>
+</li>
+</ol>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list {"ordered":true} --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">我们开始吧！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-82c2c8b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="82c2c8b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-dbe39c8 ot-flex-column-vertical" data-id="dbe39c8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b4c6c31 elementor-widget elementor-widget-iheading" data-id="b4c6c31" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">问题1)在使用查询级特征来创建查询ID之后移除它们:是或否？</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b7d3af3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b7d3af3" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5ab850f ot-flex-column-vertical" data-id="5ab850f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5683597 elementor-widget elementor-widget-text-editor" data-id="5683597" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">正如在以前的博客文章中已经解释过的，训练集中的每一行都是一个查询-文档对；它由查询级、文档级和潜在的查询文档级特性组成。我们指定“<strong> query_ID </strong>”作为每个查询的惟一查询ID，通过连接所有查询级别的特性(如果可能的话)。</p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} -->T31<!-- wp:paragraph -->T33】</p>
+<p class="translated">在我们的项目中，查询级别的特性是区域、日、月和工作日。我们使用它们来创建<em>查询Id哈希</em> ( <strong> query_ID </strong>)，如下表所示:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-83989af ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="83989af" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-70f061c ot-flex-column-vertical" data-id="70f061c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bf2fd49 elementor-widget elementor-widget-text-editor" data-id="bf2fd49" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="40625" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-04-06-alle-07-30-12" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?fit=1212%2C384&amp;ssl=1" data-orig-size="1212,384" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-04-06 alle 07.30.12" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?fit=300%2C95&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?fit=1024%2C324&amp;ssl=1" decoding="async" loading="lazy" width="1212" height="384" class="wp-image-40625 aligncenter" style="width: 650px;" src="../Images/dc104a8f57b80fb26cbfb006e23137f7.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?w=1212&amp;ssl=1 1212w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?resize=300%2C95&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?resize=1024%2C324&amp;ssl=1 1024w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?resize=768%2C243&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?resize=720%2C228&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-06-alle-07.30.12.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d42e44f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d42e44f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-07b4ea7 ot-flex-column-vertical" data-id="07b4ea7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ed57687 elementor-widget elementor-widget-text-editor" data-id="ed57687" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">很自然地想到我们可以删除查询级别的特性，因为该信息已经在查询Id中列出。<br/>每个查询Id将具有其排序的文档列表，该列表将由查询级特征的相同值组成；那么保留它们的理由是什么呢？</p>
+<p class="has-text-align-justify translated">另一方面，通过移除所有查询级特征，在重新排序时，模型将实际上仅依赖于文档级和查询文档级特征来决定如何重新排序文档；正确吗？还是低估？既然查询级别的特性是多余的，我们可以删除它们吗？</p>
+<p class="translated">我们使用XGBoost ( <strong> LambdaMART </strong>)训练了一个学习排序模型，并运行了两个不同的测试:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">丢弃所有查询级特征(共13个特征)-&gt; <span class="has-inline-color has-vivid-red-color">丢弃</span></li>
+<li class="translated">保留所有查询级特征(共17个特征)-&gt; <span class="has-inline-color" style="color: #0018a3;">保留</span></li>
+</ul>
+</li>
+</ul>
+<p class="translated">【T6<!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">这里获得的结果(表1):</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8c970d4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8c970d4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bd8b248 ot-flex-column-vertical" data-id="bd8b248" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-42d142e elementor-widget elementor-widget-text-editor" data-id="42d142e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="40730" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-04-12-alle-08-29-30" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?fit=1576%2C384&amp;ssl=1" data-orig-size="1576,384" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-04-12 alle 08.29.30" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?fit=300%2C73&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?fit=1024%2C250&amp;ssl=1" decoding="async" loading="lazy" width="1576" height="384" class="wp-image-40730 aligncenter" style="width: 450px;" src="../Images/15dddd1e127454a1479ed3ae44dda33f.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?w=1576&amp;ssl=1 1576w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?resize=300%2C73&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?resize=1024%2C250&amp;ssl=1 1024w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?resize=768%2C187&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?resize=1536%2C374&amp;ssl=1 1536w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?resize=720%2C175&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-12-alle-08.29.30.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0cb3073 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0cb3073" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e937465 ot-flex-column-vertical" data-id="e937465" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5a4f437 elementor-widget elementor-widget-text-editor" data-id="5a4f437" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">我们可以看到没有很大的区别，但是保留查询级别的特性似乎可以获得更高的性能结果。</p>
+<p class="has-text-align-justify translated">为了更好的比较，我们在相同的测试集上测试了它们；为此，训练集和测试集中的功能在数量和名称方面必须相同，否则我们会得到以下错误消息:“<em>值错误:功能名称不匹配</em>”。</p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} -->T3<!-- wp:paragraph {"align":"justify"} -->T5<!-- wp:paragraph {"align":"justify"} -->T7】</p>
+<p class="has-text-align-justify translated">所以在这种情况下，我们没有删除查询级别的特性，而是保留并填充了<strong> nan </strong>值；这里举个例子:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1e574b6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1e574b6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0951033 ot-flex-column-vertical" data-id="0951033" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5d9e929 elementor-widget elementor-widget-text-editor" data-id="5d9e929" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="41179" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-04-28-alle-09-19-59" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?fit=1220%2C396&amp;ssl=1" data-orig-size="1220,396" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-04-28 alle 09.19.59" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?fit=300%2C97&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?fit=1024%2C332&amp;ssl=1" decoding="async" loading="lazy" width="1220" height="396" class="wp-image-41179 aligncenter" style="width: 650px;" src="../Images/61dcd3a394df7665ef2b729c0bfc580e.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?w=1220&amp;ssl=1 1220w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?resize=300%2C97&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?resize=1024%2C332&amp;ssl=1 1024w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?resize=768%2C249&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?resize=720%2C234&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.59.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4f4f0df ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4f4f0df" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9e6828e ot-flex-column-vertical" data-id="9e6828e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2403d9e elementor-widget elementor-widget-text-editor" data-id="2403d9e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">只有这样模型才能被训练。获得的结果如下(表2):</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bf0d463 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bf0d463" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8a6c8d0 ot-flex-column-vertical" data-id="8a6c8d0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-409f5ae elementor-widget elementor-widget-text-editor" data-id="409f5ae" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="41180" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-04-28-alle-09-19-28" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.28.png?fit=966%2C190&amp;ssl=1" data-orig-size="966,190" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-04-28 alle 09.19.28" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.28.png?fit=300%2C59&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.28.png?fit=966%2C190&amp;ssl=1" decoding="async" loading="lazy" width="966" height="190" class="wp-image-41180 aligncenter" style="width: 600px;" src="../Images/095180619bdf1c7c193f946cff932843.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.28.png?w=966&amp;ssl=1 966w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.28.png?resize=300%2C59&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.28.png?resize=768%2C151&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.28.png?resize=720%2C142&amp;ssl=1 720w" sizes="(max-width: 966px) 100vw, 966px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-28-alle-09.19.28.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-719eb71 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="719eb71" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-82c35f1 ot-flex-column-vertical" data-id="82c35f1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1560e9c elementor-widget elementor-widget-text-editor" data-id="1560e9c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">删除查询级别的特性(DROP-Table 1)或者用'<em> nan' </em>'值填充它们没有任何区别。从上表可以看出，无论我们是否在测试集中使用它们，它们都是完全不被考虑的；事实上，结果总是一样的。</p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} -->T6】</p>
+<p class="has-text-align-justify translated">另一方面，我们可以注意到，如果我们在训练时保留查询级别的特性，但我们不测试它们，eval-ndcg@10会在某种程度上受到负面影响(表3):</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8cc897b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8cc897b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-45084e8 ot-flex-column-vertical" data-id="45084e8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-82e5968 elementor-widget elementor-widget-text-editor" data-id="82e5968" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="41189" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-04-29-alle-10-38-12" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-29-alle-10.38.12.png?fit=964%2C188&amp;ssl=1" data-orig-size="964,188" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-04-29 alle 10.38.12" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-29-alle-10.38.12.png?fit=300%2C59&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-29-alle-10.38.12.png?fit=964%2C188&amp;ssl=1" decoding="async" loading="lazy" width="964" height="188" class="wp-image-41189 aligncenter" style="width: 600px;" src="../Images/bc786d9b8b9cbcc2442cd45a872646b6.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-29-alle-10.38.12.png?w=964&amp;ssl=1 964w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-29-alle-10.38.12.png?resize=300%2C59&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-29-alle-10.38.12.png?resize=768%2C150&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-29-alle-10.38.12.png?resize=720%2C140&amp;ssl=1 720w" sizes="(max-width: 964px) 100vw, 964px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-04-29-alle-10.38.12.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f40d3d9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f40d3d9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-aba4288 ot-flex-column-vertical" data-id="aba4288" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b9f88fc elementor-widget elementor-widget-text-editor" data-id="b9f88fc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">一个原因可能是保留查询级别的特征使模型能够调整其他特征的权重，从而影响树的构建。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} -->T6】</p>
+<p class="has-text-align-justify translated">还应该指出的是，当处理真实世界的数据时，可能会碰巧有太多的特征，这可能会在对分类特征应用编码技术时导致一些问题。例如，如果使用一次性编码技术，则基数越大的分类要素越多，创建的编码要素也就越多。出于这个原因，我们可能会妥协，只保留最有意义的查询级特性(或者选择其他编码技术)。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5595b5c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5595b5c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0a41a55 ot-flex-column-vertical" data-id="0a41a55" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-992b618 elementor-widget elementor-widget-iheading" data-id="992b618" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">问题2)如果查询id采样不足，则丢弃训练样本</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2333304 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2333304" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-678694f ot-flex-column-vertical" data-id="678694f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2151c8c elementor-widget elementor-widget-text-editor" data-id="2151c8c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">评估每个查询Id的训练样本的分布是非常重要的，因为我们可能会得到不真实的结果。很少有观察让我们对文件的相关性没有足够的信心。此外，需要避免的两个常见错误是:<br/>–如果我们的观察值数量有限，那么在分割过程中，我们可能会得到一些只有一个训练样本的查询。在这种情况下，查询组的NDCG@K将是1，与模型无关；<br/>–在分割过程中，我们可以将所有带有单一相关性标签的样本放入测试集中。</p>
+<p class="has-text-align-justify translated">这就是为什么建议删除欠采样查询的原因。然而，正如已经说过的，这个概念必须结合具体情况。如果我们有可靠的数据，并且我们确信我们已经适当地控制了可能使NDCG暴涨的条件(如上所述),我们可以试着保留那些观察结果。</p>
+<p class="has-text-align-justify translated">事实上，这就是我们在前面的实现中所做的；我们设置了一个阈值，对于具有低于该阈值的大量观察值的查询id，我们将这些观察值保存在一个名为<strong> under_sampled_only_train </strong>的新数据帧中。这是因为我们将这些观察值保留在训练集中，并且仅当测试集出现的次数少于整个数据集的20%时，才将其中一些移动到测试集(具有最高数量观察值的查询id)。<span class="has-inline-color has-black-color">为什么采用这种方法？在大多数情况下，训练模型使用更多的数据(因为我们有它！)通常更好；然而，通过这个实验，我们调查并深入了解这是否真的带来了优势。</span></p>
+<p class="has-text-align-justify translated">事实上，我们想知道:如果我们完全删除'<strong> under_sampled_only_train </strong>'观察值，而不是将它们保留在训练集中，会发生什么？</p>
+<p class="translated">【T8<!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --></p>
+<p class="has-text-align-justify translated">我们检查了通过保留欠采样查询id(<mark class="has-inline-color" style="background-color: rgba(0, 0, 0, 0); color: #591796;">KEEP</mark>)和通过删除它们(<mark class="has-inline-color has-vivid-red-color" style="background-color: rgba(0, 0, 0, 0);"> DROP </mark>)来训练模型之间的差异，然后我们在相同的测试集上测试这些模型(它根本不包含欠采样查询！).这两个模型具有相同的特性(包括查询级特性)，因此可以对它们进行比较；唯一改变的是总观察值的数量，也就是查询id的数量。结果总结如下(表4):</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-81bfac7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="81bfac7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-dbb6eab ot-flex-column-vertical" data-id="dbb6eab" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3ccafac elementor-widget elementor-widget-text-editor" data-id="3ccafac" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="41392" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-05-13-alle-14-40-21" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?fit=1124%2C194&amp;ssl=1" data-orig-size="1124,194" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-05-13 alle 14.40.21" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?fit=300%2C52&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?fit=1024%2C177&amp;ssl=1" decoding="async" loading="lazy" width="1124" height="194" class="wp-image-41392 aligncenter" style="width: 600px;" src="../Images/7c7cd40fa3ea9342a2473ea55c75c4e0.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?w=1124&amp;ssl=1 1124w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?resize=300%2C52&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?resize=1024%2C177&amp;ssl=1 1024w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?resize=768%2C133&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?resize=720%2C124&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-14.40.21.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-efaf205 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="efaf205" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a08be16 ot-flex-column-vertical" data-id="a08be16" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cb0e5b0 elementor-widget elementor-widget-text-editor" data-id="cb0e5b0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">我们可以注意到没有很大的区别。在我们的例子中，将欠采样查询保留在训练集中似乎可以获得相同或略好的结果，因此我们可以非常确定我们拥有可靠的数据，并且性能是真实的。</p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --> <!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --> <!-- /wp:paragraph --></p>
+<p class="has-text-align-justify translated">还应该说，这些结果受到阈值设置的影响；提高或降低阈值，您可以决定在<em> under_sampled_only_train </em>数据帧中包含更多或更少的观察值，并可能获得不同的性能。<br/>阈值应该根据您的数据分布来设置——尝试不同的值，看看会发生什么！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b5b5cdc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b5b5cdc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ac80db0 ot-flex-column-vertical" data-id="ac80db0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-edb961e elementor-widget elementor-widget-iheading" data-id="edb961e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">问题3)对欠采样查询进行分组</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fefb26c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fefb26c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-264f004 ot-flex-column-vertical" data-id="264f004" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-39d7e9c elementor-widget elementor-widget-text-editor" data-id="39d7e9c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">让我们看看另一个实验的结果。</p>
+<p class="has-text-align-justify translated">如上所述，在我们的数据集中，有4个查询级别的特性(区域、日期、月份和工作日)用于创建查询Id散列。欠采样查询存储在名为<strong> under_sampled_only_train </strong>的数据帧中，并且只出现在训练集中；这个数据帧包含252423个观察值和3333个不同的查询id。<br/>为了使这些查询Id组更加“密集”,如果我们只给这些观察值分配一个不太详细的查询Id，会发生什么情况？</p>
+<p class="translated">我们尝试了两种不同的方法，每次都“放松”欠采样查询的查询Id:</p>
+<ol>
+<li style="list-style-type: none;">
+ 
+<ol>
+<li class="translated">将所有具有相同“区域”和“月份”的观察值分组</li>
+<li class="translated">将所有具有相同“区域”的观察分组</li>
+</ol>
+</li>
+</ol>
+<p class="has-text-align-justify translated">然后，我们检查了通过对欠采样查询进行分组来训练模型、让它们保持原样以及丢弃它们之间的差异。我们在同一个测试集上测试了这些模型(它根本不包含欠采样查询！).它们具有相同的特性(包括查询级特性),因此可以进行比较；唯一改变的是欠采样查询的查询id。</p>
+<p class="translated">我们如何将新的“query_ID”分组并分配给欠采样查询？</p>
+<h6 class="translated">1.基于地区和月份的query_ID</h6>
+<h6 class="translated"><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list {"ordered":true} --><!-- /wp:list --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:heading {"level":4} --><!-- /wp:heading --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --></h6>
+<p class="has-text-align-justify translated">在<strong>under _ sampled _ only _ train</strong>数据帧中，我们有16个不同的“区域”值和12个不同的“月份”值。我们决定将对于“Region”和“Month”特性具有相同值的所有观察分组，为它们分配一个新的查询Id:然后我们在under_sampled_only_train中获得144个唯一的查询Id(而不是3333个):</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f079156 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f079156" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ed49c18 ot-flex-column-vertical" data-id="ed49c18" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-17907c1 elementor-widget elementor-widget-text-editor" data-id="17907c1" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="41303" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-05-11-alle-09-32-40" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?fit=1206%2C518&amp;ssl=1" data-orig-size="1206,518" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-05-11 alle 09.32.40" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?fit=300%2C129&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?fit=1024%2C440&amp;ssl=1" decoding="async" loading="lazy" width="1206" height="518" class="wp-image-41303 aligncenter" style="width: 550px;" src="../Images/eb71abfe057190772ccf2dd2790ca59e.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?w=1206&amp;ssl=1 1206w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?resize=300%2C129&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?resize=1024%2C440&amp;ssl=1 1024w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?resize=768%2C330&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?resize=720%2C309&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-11-alle-09.32.40.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9dbe8f1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9dbe8f1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d944e9e ot-flex-column-vertical" data-id="d944e9e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a76043c elementor-widget elementor-widget-text-editor" data-id="a76043c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">从表中可以看到，对于所有“Region”值等于“<strong> it </strong>”且“Month”值等于“<strong> 1 </strong>”的观察值(即1793)，查询Id 2226已被赋值；而查询Id 2227已经被分配给具有等于“<strong> it </strong>”的“区域”值和等于“<strong> 2 </strong>”的“月份”值的所有观察(即1408)，等等。</p>
+<h6 class="translated">2.仅基于区域的query_ID</h6>
+<p class="translated">【T8<!-- /wp:paragraph --><!-- wp:heading {"level":4} --><!-- /wp:heading --><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --></p>
+<p class="has-text-align-justify translated">在<strong>under _ sampled _ only _ train</strong>数据帧中，我们有16个不同的“区域”值。我们决定将对“Region”特性具有相同值的所有观察值分组，为它们分配一个新的查询Id:然后我们在under_sampled_only_train (i</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c5ecfc2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c5ecfc2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e3b0ce5 ot-flex-column-vertical" data-id="e3b0ce5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a34c030 elementor-widget elementor-widget-text-editor" data-id="a34c030" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="41327" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-05-12-alle-15-45-28" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-12-alle-15.45.28.png?fit=926%2C666&amp;ssl=1" data-orig-size="926,666" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-05-12 alle 15.45.28" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-12-alle-15.45.28.png?fit=300%2C216&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-12-alle-15.45.28.png?fit=926%2C666&amp;ssl=1" decoding="async" loading="lazy" width="926" height="666" class="wp-image-41327 aligncenter" style="width: 450px;" src="../Images/efe4f26bae571d354cadc6dcffc19238.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-12-alle-15.45.28.png?w=926&amp;ssl=1 926w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-12-alle-15.45.28.png?resize=300%2C216&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-12-alle-15.45.28.png?resize=768%2C552&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-12-alle-15.45.28.png?resize=720%2C518&amp;ssl=1 720w" sizes="(max-width: 926px) 100vw, 926px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-12-alle-15.45.28.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8bbe6fd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8bbe6fd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fa6de72 ot-flex-column-vertical" data-id="fa6de72" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-de69235 elementor-widget elementor-widget-text-editor" data-id="de69235" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">从表中可以看到，对于所有“Region”值等于“<strong> it </strong>的观测值(即16799)，查询Id 2226已经被赋值；而查询Id 2227已经被分配给具有等于“<strong> nz </strong>”的“区域”值的所有观察(即12923)，等等。</p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --><!-- /wp:paragraph --><!-- wp:paragraph {"align":"justify"} -->T8】</p>
+<p class="translated"><strong>注意:为了避免重复和/或错误，新的查询id值不是随机分配给组的，而是我们使用了以下方法:</strong></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0c6eb61 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0c6eb61" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-406206a ot-flex-column-vertical" data-id="406206a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8527459 elementor-widget elementor-widget-text-editor" data-id="8527459" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre>unique_query_id = under_sampled_only_train['query_ID'].unique().tolist()
+unique_region = under_sampled_only_train['Region'].unique().tolist()
+
+column_names = under_sampled_only_train.columns
+under_sampled_only_train_grouped = pd.DataFrame(columns=column_names, dtype=int)
+
+i = unique_query_id[0]
+for value in unique_region:
+    new_dataframe = under_sampled_only_train[under_sampled_only_train['Region'] == value]
+    new_dataframe['query_ID'] = i
+    under_sampled_only_train_grouped = pd.concat([under_sampled_only_train_grouped, new_dataframe], <br/>ignore_index=True, sort=False)
+    i = i + 1</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3f5c352 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3f5c352" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4d4ba9d ot-flex-column-vertical" data-id="4d4ba9d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1f5076d elementor-widget elementor-widget-text-editor" data-id="1f5076d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">我们已经从两个列表中的<em> under_sampled_only_train </em>数据帧中获得了唯一的“区域”值和唯一的“查询Id”值，然后将前16个唯一的查询ID值作为新的“查询ID”分配给每个特定的“区域”组。</p>
+<p class="has-text-align-justify translated">这种选择是为了对仍然具有部分共同用户请求的行进行分组(即区域或区域和月份)，从而创建具有比以前更通用的查询和更多观察的组。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --> <!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --> <!-- /wp:paragraph --></p>
+<p class="has-text-align-justify translated">这里的模特训练表演(表5):</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-75afcd5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="75afcd5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2e2cc08 ot-flex-column-vertical" data-id="2e2cc08" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-36e8b0d elementor-widget elementor-widget-text-editor" data-id="36e8b0d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="41396" data-permalink="https://web.archive.org/web/20221130073030/https://sease.io/2021/05/a-learning-to-rank-project-on-a-daily-song-ranking-problem-part-4.html/schermata-2021-05-13-alle-15-23-13" data-orig-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?fit=1156%2C398&amp;ssl=1" data-orig-size="1156,398" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2021-05-13 alle 15.23.13" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?fit=300%2C103&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130073030/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?fit=1024%2C353&amp;ssl=1" decoding="async" loading="lazy" width="1156" height="398" class="wp-image-41396 aligncenter" style="width: 600px;" src="../Images/b005cb5c5d69366474cda92eb4f1e654.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?w=1156&amp;ssl=1 1156w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?resize=300%2C103&amp;ssl=1 300w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?resize=1024%2C353&amp;ssl=1 1024w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?resize=768%2C264&amp;ssl=1 768w, https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?resize=720%2C248&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130073030im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/Schermata-2021-05-13-alle-15.23.13.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3241a04 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3241a04" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6c632fe ot-flex-column-vertical" data-id="6c632fe" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8e31ada elementor-widget elementor-widget-text-editor" data-id="8e31ada" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">第一个和第四个“场景”与问题2中描述的相同，而第二个和第三个是在对训练集中的欠采样查询进行分组之后获得的结果。结果或多或少是相同的，但似乎保留或删除欠采样查询比将它们分组到一个不太细粒度的查询Id中要好。<br/>然而，如果我们决定对这些观察进行分组，以使查询Id的列表更加“填充”，那么最好使用尽可能多的查询级特性，这可能会带来一些小的改进。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c9cb8a2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c9cb8a2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b79b339 ot-flex-column-vertical" data-id="b79b339" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-be7b09c elementor-widget elementor-widget-iheading" data-id="be7b09c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">最终考虑</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-07e62d9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="07e62d9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e30ea95 ot-flex-column-vertical" data-id="e30ea95" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bec2eab elementor-widget elementor-widget-text-editor" data-id="bec2eab" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ol>
+<li style="list-style-type: none;">
+ 
+<ol id="block-73e81015-524a-4d90-8f0d-b3025eb85195" tabindex="0" role="document" aria-multiline="true" aria-label="Block: List" data-block="73e81015-524a-4d90-8f0d-b3025eb85195" data-type="core/list" data-title="List">
+<li class="translated">如果可能的话，最好是<strong>在数据集</strong>中保留所有查询级别的特征，尽管它们已经用于创建查询Id。即使上面没有报道，这一点在问题2和问题3的实施过程中也得到了验证，我们在保持它们的时候总是得到最好的模型性能。</li>
+<li class="translated">如果您有可靠的数据，并且确信您已经正确处理了可能导致NDCG暴涨的情况，您可以尝试<strong>将欠采样查询</strong>保留在训练集中，看看它是否有所改进。记得根据您的数据分布设置阈值！</li>
+<li class="translated">最好尽可能准确地使用查询id来训练模型；如果您的查询只有很少的观察值，那么您可以通过稍微“放宽”查询Id的粒度来尝试对它们进行分组，从而包含更少的查询级特性。</li>
+</ol>
+</li>
+</ol>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a2e7671 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a2e7671" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-53e101a ot-flex-column-vertical" data-id="53e101a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-be448c9 elementor-widget elementor-widget-iheading" data-id="be448c9" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-8ea732c elementor-widget elementor-widget-text-editor" data-id="8ea732c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20221130073030/https://sease.io/learning-to-rank-training">学习排名</a>和<a href="https://web.archive.org/web/20221130073030/https://sease.io/training/search-relevance-training/search-relevance-training-solr">搜索相关性</a>培训吗？<br/>我们还提供关于这些主题的咨询，<a href="https://web.archive.org/web/20221130073030/https://sease.io/contacts">如果您想让您的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9c6afa1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9c6afa1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e906ead ot-flex-column-vertical" data-id="e906ead" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1de80ad elementor-widget elementor-widget-iheading" data-id="1de80ad" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-4aebfb7 elementor-widget elementor-widget-text-editor" data-id="4aebfb7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这个帖子吗？这个帖子是关于一个关于每日歌曲排名问题的学习排名项目。不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-fbcf6b5 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="fbcf6b5" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.11 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20221130073030/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1669793430"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

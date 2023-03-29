@@ -1,0 +1,436 @@
+<html>
+<head>
+<title>Train and Test Sets Split for Evaluating Learning To Rank Models – Part 2</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">训练集和测试集分离，用于评估对模型进行排序的学习–第2部分</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2022/09/how-to-split-your-dataset-into-train-and-test-sets-for-evaluating-learning-to-rank-models-2.html#0001-01-01">https://web.archive.org/web/sease.io/2022/09/how-to-split-your-dataset-into-train-and-test-sets-for-evaluating-learning-to-rank-models-2.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-1d750f0c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1d750f0c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-04512f8 ot-flex-column-vertical" data-id="04512f8" data-element_type="column">
+			<div class="elementor-column-wrap">
+							<div class="elementor-widget-wrap">
+								</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-75b7c95 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="75b7c95" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8769537 ot-flex-column-vertical" data-id="8769537" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9731a8e elementor-widget elementor-widget-text-editor" data-id="9731a8e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">如果你来到这里，很可能是因为你想找到我们在这篇博文的第一部分分手的那个问题的答案。欢迎回来！</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">你不知道我们在说什么吗？！我们邀请您阅读<a href="https://web.archive.org/web/20220929234954/https://sease.io/2022/07/how-to-split-your-dataset-into-train-and-test-sets-for-evaluating-learning-to-rank-models.html">第1部分</a>，其中我们将介绍<b>将数据划分为子集的不同技术，这些子集用于训练和评估“学习排名”模型</b>。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">这篇博文的目标是<b>更多地关注“学习排序”数据集，</b>根据查询将文档分成几个组；因此，数据分割应该以不同于其他监督机器学习算法技术的方式进行管理，这也是我们将在这篇博文中涵盖的内容。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">让我们从同一个问题开始:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c4fef88 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c4fef88" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c7af852 ot-flex-column-vertical" data-id="c7af852" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b85f99b elementor-widget elementor-widget-iheading" data-id="b85f99b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">在“学习排名”场景中，需要考虑的重要因素是什么？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f2d5675 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f2d5675" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8009792 ot-flex-column-vertical" data-id="8009792" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3b24756 elementor-widget elementor-widget-text-editor" data-id="3b24756" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">在“学习排序”场景中，我们必须考虑两个重要的特征:<strong>查询和相关性标签</strong>。</p>
+<p class="has-text-align-justify translated">数据集中的每个样本都是一个<strong>查询-文档</strong>对，以矢量格式表示。查询列由Id标识，该Id用于对来自同一用户搜索的样本进行分组；相关性标签(目标列)包含相关性分数，该分数表示每个样本在当前查询组中的相关性。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e5d7b28 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e5d7b28" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b6fbfc7 ot-flex-column-vertical" data-id="b6fbfc7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b98a1d5 elementor-widget elementor-widget-iheading" data-id="b98a1d5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">拆分数据时，处理查询(和相关性标签)的最合适方法是什么？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b0b5b8d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b0b5b8d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-572760f ot-flex-column-vertical" data-id="572760f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3f4bcf5 elementor-widget elementor-widget-iheading" data-id="3f4bcf5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">查询拆分</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b930648 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b930648" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ce243f9 ot-flex-column-vertical" data-id="ce243f9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f4c94f9 elementor-widget elementor-widget-text-editor" data-id="f4c94f9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在我们以前的方法中(在我们以前的“学习排名”博客中提到过),我们习惯于采用拒绝方法(在<a href="https://web.archive.org/web/20220929234954/https://sease.io/2022/07/how-to-split-your-dataset-into-train-and-test-sets-for-evaluating-learning-to-rank-models.html">第1部分</a>中描述),在训练集和测试集之间分割每个查询Id，有以下“规则”:</p>
+<ul>
+<li class="translated">除非测试集包含的数据少于整个数据集的20%,否则我们会在训练集中保留具有低于某个阈值的大量观察值的查询id。在这种情况下，由于测试集可能太小，我们将一些欠采样查询移动到测试集(观察次数最多的查询id)。原因是具有很少搜索结果的查询更容易排序，因此如果在测试集中出现，它们会使整体重新排序任务变得有点简单，具有较高的度量分数，结果可能不具有指示性或代表现实。<br/>T19】</li>
+<li class="translated">我们试图保持每个查询的相关性标签平均分布，手动选择并移动每个相关性标签所有观察值的20%到测试集。在这样做的时候，我们确保所有的相关性标签都在两个集合中。</li>
+</ul>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-00d8d3b elementor-widget elementor-widget-image" data-id="00d8d3b" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img width="525" height="389" src="../Images/515334ff27522a1386d33b9b0c368e4a.png" class="attachment-large size-large" alt="" loading="lazy" srcset="https://web.archive.org/web/20220929234954im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.32.52.png?w=525&amp;ssl=1 525w, https://web.archive.org/web/20220929234954im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.32.52.png?resize=300%2C222&amp;ssl=1 300w" sizes="(max-width: 525px) 100vw, 525px" data-attachment-id="46595" data-permalink="https://web.archive.org/web/20220929234954/https://sease.io/2022/07/how-to-split-your-dataset-into-train-and-test-sets-for-evaluating-learning-to-rank-models.html/schermata-2022-05-04-alle-09-32-52" data-orig-file="https://web.archive.org/web/20220929234954/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.32.52.png?fit=525%2C389&amp;ssl=1" data-orig-size="525,389" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="how-to-split-your-dataset-into-train-and-test-sets-for-evaluating-learning-to-rank-models" data-image-description="&lt;p&gt;Train-test split example, splitting the query Ids&lt;/p&gt;&#10;" data-image-caption="&lt;p&gt;Train-test split example, splitting the query Ids&lt;/p&gt;&#10;" data-medium-file="https://web.archive.org/web/20220929234954/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.32.52.png?fit=300%2C222&amp;ssl=1" data-large-file="https://web.archive.org/web/20220929234954/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.32.52.png?fit=525%2C389&amp;ssl=1" data-original-src="https://web.archive.org/web/20220929234954im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.32.52.png?fit=525%2C389&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-5381eb2 elementor-widget elementor-widget-text-editor" data-id="5381eb2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-center translated"><em> Train-test拆分示例，拆分查询id</em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1e91beb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1e91beb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-43f5021 ot-flex-column-vertical" data-id="43f5021" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-aa48ad7 elementor-widget elementor-widget-text-editor" data-id="aa48ad7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在我们的<a href="https://web.archive.org/web/20220929234954/https://sease.io/blog-2/our-blog">博客版块</a>，如果你好奇的话，你肯定会找到更详细描述这种方法的旧帖子。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dcb5473 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dcb5473" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3288f08 ot-flex-column-vertical" data-id="3288f08" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4ed8e3a elementor-widget elementor-widget-iheading" data-id="4ed8e3a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">查询完整性</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-001e20d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="001e20d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d3fc908 ot-flex-column-vertical" data-id="d3fc908" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1de4a9b elementor-widget elementor-widget-text-editor" data-id="1de4a9b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">在我们的新方法中，实现了不同的训练测试分割，以便在创建两个集合时<strong>将来自相同查询</strong> <strong>的样本保存在一起</strong>。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">具体来说，我们利用了sk learn<a href="https://web.archive.org/web/20220929234954/https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedGroupKFold.html">StratifiedGroupKFold</a>方法，该方法试图创建训练和测试集，这些训练和测试集在给定拆分之间的非重叠组的约束的情况下，尽可能多地保留每个查询/相关性标签的样本分布。这意味着它将试图<strong>保持我们的相关性分布</strong>(例如在从0到4的范围内)<strong>，同时将查询</strong>保持在一起。这允许我们获得更平衡的训练和测试集。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a59e90c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a59e90c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2228153 ot-flex-column-vertical" data-id="2228153" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-316befa elementor-widget elementor-widget-image" data-id="316befa" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img width="522" height="388" src="../Images/ce4ad65c8e6f483808af0b97fd20e2ab.png" class="attachment-large size-large" alt="" loading="lazy" srcset="https://web.archive.org/web/20220929234954im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.33.01.png?w=522&amp;ssl=1 522w, https://web.archive.org/web/20220929234954im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.33.01.png?resize=300%2C223&amp;ssl=1 300w" sizes="(max-width: 522px) 100vw, 522px" data-attachment-id="46594" data-permalink="https://web.archive.org/web/20220929234954/https://sease.io/2022/07/how-to-split-your-dataset-into-train-and-test-sets-for-evaluating-learning-to-rank-models.html/schermata-2022-05-04-alle-09-33-01" data-orig-file="https://web.archive.org/web/20220929234954/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.33.01.png?fit=522%2C388&amp;ssl=1" data-orig-size="522,388" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Train-test split example, keeping together the query Ids" data-image-description="&lt;p&gt;Train-test split example, keeping together the query Ids&lt;/p&gt;&#10;" data-image-caption="&lt;p&gt;Train-test split example, keeping together the query Ids&lt;/p&gt;&#10;" data-medium-file="https://web.archive.org/web/20220929234954/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.33.01.png?fit=300%2C223&amp;ssl=1" data-large-file="https://web.archive.org/web/20220929234954/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.33.01.png?fit=522%2C388&amp;ssl=1" data-original-src="https://web.archive.org/web/20220929234954im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-05-04-alle-09.33.01.png?fit=522%2C388&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-42fbf0f elementor-widget elementor-widget-text-editor" data-id="42fbf0f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-center translated"><em>训练-测试分割示例，将查询id保存在一起</em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8c2edd6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8c2edd6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c822da2 ot-flex-column-vertical" data-id="c822da2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e5c0558 elementor-widget elementor-widget-text-editor" data-id="e5c0558" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">在第1部分中，我们包含了几个使用这种方法的代码示例，展示了不同的数据分割方法。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">在这里，您可以找到另一个<a href="https://web.archive.org/web/20220929234954/https://medium.com/predictly-on-tech/learning-to-rank-using-xgboost-83de0166229d">示例实现</a>，其中他们使用了一个不同的<em><a href="https://web.archive.org/web/20220929234954/https://scikit-learn.org/stable/modules/classes.html#module-sklearn.model_selection">sk learn . model _ selection</a></em>方法来根据提供的组拆分数据，但这不考虑相关性标签。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4ab92d0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4ab92d0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-25ea6f1 ot-flex-column-vertical" data-id="25ea6f1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-139dcc0 elementor-widget elementor-widget-iheading" data-id="139dcc0" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">我们的观察</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7db14b0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7db14b0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7a1e6a2 ot-flex-column-vertical" data-id="7a1e6a2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-886060d elementor-widget elementor-widget-text-editor" data-id="886060d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">一个有效和真实的测试应该是显示它从未见过的模型数据！事实上，模型的有效性必须在最坏的情况下进行评估，因此是基于训练时没有使用的数据。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">根据我们刚才所说的，<strong>我们相信这两种方法显然都是正确的</strong>，因为我们确保它们的测试集不包含训练集中存在的任何文档/产品。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">然而，<strong>我们选择了查询完整性方法，因为我们认为在讨论排名</strong>时，它在概念上比查询分裂更正确。如果一个系统必须学习如何对一个文档列表进行排序，那么当列表中的一些文档被删除时，它如何做得最好呢？！</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">事实上，尽管我们确保所有相关性标签(与特定查询相关)都在查询分裂的两个集合中，但我们实质上是从训练集合中移除了关于查询的总体排名的一些信息，因此模型可能不太能够概括。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">此外，可能发生的情况是，一些查询可能具有非常少的具有高相关性的观察值，这将不可避免地只出现在两个集合中的一个集合中(或者在训练或测试中)。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">查询拆分不应该是完全错误的，但是我们不能保证不引入评估“偏差”。测试集确实包含不同的数据，但它仍然包含与属于同一查询的训练集中的产品间接相关的产品，这可能会伪造所获得的性能结果。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6d9eb78 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6d9eb78" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-84cf9d4 ot-flex-column-vertical" data-id="84cf9d4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-651645f elementor-invisible elementor-widget elementor-widget-iheading" data-id="651645f" data-element_type="widget" data-settings="{&quot;_animation&quot;:&quot;bounceInLeft&quot;}" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">你有什么看法？你使用哪种方法？</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-fabc7e7 elementor-widget elementor-widget-text-editor" data-id="fabc7e7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">喜欢你的想法，请在下面的评论中分享你的观点！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1e9b98c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1e9b98c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6010605 ot-flex-column-vertical" data-id="6010605" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3c761c2 elementor-widget elementor-widget-iheading" data-id="3c761c2" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">结论</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-68cd2d6 elementor-widget elementor-widget-text-editor" data-id="68cd2d6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">我们希望我们已经在“学习排名”场景中正确传达了我们对查询拆分和查询完整性的疑虑和观察，以便与我们出色的社区公开讨论这一重要问题。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">下一篇博文再见！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7299fccc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7299fccc" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-36f5f490 ot-flex-column-vertical" data-id="36f5f490" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1a0577aa elementor-widget elementor-widget-iheading" data-id="1a0577aa" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-66d3d5b5 elementor-widget elementor-widget-text-editor" data-id="66d3d5b5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220929234954/https://sease.io/learning-to-rank-training">学习排名</a>培训吗？<br/>我们也提供这方面的咨询，<a href="https://web.archive.org/web/20220929234954/https://sease.io/contacts">如果你想用学习排名的力量让你的搜索引擎更上一层楼，就联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-145d550e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="145d550e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-69b8847b ot-flex-column-vertical" data-id="69b8847b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2eaca83 elementor-widget elementor-widget-iheading" data-id="2eaca83" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-acea188 elementor-widget elementor-widget-text-editor" data-id="acea188" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于训练和测试集分开来评估模型排序的文章吗？不要忘记订阅我们的时事通讯，以便在信息检索世界中保持最新状态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-707cef04 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="707cef04" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929234954/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664495394"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

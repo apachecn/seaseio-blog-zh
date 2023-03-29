@@ -1,0 +1,718 @@
+<html>
+<head>
+<title>Benchmark Apache Solr Performance with Apache JMeter</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">用Apache JMeter测试Apache Solr性能</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html#0001-01-01">https://web.archive.org/web/sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-77fc095 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="77fc095" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f1e6a2a ot-flex-column-vertical" data-id="f1e6a2a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e198a86 elementor-widget elementor-widget-text-editor" data-id="e198a86" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">如果您熟悉Apache Solr，但不知道如何创建Solr性能测试，那么您就找对了地方。</p>
+<p class="has-text-align-justify translated">这篇博文展示了如何使用JMeter工具创建Solr基准。目的不是要具体详细地介绍JMeter，所以我们不会描述所有的JMeter特性，而只是想让您大致了解如何以Apache Solr为目标，使用Jmeter设置性能测试。</p>
+<p class="has-text-align-justify translated">我们将通过提交几个查询来对Apache Solr查询时功能进行压力测试，其中(特定字段的)查询术语每次都会发生变化，以模拟真实用户向服务器发送多个请求。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9ee5c8f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9ee5c8f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-65ae287 ot-flex-column-vertical" data-id="65ae287" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-441bd52 elementor-widget elementor-widget-iheading" data-id="441bd52" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">什么是性能测试</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-58a6af0 elementor-widget elementor-widget-text-editor" data-id="58a6af0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">性能测试是检查系统(网站、应用、服务器、数据库、网络等)行为的测试的通称。)以及它在正常和极端条件下的表现。</p>
+<p class="has-text-align-justify translated">它被认为是任何软件应用程序的关键阶段，以便验证和确认其性能和质量保证。</p>
+<p class="has-text-align-left translated">性能测试是各种测试类型的超集，例如:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-2b8f12a elementor-widget elementor-widget-text-editor" data-id="2b8f12a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">每个测试都可以用来分析各种因素，例如速度、响应时间、加载时间和可伸缩性，以便识别瓶颈或错误，并决定如何优化您的应用程序。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2c52a60 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2c52a60" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5475d6a ot-flex-column-vertical" data-id="5475d6a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1f0db61 elementor-widget elementor-widget-iheading" data-id="1f0db61" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">什么是Apache JMeter</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-ad619fb elementor-widget elementor-widget-text-editor" data-id="ad619fb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">JMeter是一个开源工具，由Apache Software Foundation提供，能够进行所有类型的性能测试，包括负载和压力测试。它是一个100%纯Java应用程序，因此在安装了Java的每个操作系统上运行它应该没有问题。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-f88b6ce elementor-widget elementor-widget-iheading" data-id="f88b6ce" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">JMeter特性:</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-e9a1e3f elementor-widget elementor-widget-image" data-id="e9a1e3f" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53423" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-11-alle-08-24-52" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?fit=1358%2C1220&amp;ssl=1" data-orig-size="1358,1220" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-11 alle 08.24.52" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?fit=300%2C270&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?fit=1024%2C920&amp;ssl=1" decoding="async" width="300" height="270" src="../Images/44c546a2624ecabb626c53225ffc380e.png" class="attachment-medium size-medium wp-image-53423" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?w=1358&amp;ssl=1 1358w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?resize=300%2C270&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?resize=1024%2C920&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?resize=768%2C690&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?resize=720%2C647&amp;ssl=1 720w" sizes="(max-width: 300px) 100vw, 300px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.24.52.png?fit=300%2C270&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-053e12a elementor-widget elementor-widget-text-editor" data-id="053e12a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul>
+<li class="translated">开源(免费)</li>
+<li class="translated">易于安装和直观的GUI ( <em>图形用户界面)</em></li>
+<li class="translated">能够分析和测量各种服务/不同服务器类型的性能</li>
+<li class="translated">完整的多线程框架(即几个独立的线程组可以同时执行)</li>
+<li class="translated">能够支持多协议和多测试策略</li>
+<li class="translated">巨大的测试能力</li>
+<li class="translated">测试结果可以以不同的格式显示和保存</li>
+</ul>
+<p class="translated"><em> <strong>注意</strong>:这个示例程序展示了如何使用Mac OS </em>安装Jmeter和配置性能测试。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-1b33fd4 elementor-widget elementor-widget-iheading" data-id="1b33fd4" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">安装Apache JMeter</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-5c9157a elementor-widget elementor-widget-text-editor" data-id="5c9157a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><em> <strong>先决条件</strong> </em> : <code>Java 8+ for Apache JMeter 5.5</code></p>
+<ul>
+<li class="translated">从<a href="https://web.archive.org/web/20230325173909/https://jmeter.apache.org/download_jmeter.cgi"> Apache JMeter网站</a>下载JMeter的最新版本</li>
+<li class="translated">验证下载文件的完整性，包括<em> sha512 </em>和<em> PGP </em>键:</li>
+</ul>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-c7ad6ac elementor-widget elementor-widget-text-editor" data-id="c7ad6ac" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:code --></p>
+<pre class="wp-block-code"><code><strong><span style="text-decoration: underline;">SHA</span></strong>
+<em>1) Click on <a href="https://web.archive.org/web/20230325173909/https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.5.zip.sha512">sha512</a></em>
+<em>
+2) Open the Terminal from /Applications/Utility/ and enter:</em>
+<strong>openssl sha512 /path/to/file/apache-jmeter-5.5.zip
+</strong>
+<em>3) Verify that the output from the previous command matches the SHA key obtained in step 1</em>
+
+<em><strong><span style="text-decoration: underline;">PGP</span></strong></em>
+<em>1) Download the PGP key:</em>
+<strong>wget -q https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.5.zip.asc</strong>
+
+<em>2) Verify the downloaded file against the key:</em>
+<strong>gpg --verify /path/to/key/apache-jmeter-5.5.zip.asc /path/to/file/apache-jmeter-5.5.zip</strong>
+
+<em>3) If you get the error message "No public key" (C4923F9ABFB2F1A06F08E88BAC214CAA0612B399), it means that it is unknown on your local machine, so you need to import it from the PGP servers, e.g:</em>
+<strong>gpg --keyserver pgpkeys.mit.edu --recv-key C4923F9ABFB2F1A06F08E88BAC214CAA0612B399</strong>
+
+<em>Once imported, you should be able to repeat step 2 successfully</em></code></pre>
+<p class="translated"><!-- /wp:code --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-8284a6b elementor-widget elementor-widget-text-editor" data-id="8284a6b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul>
+<li class="translated">将zip文件解压缩到您想要使用它的位置</li>
+<li class="translated">从/bin文件夹中打开终端，输入以下命令用GUI打开JMeter:</li>
+</ul>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-8c87614 elementor-widget elementor-widget-text-editor" data-id="8c87614" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:code --></p>
+<pre class="wp-block-code" style="font-size: 16px;"><code>./jmeter.sh</code></pre>
+<p class="translated"><!-- /wp:code --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-3f69792 elementor-widget elementor-widget-text-editor" data-id="3f69792" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">现在您应该能够看到GUI控制台，并开始配置您的<em>测试计划</em>。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b5ef006 elementor-widget elementor-widget-iheading" data-id="b5ef006" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">使用JMeter进行Solr性能测试</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-3a71777 elementor-widget elementor-widget-text-editor" data-id="3a71777" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-left translated">在这篇博文中，我们展示了一个使用JMeter进行Apache Solr性能分析的非常简单的例子。</p>
+<p class="has-text-align-justify translated">我们想测试Solr搜索请求，并通过生成虚拟用户点击服务器来衡量性能，就好像他们是发送多个请求的真实用户一样。</p>
+<p class="has-text-align-justify translated">JMeter允许您通过创建几个Solr查询(请求)来重现这种类型的测试，其中(特定字段的)查询术语每次都会发生变化。通过这种方式，我们能够测试和评估单个请求和整体上的许多不同的指标。</p>
+<p class="has-text-align-justify translated">要重现这个测试，您应该有一个在端口8983上本地运行的Solr和一个应该在其上执行查询的集合。</p>
+<p class="has-text-align-justify translated">事实上，对于这个实际的例子，我们已经创建了一个名为<em> wiki_ita </em>的集合，其中我们已经用意大利语索引了数千个维基百科文档，并且我们已经测试了Solr，对“<em>文本</em>字段进行了几次查询。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-12764c3 elementor-widget elementor-widget-iheading" data-id="12764c3" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">测试配置示例</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-1091069 elementor-widget elementor-widget-text-editor" data-id="1091069" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated"><strong>测试计划</strong>是JMeter的根元素，可以由几个元素组成，设计用于特定的目的，允许您定义变量和默认参数。</p>
+<p class="has-text-align-justify translated">在这种情况下，我们设置了一个最小的测试，只包含一个线程组、一个采样器、监听器和配置元素；如果你好奇，你可以在这里找到元素的完整列表。</p>
+<p class="translated">测试计划中包含的一切都是按照一个定义的顺序运行的。</p>
+<p class="translated">以下是配置该示例测试的主要步骤:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b3bb157 elementor-widget elementor-widget-iheading" data-id="b3bb157" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">1.添加线程组</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-f6b2558 elementor-widget elementor-widget-text-editor" data-id="f6b2558" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><em>右击测试计划→添加→线程(用户)→线程组</em></p>
+<p class="has-text-align-justify translated">这是所有测试的入口点，设置“线程属性”来指定您希望请求如何运行是很重要的:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-dcadcc2 elementor-widget elementor-widget-image" data-id="dcadcc2" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53743" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-11-19" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?fit=1158%2C954&amp;ssl=1" data-orig-size="1158,954" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="apache solr benchmark" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?fit=300%2C247&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?fit=1024%2C844&amp;ssl=1" decoding="async" width="1024" height="844" src="../Images/13338f8cd37678a35465256824adad41.png" class="attachment-large size-large wp-image-53743" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?w=1158&amp;ssl=1 1158w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?resize=300%2C247&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?resize=1024%2C844&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?resize=768%2C633&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?resize=720%2C593&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.11.19.png?fit=1024%2C844&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b88bc9d elementor-widget elementor-widget-text-editor" data-id="b88bc9d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">特别是，您应该定义:</p>
+<p class="translated"><em> <strong>线程(用户)数</strong> </em>:连接到服务器的线程/用户数</p>
+<p class="translated">在我们的例子中，我们设置了1000:这个值等于CSV文件中的术语数，我们很快就会看到。</p>
+<p class="translated"><em> <strong>【秒】</strong> </em>:用于确定JMeter运行所有线程需要多长时间，从而告诉JMeter如何分配线程的开始(它们之间的延迟)。</p>
+<p class="has-text-align-justify translated">正如你可以从<a href="https://web.archive.org/web/20230325173909/https://jmeter.apache.org/usermanual/test_plan.html#thread_group">文档</a>中读到的，你可以“<em>从<strong>斜升=线程数</strong>开始，并根据需要向上或向下调整</em>”。</p>
+<p class="has-text-align-justify translated">如果您有1000个线程和1000秒的加速时间，这意味着JMeter需要1000秒来运行所有1000个线程，并且每个线程将在前一个线程开始后1 (1000/1000)秒开始。</p>
+<p class="has-text-align-justify translated">如果您想同时执行多个请求，可以将上升周期设置为100秒，如本例所示，这样JMeter每秒增加10个用户。</p>
+<p class="translated"><strong> <em>循环计数</em> : </strong>测试执行的次数(针对用户数)。</p>
+<p class="translated">在这种情况下，我们保留默认值1。</p>
+<p class="has-text-align-justify translated">您还可以设置在出现错误时要采取的操作，或者您可以决定安排您的测试，指定持续时间或开始和结束时间。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e283262 elementor-widget elementor-widget-iheading" data-id="e283262" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">2.添加配置元素</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-dd1666e elementor-widget elementor-widget-text-editor" data-id="dd1666e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">配置项用于配置发送到服务器的请求，允许我们设置默认值和声明变量，这些变量稍后会被采样器使用。它们在开始时执行，然后在实际请求之前执行。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e3f4855 elementor-widget elementor-widget-iheading" data-id="e3f4855" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">HTTP请求默认值</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-3529eee elementor-widget elementor-widget-text-editor" data-id="3529eee" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><em>右击线程组→添加→配置元素→ HTTP请求默认值</em></p>
+<p class="has-text-align-justify translated">当您需要向同一台服务器发送多个请求(相同类型)时，它用于定义默认参数，如主机名和服务器端口。</p>
+<p class="has-text-align-justify translated">建议使用它，因为它使Jmeter易于维护，避免了重复，并减少了服务器名称或IP随时间变化时出错的机会:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-149f3fc elementor-widget elementor-widget-image" data-id="149f3fc" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53741" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-07-56" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?fit=2054%2C626&amp;ssl=1" data-orig-size="2054,626" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="https requests defaults" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?fit=300%2C91&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?fit=1024%2C312&amp;ssl=1" decoding="async" width="1024" height="312" src="../Images/5bae37e7895508317655ee1b042c46bb.png" class="attachment-large size-large wp-image-53741" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?w=2054&amp;ssl=1 2054w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?resize=300%2C91&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?resize=1024%2C312&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?resize=768%2C234&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?resize=1536%2C468&amp;ssl=1 1536w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?resize=2048%2C624&amp;ssl=1 2048w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?resize=720%2C219&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.07.56.png?fit=1024%2C312&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-bdacf7e elementor-widget elementor-widget-text-editor" data-id="bdacf7e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">对于这个测试，使用的协议是默认的<code>HTTP</code>，服务器名是<code>localhost</code>，端口号是<code>8983</code>。</p>
+<p class="translated"><a href="https://web.archive.org/web/20230325173909/https://jmeter.apache.org/usermanual/component_reference.html#HTTP_Request_Defaults">用户手册</a></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-9716ad3 elementor-widget elementor-widget-iheading" data-id="9716ad3" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">CSV数据集配置</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-f347862 elementor-widget elementor-widget-text-editor" data-id="f347862" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><em>右击线程组→添加→配置元素→ CSV数据集配置</em></p>
+<p class="has-text-align-justify translated">如果需要使用外部数据进行测试，JMeter提供了一个名为<strong> <em> CSV数据集配置</em> </strong>的配置元素，能够使用仅以. CSV文件格式存储的数据。它读取文件的每一行，并将其拆分为变量:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a09c945 elementor-widget elementor-widget-image" data-id="a09c945" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53742" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-10-11" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?fit=2050%2C766&amp;ssl=1" data-orig-size="2050,766" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-18 alle 08.10.11" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?fit=300%2C112&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?fit=1024%2C383&amp;ssl=1" decoding="async" width="1024" height="383" src="../Images/d0114fe2949407bc41834f27a7872fd6.png" class="attachment-large size-large wp-image-53742" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?w=2050&amp;ssl=1 2050w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?resize=300%2C112&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?resize=1024%2C383&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?resize=768%2C287&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?resize=1536%2C574&amp;ssl=1 1536w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?resize=2048%2C765&amp;ssl=1 2048w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?resize=720%2C269&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.10.11.png?fit=1024%2C383&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-8fb21af elementor-widget elementor-widget-text-editor" data-id="8fb21af" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">在我们的例子中，我们创建了一个包含1000个术语的CSV文件(<em> CSVQueryTerms.csv </em>)。看起来是这样的:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-f81a591 elementor-widget elementor-widget-text-editor" data-id="f81a591" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:code --></p>
+<pre class="wp-block-code"><code><strong>term</strong>
+computer
+relax
+stress
+shopping
+brand
+ticket
+web
+team
+...
+...
+match</code></pre>
+<p class="translated"><!-- /wp:code --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-431222a elementor-widget elementor-widget-text-editor" data-id="431222a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">我们的目标是使用文件中的每个术语作为测试的查询术语。</p>
+<p class="has-text-align-justify translated">在配置部分，您需要配置几个必填字段来运行测试:</p>
+<p class="has-text-align-justify translated"><em> <strong> Filename </strong> </em>定义了要读取的文件的名称(如果该文件不在“测试计划”的目录中，请提供完整路径)。jmx文件))。</p>
+<p class="has-text-align-justify translated"><em> <strong>变量名</strong> </em>，定义了用逗号分隔的变量名列表；在我们的例子中，我们可以将这个字段留空，因为JMeter支持CSV标题行，文件的第一行被读取并解释为列名列表。因此，JMeter将把第一行(<em> term </em>)作为变量名，并从第二行读取数据。</p>
+<p class="has-text-align-justify translated">我们在其他字段中保留了默认值。</p>
+<p class="has-text-align-justify translated"><em>共享模式</em>等于<em>所有线程</em>意味着文件只打开一次，每个线程会使用文件的不同行。</p>
+<p class="translated">您可以在<a href="https://web.archive.org/web/20230325173909/https://jmeter.apache.org/usermanual/component_reference.html#CSV_Data_Set_Config"> JMeter用户手册</a>中了解更多关于该配置元素的信息。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-57c8854 elementor-widget elementor-widget-iheading" data-id="57c8854" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">3.添加控制器(采样器| HTTP请求)</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-8227293 elementor-widget elementor-widget-text-editor" data-id="8227293" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">采样器(一种JMeter控制器)是用于向服务器发送请求并获得其响应的组件。在我们的例子中，我们使用了HTTP请求采样器。</p>
+<p class="translated"><em>右击线程组→添加→采样器→ HTTP请求</em></p>
+<p class="translated">我们的目的是创建对Solr服务器的请求，如下所示:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-6e60bec elementor-widget elementor-widget-text-editor" data-id="6e60bec" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-code" style="font-size: 15px;"><code>http://localhost:8983/solr/COLLECTION_NAME/select?
+q=FIELD_NAME:QUERY_TERM&amp;fl=id,title,text&amp;debug=all </code></pre>
+<p class="translated"><!-- /wp:code --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-74a3d15 elementor-widget elementor-widget-text-editor" data-id="74a3d15" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">因此，在这个配置部分，您可以输入请求的所有细节:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-8b213ae elementor-widget elementor-widget-image" data-id="8b213ae" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53744" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-12-02" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?fit=2036%2C630&amp;ssl=1" data-orig-size="2036,630" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-18 alle 08.12.02" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?fit=300%2C93&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?fit=1024%2C317&amp;ssl=1" decoding="async" width="1024" height="317" src="../Images/a3f6067cc072beb073ada231cf541dff.png" class="attachment-large size-large wp-image-53744" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?w=2036&amp;ssl=1 2036w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?resize=300%2C93&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?resize=1024%2C317&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?resize=768%2C238&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?resize=1536%2C475&amp;ssl=1 1536w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?resize=720%2C223&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.12.02.png?fit=1024%2C317&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-1f492df elementor-widget elementor-widget-text-editor" data-id="1f492df" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">在我们的例子中，服务器名称和端口号为空，因为它们已经在HTTP请求默认值配置元素中设置好了。</p>
+<p class="translated">选择的方法是GET，我们输入了路径:<code>/solr/wiki_ita/select</code></p>
+<p class="translated">然后您可以添加请求参数，为了简单起见，我们只使用:</p>
+<ul>
+<li>
+ 
+<ul>
+<li class="translated"><strong>问:text:${term} </strong>(主查询参数)</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>
+ 
+<ul>
+<li class="translated"><strong> fl: id，title，text </strong>(仅选择查询响应中指定的字段列表)</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>
+ 
+<ul>
+<li class="translated"><strong> debug: all </strong>(返回关于请求的所有可用调试信息:查询、计时、评分结果)</li>
+</ul>
+</li>
+</ul>
+<p class="has-text-align-justify translated">您可以立即看到，通过将变量名添加到定义查询的查询解析器参数中(<em> q </em>，我们将能够使用从CSV文件中提取的值:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-216f25a elementor-widget elementor-widget-text-editor" data-id="216f25a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-code"><code>field_name:${variable_name}</code></pre>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-0a836bb elementor-widget elementor-widget-text-editor" data-id="0a836bb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">因此，JMeter将创建以下URL请求:</p>
+<pre class="wp-block-code"><code>e.g. first line of the CSV file  
+http://localhost:8983/solr/wiki_ita/select?q=text:computer&amp;fl;=id,title,text&amp;debug;=all</code></pre>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e8164bc elementor-widget elementor-widget-iheading" data-id="e8164bc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">4.添加侦听器</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-439dfd8 elementor-widget elementor-widget-text-editor" data-id="439dfd8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><em>右键单击线程组→添加→监听器→查看结果树|在表中查看结果|等等。</em></p>
+<p class="has-text-align-justify translated">最后，为了查看和总结测试结果，您需要添加一个或多个<a href="https://web.archive.org/web/20230325173909/https://jmeter.apache.org/usermanual/listeners">监听器</a>。</p>
+<p class="has-text-align-justify translated">监听器是显示样本结果的组件，因此是JMeter测试计划中最重要的部分。有各种侦听器以不同的形式显示结果，比如表、树、图和日志文件；你可以针对你的具体情况选择最适合的，最有趣的。</p>
+<p class="translated">在本例中，我们选择了:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-2db3996 elementor-widget elementor-widget-iheading" data-id="2db3996" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">查看结果树</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-e6a4cd8 elementor-widget elementor-widget-text-editor" data-id="e6a4cd8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">使用这个侦听器的优点是您可以检查请求和响应。</p>
+<p class="has-text-align-justify translated">它按照JMeter脚本生成的顺序显示所有样本(成功或失败)和所有相关的断言。</p>
+<p class="has-text-align-justify translated">对于每个请求(在我们的例子中是1000个HTTP请求),它提供了:</p>
+<p class="has-text-align-justify translated"><strong>采样器结果</strong>:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-5b38830 elementor-widget elementor-widget-image" data-id="5b38830" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53745" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-13-00" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.00.png?fit=976%2C680&amp;ssl=1" data-orig-size="976,680" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-18 alle 08.13.00" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.00.png?fit=300%2C209&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.00.png?fit=976%2C680&amp;ssl=1" decoding="async" width="976" height="680" src="../Images/fffb3ee7b90d93667697c1e65c665208.png" class="attachment-large size-large wp-image-53745" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.00.png?w=976&amp;ssl=1 976w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.00.png?resize=300%2C209&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.00.png?resize=768%2C535&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.00.png?resize=720%2C502&amp;ssl=1 720w" sizes="(max-width: 976px) 100vw, 976px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.00.png?fit=976%2C680&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-3412a90 elementor-widget elementor-widget-text-editor" data-id="3412a90" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">它包含关于加载时间、延迟和字节大小的一般响应信息。</p>
+<p class="translated"><strong>请求</strong>(正文和标题):</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-91e4c1b elementor-widget elementor-widget-image" data-id="91e4c1b" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53746" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-13-37" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?fit=1600%2C396&amp;ssl=1" data-orig-size="1600,396" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-18 alle 08.13.37" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?fit=300%2C74&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?fit=1024%2C253&amp;ssl=1" decoding="async" width="1024" height="253" src="../Images/ce09f0daf7efd04c252754d13524f33f.png" class="attachment-large size-large wp-image-53746" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?w=1600&amp;ssl=1 1600w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?resize=300%2C74&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?resize=1024%2C253&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?resize=768%2C190&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?resize=1536%2C380&amp;ssl=1 1536w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?resize=720%2C178&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.37.png?fit=1024%2C253&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-03f0ccd elementor-widget elementor-widget-image" data-id="03f0ccd" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53747" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-13-42" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.42.png?fit=852%2C318&amp;ssl=1" data-orig-size="852,318" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-18 alle 08.13.42" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.42.png?fit=300%2C112&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.42.png?fit=852%2C318&amp;ssl=1" decoding="async" width="852" height="318" src="../Images/2addfb257e95b26d00a911ff2ffa7933.png" class="attachment-large size-large wp-image-53747" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.42.png?w=852&amp;ssl=1 852w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.42.png?resize=300%2C112&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.42.png?resize=768%2C287&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.42.png?resize=720%2C269&amp;ssl=1 720w" sizes="(max-width: 852px) 100vw, 852px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.13.42.png?fit=852%2C318&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-6036a39 elementor-widget elementor-widget-text-editor" data-id="6036a39" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我们可以检查每个请求的<em> q </em>参数的术语是否用从CSV数据集配置中使用的CSV文件中提取的值进行了更新，例如:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a683597 elementor-widget elementor-widget-text-editor" data-id="a683597" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-code"><code>GET http://localhost:8983/solr/wiki_ita/select?q=<strong>young</strong>&amp;fl=id,title,text&amp;debug=all
+GET http://localhost:8983/solr/wiki_ita/select?q=text:<strong>computer</strong>&amp;fl=id,title,text&amp;debug=all
+GET http://localhost:8983/solr/wiki_ita/select?q=text:<strong>relax</strong>&amp;fl=id,title,text&amp;debug=all
+...</code></pre>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-316db72 elementor-widget elementor-widget-text-editor" data-id="316db72" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><strong>响应数据</strong>(正文和标题):</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-ea496a7 elementor-widget elementor-widget-image" data-id="ea496a7" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53748" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-16-43" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?fit=1602%2C1068&amp;ssl=1" data-orig-size="1602,1068" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-18 alle 08.16.43" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?fit=300%2C200&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?fit=1024%2C683&amp;ssl=1" decoding="async" width="1024" height="683" src="../Images/85b66de8377fdcfc3d943a9458c78a6b.png" class="attachment-large size-large wp-image-53748" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?w=1602&amp;ssl=1 1602w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?resize=300%2C200&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?resize=1024%2C683&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?resize=768%2C512&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?resize=1536%2C1024&amp;ssl=1 1536w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?resize=720%2C480&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.16.43.png?fit=1024%2C683&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-1f4d4d2 elementor-widget elementor-widget-text-editor" data-id="1f4d4d2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">下面是Solr在响应查询时返回给客户机的完整结果集；默认情况下，它一次返回10个文档。</p>
+<p class="has-text-align-justify translated">响应可以以不同的格式显示，如文本、Regexp测试器、边界提取器测试器、CSS/JQuery测试器、Xpath测试器、JSON路径测试器、HTML、HTML源格式、HTML(下载资源)、文档、JSON、XML、浏览器。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-528e178 elementor-widget elementor-widget-iheading" data-id="528e178" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">总结报告</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-3d54af0 elementor-widget elementor-widget-text-editor" data-id="3d54af0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">它是一个表格格式的监听器，为测试中的每个HTTP请求采样器创建一行，在我们的例子中，只有一行:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-f38ea0f elementor-widget elementor-widget-image" data-id="f38ea0f" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53749" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-17-38" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?fit=2054%2C460&amp;ssl=1" data-orig-size="2054,460" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-18 alle 08.17.38" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?fit=300%2C67&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?fit=1024%2C229&amp;ssl=1" decoding="async" width="1024" height="229" src="../Images/07ad3ca0395efab26fd75049041732aa.png" class="attachment-large size-large wp-image-53749" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?w=2054&amp;ssl=1 2054w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?resize=300%2C67&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?resize=1024%2C229&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?resize=768%2C172&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?resize=1536%2C344&amp;ssl=1 1536w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?resize=2048%2C459&amp;ssl=1 2048w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?resize=720%2C161&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.17.38.png?fit=1024%2C229&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-007bb27 elementor-widget elementor-widget-text-editor" data-id="007bb27" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">它总结了测试期间发送到服务器的请求总数的不同性能测试指标(即1000):</p>
+<ul>
+<li class="translated"><strong>样本</strong>:发送的请求数</li>
+<li class="translated"><strong>平均</strong>:平均响应时间</li>
+<li class="translated"><strong> Min </strong>:最小响应时间(毫秒)</li>
+<li class="translated"><strong>最大</strong>:最大响应时间(毫秒)</li>
+<li class="translated"><strong> Std。戴夫。</strong>:显示偏离平均响应时间值的异常情况。越少越好</li>
+<li class="translated"><strong>错误% </strong>:失败请求的百分比</li>
+<li class="translated"><strong>吞吐量</strong>:你的服务器每秒处理多少请求(越大越好)</li>
+<li class="translated"><strong>接收</strong>–<strong>发送KB/秒</strong>:客户端每秒接收多少KB–发送给服务器</li>
+<li class="translated"><strong>平均字节数</strong>:平均响应大小<br/> <br/> <br/>该监听器类似于“聚合报告”，但消耗的内存较少，因为它不提供百分点值。</li>
+</ul>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-361fc0b elementor-widget elementor-widget-iheading" data-id="361fc0b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">查看表格中的结果</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-fd79fb9 elementor-widget elementor-widget-text-editor" data-id="fd79fb9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果您需要类似于查看结果树但以表格形式显示的内容，您可以使用这个监听器:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-f483948 elementor-widget elementor-widget-image" data-id="f483948" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53751" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-18-alle-08-18-17" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?fit=2046%2C1500&amp;ssl=1" data-orig-size="2046,1500" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-18 alle 08.18.17" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?fit=300%2C220&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?fit=1024%2C751&amp;ssl=1" decoding="async" width="1024" height="751" src="../Images/45c53a7be24323e0de3b4b6af2792068.png" class="attachment-large size-large wp-image-53751" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?w=2046&amp;ssl=1 2046w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?resize=300%2C220&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?resize=1024%2C751&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?resize=768%2C563&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?resize=1536%2C1126&amp;ssl=1 1536w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?resize=720%2C528&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-18-alle-08.18.17.png?fit=1024%2C751&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-6629dbe elementor-widget elementor-widget-text-editor" data-id="6629dbe" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">对于每个样本，它提供有关执行结果、时间相关数据(延迟、连接时间、样本时间)和字节的信息。</p>
+<p class="has-text-align-justify translated">但是，不建议将其用于负载测试，只能用于功能测试，因为会消耗大量的CPU/内存。</p>
+<p class="has-text-align-justify translated">JMeter还提供图形分析，例如添加“图形结果”或“响应时间图”监听器。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-d44ebe1 elementor-widget elementor-widget-iheading" data-id="d44ebe1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">5.运行测试并查看结果</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-703153b elementor-widget elementor-widget-text-editor" data-id="703153b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">当一切都配置好了，您需要在运行测试之前保存JMeter测试(通过点击绿色的play按钮)。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-99a81ee elementor-widget elementor-widget-iheading" data-id="99a81ee" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">JMeter到底会怎么做？</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-4982d12 elementor-widget elementor-widget-text-editor" data-id="4982d12" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">对于每个用户(即CSV文件的每一项)，它将:<br/>–创建一个请求<br/>–将其发送到服务器<br/>–接收并处理服务器响应<br/>–生成不同格式的测试结果，以便测试人员可以对其进行分析</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-15ae943 elementor-widget elementor-widget-image" data-id="15ae943" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="53432" data-permalink="https://web.archive.org/web/20230325173909/https://sease.io/2023/02/benchmark-apache-solr-performance-with-apache-jmeter.html/schermata-2022-10-11-alle-08-42-29" data-orig-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?fit=2086%2C1126&amp;ssl=1" data-orig-size="2086,1126" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata 2022-10-11 alle 08.42.29" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?fit=300%2C162&amp;ssl=1" data-large-file="https://web.archive.org/web/20230325173909/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?fit=1024%2C553&amp;ssl=1" decoding="async" width="1024" height="553" src="../Images/22a848a157dfa5de15312172932aa1ff.png" class="attachment-large size-large wp-image-53432" alt="" loading="lazy" srcset="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?w=2086&amp;ssl=1 2086w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?resize=300%2C162&amp;ssl=1 300w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?resize=1024%2C553&amp;ssl=1 1024w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?resize=768%2C415&amp;ssl=1 768w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?resize=1536%2C829&amp;ssl=1 1536w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?resize=2048%2C1105&amp;ssl=1 2048w, https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?resize=720%2C389&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230325173909im_/https://i0.wp.com/sease.io/wp-content/uploads/2023/12/Schermata-2022-10-11-alle-08.42.29.png?fit=1024%2C553&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-8a9edc4 elementor-widget elementor-widget-text-editor" data-id="8a9edc4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated"><em> <strong>注意:</strong> </em></p>
+<p class="has-text-align-justify translated">您可以使用GUI来设置和测试您的“测试计划”，但是对于巨大的请求量，建议使用<a href="https://web.archive.org/web/20230325173909/https://jmeter.apache.org/usermanual/get-started.html#non_gui"> CLI(命令行界面)模式</a>来实际运行它。</p>
+<p class="has-text-align-justify translated">因此，最好在没有任何侦听器的情况下运行测试；随后，可以使用GUI打开生成的结果文件，并将其导入到任何所需的侦听器中。</p>
+<p class="has-text-align-justify translated">Jmeter的另一个优点是能够将结果写入文件，并以不同的格式保存。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9bf2b18 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9bf2b18" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7121557 ot-flex-column-vertical" data-id="7121557" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-fb2a435 elementor-widget elementor-widget-iheading" data-id="fb2a435" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">最终考虑</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-3ef21fd elementor-widget elementor-widget-text-editor" data-id="3ef21fd" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">我希望这个实际的例子能够帮助您理解如何使用JMeter工具创建Solr基准。</p>
+<p class="has-text-align-justify translated">性能测试的一个替代工具是<a href="https://web.archive.org/web/20230325173909/https://github.com/tflobbe/solrmeter"> SolrMeter </a>，它是专门为Solr创建的，但是这个项目不再维护，可能会有一些bug，这就是为什么最好使用JMeter(或者其他工具)。</p>
+<p class="translated">根据您的情况和模式，尝试修改这个实际的例子。</p>
+<p class="has-text-align-justify translated">当运行性能测试时，确保您真正想要测试什么，并确保您使用的查询集实际上代表了您的领域，以及您如何使用Solr来获得相关的性能分析。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-21f47ee8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="21f47ee8" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-731a3582 ot-flex-column-vertical" data-id="731a3582" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3fa90e6c elementor-widget elementor-widget-iheading" data-id="3fa90e6c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">还在纠结Solr性能测试？</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-1ab47b72 elementor-widget elementor-widget-text-editor" data-id="1ab47b72" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果你在Solr性能测试上有困难，不要担心——我们会帮助你的！<br/>我们的团队提供<span style="color: #ffcc00;"> <strong>专家服务和培训</strong> </span>来帮助您优化Solr搜索引擎，充分利用您的系统。立即联系我们，了解更多信息！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e47987f elementor-widget elementor-widget-ibutton" data-id="e47987f" data-element_type="widget" data-widget_type="ibutton.default">
+				<div class="elementor-widget-container">
+					<div class="ot-button">
+			<a href="https://web.archive.org/web/20230325173909/mailto:info@sease.io" class="octf-btn octf-btn-primary">Send us an e-mail</a>
+	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9776bf8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9776bf8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-338dcc94 ot-flex-column-vertical" data-id="338dcc94" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-77f4ee5 elementor-widget elementor-widget-iheading" data-id="77f4ee5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-323fbc45 elementor-widget elementor-widget-text-editor" data-id="323fbc45" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于用Apache JMeter测试Apache Solr性能的文章吗？不要忘记订阅我们的时事通讯，以便在信息检索世界中保持最新状态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-33ee386b elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="33ee386b" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.9.2 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20230325173909/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1679765950"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

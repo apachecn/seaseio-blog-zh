@@ -1,0 +1,1136 @@
+<html>
+<head>
+<title>OpenSearch Neural Search Plugin Tutorial</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">OpenSearch神经搜索插件教程</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2022/12/opensearch-neural-search-plugin-tutorial.html#0001-01-01">https://web.archive.org/web/sease.io/2022/12/opensearch-neural-search-plugin-tutorial.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-188cb8b2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="188cb8b2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-32ee7ef ot-flex-column-vertical" data-id="32ee7ef" data-element_type="column">
+			<div class="elementor-column-wrap">
+							<div class="elementor-widget-wrap">
+								</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f915903 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f915903" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-02348bb ot-flex-column-vertical" data-id="02348bb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d38cccb elementor-widget elementor-widget-iheading" data-id="d38cccb" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">OpenSearch神经搜索插件教程</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-cd136e0 elementor-widget elementor-widget-text-editor" data-id="cd136e0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">嗨读者们！<br/>在这篇博文中，我们将探索版本<strong> 2.4.0 </strong>中引入的新<strong> OpenSearch神经搜索<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/neural-search-plugin/index/">插件</a> </strong>！</p>
+<p class="translated"><!-- /wp:paragraph -->T9】</p>
+<p class="has-text-align-justify translated">neural插件是一个实验性的功能，允许用户在搜索中轻松集成机器学习和基于神经网络的语言模型。它管理语言模型，使用它们将文本转换成向量(在索引和查询时)，最后在检索阶段使用这些向量。</p>
+<p class="translated"><!-- /wp:paragraph -->T11】</p>
+<p class="has-text-align-justify translated">我们将通过我们的端到端测试经验给出该插件的详细描述，详细说明该插件的工作原理:</p>
+<p class="translated"><!-- /wp:paragraph -->T13】</p>
+<ul><!-- wp:list-item -->
+<li class="translated"><strong>模型管理和部署</strong>:上传外部模型并监控其状态。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated"><strong>索引文档</strong>:使用该模型通过文本字段的数字向量表示来丰富文档。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated"><strong>搜索</strong>:使用模型执行神经查询。</li>
+<!-- /wp:list-item --></ul>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">然后，我们将强调使用它的优势、限制(或困难)(如果有的话),以及尚未提供的功能。</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7762644 elementor-widget elementor-widget-iheading" data-id="7762644" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">管道</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-87454e6 elementor-widget elementor-widget-text-editor" data-id="87454e6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">让我们从使用OpenSearch实现神经搜索的端到端管道的概述开始:</p>
+<p class="translated"><!-- /wp:paragraph -->T25】</p>
+<ol><!-- wp:list-item -->
+<li class="translated">下载OpenSearch</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">上传您的模型</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">创建一个神经搜索管道</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">创建包含向量字段的索引</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">索引文档</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">搜索(利用向量场)</li>
+<!-- /wp:list-item --></ol>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">流水线执行了两次，即在两个不同的操作系统上:</p>
+<p class="translated"><!-- /wp:paragraph -->T29】</p>
+<ul><!-- wp:list-item -->
+<li class="translated">LTS Ubuntu 22 . 04 . 1</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">马科斯大苏尔11.7</li>
+<!-- /wp:list-item --></ul>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">在复制整个管道时，我们没有观察到两个系统之间的特殊差异。</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-aba7512 elementor-widget elementor-widget-iheading" data-id="aba7512" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">1.下载OpenSearch</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-ac64840 elementor-widget elementor-widget-text-editor" data-id="ac64840" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">你可以从<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/downloads.html">https://opensearch.org/downloads.html</a>下载2.4.0版本的OpenSearch</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">唯一需要注意的是<strong>环境</strong>的正确设置，特别是<em>虚拟机</em> <em> (VM) </em>如<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/opensearch/install/important-settings/">https://open search . org/docs/latest/open search/install/important-settings/</a><br/>中所述，因此:</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:list --></p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul><!-- wp:list-item --></ul>
+</li>
+</ul>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">Linux: <em> <strong> <code>vm.max_map_count</code> </strong> </em>至少要设置成<em> 262144 </em></li>
+<li class="translated">MacOS: <strong> RAM </strong>必须至少设置为<em> 4 GB </em>(在Docker资源中)</li>
+</ul>
+</li>
+</ul>
+<p class="translated"><!-- /wp:list-item --></p>
+<p class="translated"><!-- /wp:list -->T15】</p>
+<p class="translated">对于最新的OpenSearch版本，兼容的Java版本是11和17。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">正如<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/downloads.html">文档页面</a>所建议的，我们使用<strong> Docker Compose </strong>来尝试OpenSearch。要执行它，您只需从文档中下载<em><a href="https://web.archive.org/web/20221226170401/https://opensearch.org/samples/docker-compose.yml">docker-compose . yml</a></em>并运行:</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b6514e4 elementor-widget elementor-widget-html" data-id="b6514e4" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>docker-compose up</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-aef8b9a elementor-widget elementor-widget-text-editor" data-id="aef8b9a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">此过程将创建一个包含两个节点的集群。</p>
+<p class="translated"><!-- /wp:paragraph -->T29】</p>
+<p class="has-text-align-justify translated">对于本教程，我们使用cURL请求。API调用需要认证，因此对于我们教程中的每个cURL操作，您都会发现头:</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-0182cd1 elementor-widget elementor-widget-html" data-id="0182cd1" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>--header 'Authorization: Basic YWRtaW46YWRtaW4='</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-bd4eb97 elementor-widget elementor-widget-text-editor" data-id="bd4eb97" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">其中<em> YWRtaW46YWRtaW4= </em>是作为代表您的用户名和密码值的Base64编码字符串计算的授权令牌。对于OpenSearch，默认验证值为<em>用户名=管理员</em>和<em>密码=管理员</em>。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">否则，如果您想使用OpenSearch Dashboards，默认的内置数据可视化工具，只需导航到<a href="https://web.archive.org/web/20221226170401/http://localhost:5601/"> http://localhost:5601/ </a>并使用默认凭据登录。</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b5a6326 elementor-widget elementor-widget-iheading" data-id="b5a6326" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">2.上传您的模型</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-31df262 elementor-widget elementor-widget-text-editor" data-id="31df262" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">一旦安装了OpenSearch，要做的第一件事就是上传你想要用于你的神经搜索的模型。这是一个从文本中生成向量的函数。</p>
+<p class="translated"><!-- /wp:paragraph -->T45】</p>
+<p class="has-text-align-justify translated">为了做到这一点，OpenSearch在<strong> ML-Commons插件</strong>中提供了一个名为<strong>模型服务框架</strong>的框架:<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/ml-commons-plugin/model-serving-framework/">https://open search . org/docs/latest/ML-Commons-plugin/Model-Serving-Framework/</a><br/>使用这个<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/ml-commons-plugin/api/"> API </a>您可以:</p>
+<p class="translated"><!-- /wp:paragraph -->T56】</p>
+<ol><!-- wp:list-item -->
+<li class="translated">将外部模型上传到OpenSearch</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">将它加载到内存中</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">使用模型进行推理</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">卸载模型</li>
+<!-- /wp:list-item --></ol>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">除了模型推论，我们将使用所有这些特性。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">即使上传外部模型很容易，但仍有一些限制:</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:list --></p>
+<ul><!-- wp:list-item -->
+<li class="translated">仅支持没有GPU加速的文本嵌入<strong>型号</strong>。<br/><a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/ml-commons-plugin/model-serving-framework/#model-support">https://open search . org/docs/latest/ml-commons-plugin/model-serving-framework/# model-support</a><br/><a href="https://web.archive.org/web/20221226170401/https://github.com/opensearch-project/ml-commons/issues/302">https://github.com/opensearch-project/ml-commons/issues/302</a></li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">仅支持PyTorch的<a href="https://web.archive.org/web/20221226170401/https://pytorch.org/docs/stable/jit.html"> <strong> TorchScript </strong> </a>格式。你要上传到OpenSearch的TorchScript文件需要保存为<strong> zip </strong>。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">大小&gt; =100 MB的模型被拆分成块，以便存储在模型索引中。<strong>注意型号</strong>的尺寸，监控性能，避免停机。<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/ml-commons-plugin/model-serving-framework/#model-support">https://open search . org/docs/latest/ml-commons-plugin/model-serving-framework/# model-support</a></li>
+<!-- /wp:list-item --></ul>
+<p class="translated"><!-- /wp:list --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-cc860cc elementor-widget elementor-widget-iheading" data-id="cc860cc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h5 class="main-heading translated">2.1上传外部模型</h5>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-d440627 elementor-widget elementor-widget-text-editor" data-id="d440627" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">对于本教程，我们<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/ml-commons-plugin/model-serving-framework/#upload-model-to-opensearch">上传</a>一个预先训练好的(并经过微调的)模型，名为<strong><a href="https://web.archive.org/web/20221226170401/https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a></strong>，这是一个自然语言处理(NLP)句子转换模型。<br/>型号类型为<strong> BERT </strong>，<em> hidden_size </em>(所以<em> <code>embedding_dimension</code> </em>)为384，大致为80MB。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">我们使用“<em> URL上传操作</em>，它能够传递几个字段，比如模型的名称、版本和格式，包括<strong> URL </strong>来指定模型在外部的位置(比如GitHub，在本例中，或者S3服务器)。</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7bc65e6 elementor-widget elementor-widget-iheading" data-id="7bc65e6" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-77b6ca7 elementor-widget elementor-widget-html" data-id="77b6ca7" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request POST 
+'https://localhost:9200/_plugins/_ml/models/_upload' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "name": "all-MiniLM-L6-v2",
+  "version": "1.0.0",
+  "description": "test model",
+  "model_format": "TORCH_SCRIPT",
+  "model_config": {
+    "model_type": "bert",
+    "embedding_dimension": 384,
+    "framework_type": "sentence_transformers"
+  },
+  "url": "https://github.com/opensearch-project/ml-commons/raw/2.x/ml-
+  algorithms/src/test/resources/org/opensearch/ml/engine/algorithms/text_embe
+  dding/all-MiniLM-L6-v2_torchscript_sentence-transformer.zip?raw=true"
+}'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-194a1be elementor-widget elementor-widget-iheading" data-id="194a1be" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-10fa6a5 elementor-widget elementor-widget-html" data-id="10fa6a5" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+  "task_id": "MOSa24QBNFSZcaBDreDP",
+  "status": "CREATED"
+}</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-5f24d8a elementor-widget elementor-widget-text-editor" data-id="5f24d8a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">从响应中，保存<em> <code>task_id</code> </em>用于下一步。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-69abb37 elementor-widget elementor-widget-iheading" data-id="69abb37" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h5 class="main-heading translated">2.2获取型号id</h5>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-e853e7e elementor-widget elementor-widget-text-editor" data-id="e853e7e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">要加载模型，需要<em><code>model_id</code></em>；从“<em> <strong>模型的上传操作API </strong> </em>”的响应中保存<em> <code>task_id</code> </em>，并在接下来的步骤中使用它来获取<em> <code>model_id</code> </em>:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-d40ad2b elementor-widget elementor-widget-iheading" data-id="d40ad2b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-b1f7049 elementor-widget elementor-widget-html" data-id="b1f7049" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request GET 
+'https://localhost:9200/_plugins/_ml/tasks/MOSa24QBNFSZcaBDreDP' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4='</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-6237efe elementor-widget elementor-widget-iheading" data-id="6237efe" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-60941f3 elementor-widget elementor-widget-html" data-id="60941f3" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+  "model_id": "loaded_neural_model_id",
+  "task_type": "UPLOAD_MODEL",
+  "function_name": "TEXT_EMBEDDING",
+  "state": "COMPLETED",
+  "worker_node": "aVrtho4BQhyDbA5QireffA",
+  "create_time": 1670131658068,
+  "last_update_time": 1670131682488,
+  "is_async": true
+}</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-1f0afb8 elementor-widget elementor-widget-text-editor" data-id="1f0afb8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><em> <code>model_id</code> </em>是OpenSearch直接生成的id，这里我们将使用<strong> loaded_neural_model_id </strong>，只是为了简单起见。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-6bd2990 elementor-widget elementor-widget-iheading" data-id="6bd2990" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h5 class="main-heading translated">2.3负载模型</h5>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-fc5611a elementor-widget elementor-widget-text-editor" data-id="fc5611a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">一旦得到了<em> <code>model_id</code> </em>，就可以传递给“<em> <strong> load API </strong> </em>”从模型索引中读取模型，加载到内存中使用；模型的一个实例保存在ML节点的缓存中。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-13524bb elementor-widget elementor-widget-iheading" data-id="13524bb" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-c056afa elementor-widget elementor-widget-html" data-id="c056afa" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request POST 
+'https://localhost:9200/_plugins/_ml/models/loaded_neural_model_id/_load' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4='</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-57af788 elementor-widget elementor-widget-iheading" data-id="57af788" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-6babc70 elementor-widget elementor-widget-html" data-id="6babc70" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+  "task_id": "ROSg24QBNFSZcaBDJ-BT",
+  "status": "CREATED"
+}</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-b0264ba elementor-widget elementor-widget-text-editor" data-id="b0264ba" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">从响应中，再次保存<em> <code>task_id</code> </em>并在下一步中使用，以检查模型的加载状态。</p>
+<p class="translated"><!-- /wp:paragraph -->T15】</p>
+<p class="translated"><em>注意:每次重新启动服务器时，都需要在内存中重新加载模型。</em></p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-d65ea44 elementor-widget elementor-widget-iheading" data-id="d65ea44" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">2.3.1检查模型加载状态</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-fc71f63 elementor-widget elementor-widget-text-editor" data-id="fc71f63" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">使用这个API来检查加载任务的状态是否完成是很有用的，否则，模型就不能使用。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-df20818 elementor-widget elementor-widget-iheading" data-id="df20818" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-eb75c3e elementor-widget elementor-widget-html" data-id="eb75c3e" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request GET 
+'https://localhost:9200/_plugins/_ml/tasks/ROSg24QBNFSZcaBDJ-BT' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4='</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-7f13079 elementor-widget elementor-widget-iheading" data-id="7f13079" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-b0dac38 elementor-widget elementor-widget-html" data-id="b0dac38" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+  "model_id": "loaded_neural_model_id",
+  "task_type": "LOAD_MODEL",
+  "function_name": "TEXT_EMBEDDING",
+  "state": "COMPLETED",
+  "worker_node": "bLM0_iO0S8aCJZ1snb91sg,aVrtho4BQhyDbA5QireffA",
+  "create_time": 1670132016977,
+  "last_update_time": 1670132069239,
+  "is_async": true
+}</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-3a38f5d elementor-widget elementor-widget-iheading" data-id="3a38f5d" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">3.创建一个神经搜索管道</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-438f349 elementor-widget elementor-widget-text-editor" data-id="438f349" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">在neural插件发布之前，为了执行利用矢量嵌入的搜索，有必要:</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:list {"ordered":true} --></p>
+<ol><!-- wp:list-item -->
+<li class="translated">在OpenSearch之外训练模型。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">使用自定义脚本从文档字段创建矢量嵌入。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">手动将嵌入内容上传到OpenSearch。</li>
+<!-- /wp:list-item --></ol>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">多亏了神经插件，<strong>现在可以从OpenSearch </strong>中的文本自动创建向量，定义一个<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/2.4/neural-search-plugin/index/#ingest-data-with-neural-search"> <strong>神经搜索管道</strong> </a>。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">管道由一系列在摄取过程中处理文档的处理器组成，允许将文档文本转换为矢量嵌入。<br/>神经搜索支持的唯一处理器是<em> text_embedding </em>，在这里您可以使用<em> field_maps </em>参数来确定:</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:list --></p>
+<ul><!-- wp:list-item -->
+<li class="translated"><strong>输入字段名</strong>:从哪些字段生成矢量嵌入。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated"><strong>输出字段名</strong>:存储字段矢量嵌入。</li>
+<!-- /wp:list-item --></ul>
+<p class="translated"><!-- /wp:list -->T44】</p>
+<p class="has-text-align-justify translated">在这个管道创建示例中，我们将<em> <code>general_text</code> </em>定义为输入字段，从中获取文本以创建矢量嵌入，并将<em> <code>general_text_vector</code> </em>定义为输出字段，在其上存储它们。</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-360a1ad elementor-widget elementor-widget-iheading" data-id="360a1ad" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-35d0535 elementor-widget elementor-widget-html" data-id="35d0535" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request PUT 
+'https://localhost:9200/_ingest/pipeline/neural_pipeline' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "description": "An example neural search pipeline",
+  "processors" : [
+    {
+      "text_embedding": {
+        "model_id": "loaded_neural_model_id",
+        "field_map": {
+           "general_text": "general_text_vector"
+        }
+      }
+    }
+  ]
+}'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-ef3616b elementor-widget elementor-widget-iheading" data-id="ef3616b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-e4c67bf elementor-widget elementor-widget-html" data-id="e4c67bf" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+  "acknowledged": true
+}</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-a5833b7 elementor-widget elementor-widget-iheading" data-id="a5833b7" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h5 class="main-heading translated">3.1多矢量场映射</h5>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-c961007 elementor-widget elementor-widget-text-editor" data-id="c961007" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果您想为多个文本字段创建<strong>矢量嵌入，您可以在<em> <code>field_map</code> </em>参数内的同一管道中定义所有矢量嵌入，如下所示。</strong></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e95e11a elementor-widget elementor-widget-html" data-id="e95e11a" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request PUT 
+'https://localhost:9200/_ingest/pipeline/neural_pipeline' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "description": "An example neural search pipeline",
+  "processors" : [
+    {
+      "text_embedding": {
+        "model_id": "loaded_neural_model_id",
+        "field_map": {
+           "general_text": "general_text_vector",
+           "second_general_text": "second_general_text_vector"
+        }
+      }
+    }
+  ]
+}'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-911361f elementor-widget elementor-widget-iheading" data-id="911361f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">4.创建包含向量字段的索引</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-59abd7e elementor-widget elementor-widget-text-editor" data-id="59abd7e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">既然神经管道已经配置好了，我们需要将它与一个<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/2.4/neural-search-plugin/index/#ingest-data-with-neural-search">索引</a>关联起来。这将是我们要添加向量场的索引。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">创建索引时，我们需要定义一些参数:</p>
+<p class="translated"><!-- /wp:paragraph -->T12】</p>
+<ul><!-- wp:list-item -->
+<li class="translated"><em> <code>index.knn</code> </em> <strong>设置</strong>必须设置为<strong>真</strong>。这将告诉OpenSearch我们将存储向量，并且我们希望对这些数据使用k-NN搜索。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated"><strong>索引映射</strong>必须包括<strong> k-NN矢量场</strong>以存储生成的嵌入。这些<em> <code>knn_vector</code> </em>字段需要具有与模型相匹配的维度。<br/>在我们的教程中，我们定义:<em> <code>general_text_vector</code> </em>用于存储矢量嵌入，<em> <code>general_text</code> </em>用于创建嵌入的源字段，<em> <code>color</code> </em>用于显示过滤查询行为的附加字段。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated"><strong>神经管道</strong>必须关联。在我们的教程中，我们将<code>default_pipeline</code>定义为我们的神经管道。请注意，索引字段与管道映射中指定的字段对齐。</li>
+<!-- /wp:list-item --></ul>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph --></p>
+<p class="translated">对于<em> <code>general_text_vector</code> </em>字段我们进一步定义:</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:list --></p>
+<ul><!-- wp:list-item -->
+<li class="translated"><strong>类型</strong> : <em> knn_vector </em>类型</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated"><strong>尺寸</strong>:需要等于模型尺寸。在这种情况下<em> 384 </em>。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated"><strong>方法</strong>:近似k-NN搜索的层次邻近图方法。在这种情况下，<em>分层可导航小世界图(hnsw)。</em></li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated"><strong>引擎</strong>:用于索引和搜索的近似k-NN库。在这种情况下，我们选择了<em> lucene </em>。</li>
+<!-- /wp:list-item --></ul>
+<p class="translated"><!-- /wp:list -->T57】</p>
+<p class="has-text-align-justify translated">你可以在OpenSearch <a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/search-plugins/knn/knn-index/#method-definitions">文档</a>中找到更多的参数和选项。</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-db9ca78 elementor-widget elementor-widget-iheading" data-id="db9ca78" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-d25c34c elementor-widget elementor-widget-html" data-id="d25c34c" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request PUT 'https://localhost:9200/my_neural_index' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "settings": {
+        "index.knn": true,
+        "default_pipeline": "neural_pipeline"
+    },
+    "mappings": {
+        "properties": {
+            "general_text_vector": {
+                "type": "knn_vector",
+                "dimension": 384,
+                "method": {
+                    "name": "hnsw",
+                    "engine": "lucene"
+                }
+            },
+            "general_text": { 
+                "type": "text"            
+            },
+            "color": {
+                "type": "text"
+            }
+        }
+    }
+}'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-b80cd15 elementor-widget elementor-widget-iheading" data-id="b80cd15" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-3f066f5 elementor-widget elementor-widget-html" data-id="3f066f5" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+  "acknowledged": true,
+  "shards_acknowledged": true,
+  "index": "my_neural_index"
+}</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-0ad2b51 elementor-widget elementor-widget-iheading" data-id="0ad2b51" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">5.索引文档</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-9d18f39 elementor-widget elementor-widget-text-editor" data-id="9d18f39" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">我们现在准备索引我们的文档。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">这一步照常进行，使用OpenSearch的<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/api-reference/ingest-apis/index/">摄取API </a>。在每个文档摄取之后，<strong>由于与神经索引相关联的神经管道，嵌入向量将从定义的字段自动创建</strong>。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">对于本教程，我们采用了MARCO女士的一个语料库，这是一个用于深度学习的大规模信息检索数据集的集合。特别是，我们下载了文章检索集:【collection.tar.gz<a href="https://web.archive.org/web/20221226170401/https://msmarco.blob.core.windows.net/msmarcoranking/collection.tar.gz"/>，并索引了大约10k篇文章。<br/>正如在神经索引创建阶段提到的，我们还为每个包含颜色名称的文档添加了一个额外的字段。颜色名称是从值列表中随机分配的(绿色、白色、红色、黑色、黄色、蓝色、橙色和粉色)。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph --></p>
+<p class="translated">这是我们用来将几个文档(一次)推入我们的神经索引的<em> <a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/2.4/api-reference/document-apis/bulk/"> _bulk </a> </em>请求:</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-406b732 elementor-widget elementor-widget-iheading" data-id="406b732" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-2848876 elementor-widget elementor-widget-html" data-id="2848876" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request POST 'https://localhost:9200/_bulk' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Content-Type: application/json' \
+--data-raw '{"create":{"_index":"my_neural_index", "_id":"0"}}
+{"general_text":"The presence of communication amid scientific minds was
+equally important to the success of the Manhattan Project as scientific
+intellect was. The only cloud hanging over the impressive achievement of
+the atomic researchers and engineers is what their success truly meant;
+hundreds of thousands of innocent lives obliterated.","color":"red"}
+{"create":{"_index":"my_neural_index", "_id":"1"}}
+{"general_text":"The Manhattan Project and its atomic bomb helped bring an
+end to World War II. Its legacy of peaceful uses of atomic energy continues
+to have an impact on history and science.","color":"black"}
+{"create":{"_index":"my_neural_index", "_id":"2"}}
+{"general_text":"Essay on The Manhattan Project - ...'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-6468419 elementor-widget elementor-widget-iheading" data-id="6468419" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE </span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-9d16972 elementor-widget elementor-widget-html" data-id="9d16972" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+  "took": 87,
+  "ingest_took": 238,
+  "errors": false,
+  "items": [{
+    "create": {
+      "_index": "my_neural_index",
+      "_id": "0",
+      "_version": 1,
+      "result": "created",
+      "_shards": {
+        "total": 2,
+        "successful": 2,
+        "failed": 0
+      },
+      "_seq_no": 1,
+      "_primary_term": 1,
+      "status": 201
+    }
+  },{
+  "create": {
+    "_index": "my_neural_index",
+    "_id": "1",
+    ...
+    ...</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-6bddfb0 elementor-widget elementor-widget-text-editor" data-id="6bddfb0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在这种情况下，我们在请求体中包含了索引名称，否则，只能在路径中指定一次:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-d6cd8dc elementor-widget elementor-widget-html" data-id="d6cd8dc" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request POST 
+'https://localhost:9200/my_neural_index/_bulk'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-3b608f9 elementor-widget elementor-widget-text-editor" data-id="3b608f9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">注意:在请求体的末尾，需要一个空行！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a8d1e4b elementor-widget elementor-widget-iheading" data-id="a8d1e4b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">6.利用向量场的搜索</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-044df55 elementor-widget elementor-widget-text-editor" data-id="044df55" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">多亏了这个插件，我们再也不用担心从外部生成查询向量并将其传递给OpenSearch。<br/>它提供了一个名为<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/2.4/neural-search-plugin/index/#ingest-data-with-neural-search"> <strong>的自定义查询类型，神经查询</strong> </a>会自动:</p>
+<p class="translated"><!-- /wp:paragraph -->T19】</p>
+<ol><!-- wp:list-item -->
+<li class="translated">使用语言模型从查询文本计算查询向量。</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">将用户提供的查询转换成一个<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/search-plugins/knn/index/"> k-NN向量查询</a>。</li>
+<!-- /wp:list-item --></ol>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">为了进行一些查询，我们从Marco女士那里下载了段落检索查询:<a href="https://web.archive.org/web/20221226170401/https://msmarco.blob.core.windows.net/msmarcoranking/queries.tar.gz">queries.tar.gz</a></p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-25d4a81 elementor-widget elementor-widget-iheading" data-id="25d4a81" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h5 class="main-heading translated">6.1神经查询</h5>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-cff4f60 elementor-widget elementor-widget-text-editor" data-id="cff4f60" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这是一个神经查询的例子，是插件引入的。它使用用户提供的语言模型将文本查询转换成k-NN向量查询。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-bb0de63 elementor-widget elementor-widget-iheading" data-id="bb0de63" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-9932ed6 elementor-widget elementor-widget-html" data-id="9932ed6" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request GET 
+'https://localhost:9200/my_neural_index/_search' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "_source": [
+        "general_text"
+    ],
+    "query": {
+        "neural": {
+            "general_text_vector": {
+                "query_text": "what is a bank transit number",
+                "model_id": "loaded_neural_model_id",
+                "k": 3
+            }
+        }
+    }
+}'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-1c4d209 elementor-widget elementor-widget-text-editor" data-id="1c4d209" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">在这种情况下，我们有:</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph --></p>
+<p class="translated"><strong> general_text_vector </strong> =对<br/><strong>query _ text</strong>=(string)查询文本(来自<em>queries.tar.gz</em>)<br/><strong>model _ id</strong>=(string)语言模型的ID，先前上传的<br/> <strong> k </strong> = (int)从k-NN搜索返回的结果数。<!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-4fe5012 elementor-widget elementor-widget-iheading" data-id="4fe5012" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-62ae7d6 elementor-widget elementor-widget-html" data-id="62ae7d6" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+    "took": 105,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 3,
+            "relation": "eq"
+        },
+        "max_score": 0.44739452,
+        "hits": [
+            {
+                "_index": "my_neural_index",
+                "_id": "7686",
+                "_score": 0.44739452,
+                "_source": {
+                  "general_text": "A. A federal tax identification number
+                  (also known as an employer identification number or EIN), is a number
+                  assigned solely to your business by the IRS. Your tax ID number is
+                  used to identify your business to several federal agencies responsible
+                  for the regulation of business."
+                }
+            },
+            {
+                "_index": "my_neural_index",
+                "_id": "7691",
+                "_score": 0.44169965,
+                "_source": {
+                  "general_text": "A. A federal tax identification number (also known as
+                  an employer identification number or EIN), is a number assigned solely
+                  to your business by the IRS."
+                }
+            },
+            {
+                "_index": "my_neural_index",
+                "_id": "7692",
+                "_score": 0.43761322,
+                "_source": {
+                  "general_text": "Lets start at the beginning. A tax ID number or
+                  employer identification number (EIN) is a number you get from the U.S.
+                  federal government that gives an identification number to a business,
+                  much like a social security number does for a person."
+                }
+            }
+        ]
+    }
+}</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-ac5a12c elementor-widget elementor-widget-iheading" data-id="ac5a12c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h5 class="main-heading translated">6.2过滤器+神经查询</h5>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-e32fda8 elementor-widget elementor-widget-text-editor" data-id="e32fda8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">让我们通过一个例子来看看在执行一个神经查询时如何管理过滤器。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph --></p>
+<p class="translated">假设执行前面示例中的神经查询，但是使用<em> k </em> =8: <!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-aebbf6a elementor-widget elementor-widget-html" data-id="aebbf6a" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request GET 
+'https://localhost:9200/my_neural_index/_search' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "query": {
+        "neural": {
+            "general_text_vector": {
+                "query_text": "what is a bank transit number",
+                "model_id": "loaded_neural_model_id",
+                "k": 8
+            }
+        }
+    }
+}'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-67efc86 elementor-widget elementor-widget-text-editor" data-id="67efc86" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">在这种情况下，响应包含具有以下颜色的八个文档(按顺序排列):</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:list {"ordered":true} --></p>
+<ol><!-- wp:list-item -->
+<li class="translated">红色</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">红色</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">怀特（姓氏）</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">柑橘</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">蓝色</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">格林（姓氏）；绿色的</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">怀特（姓氏）</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">怀特（姓氏）</li>
+<!-- /wp:list-item --></ol>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph --></p>
+<p class="translated">现在假设使用过滤器和神经查询进行组合查询:<!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-95db276 elementor-widget elementor-widget-html" data-id="95db276" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>curl --location --request GET 
+'https://localhost:9200/my_neural_index/_search' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "query": {
+        "bool": {
+            "filter": {
+                "term": {
+                    "color": "white"
+                }
+            },
+            "must": {
+                "neural": {
+                    "general_text_vector": {
+                        "query_text": "what is a bank transit number",
+                        "model_id": "loaded_neural_model_id",
+                        "k": 3
+                    }
+                }
+            }
+        }
+    }
+}'</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-568618e elementor-widget elementor-widget-text-editor" data-id="568618e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">该查询的目的是为查询“<em>什么是银行转帐号”</em>获得最佳的三个文档。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">在响应中，我们获得了一个带有单个“白色”文档的1次命中。<br/> <strong>如果我们设置<em> k </em> =3，为什么我们只获得一个文档？</strong> <br/>这是因为OpenSearch对这个查询执行了一个<strong>后置过滤</strong>。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph --></p>
+<p class="translated">通过改变<em> k </em>值，我们可以很容易地看到这一点:</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:list --></p>
+<ul><!-- wp:list-item -->
+<li class="translated">k=3，我们有一个命中</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">k=6我们有一个命中</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">k=7我们有两个命中</li>
+<!-- /wp:list-item --> <!-- wp:list-item -->
+<li class="translated">k=8我们有三个命中</li>
+<!-- /wp:list-item --></ul>
+<p class="translated"><!-- /wp:list --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">当设置<em> k </em> =3时，OpenSearch首先执行获取3个文档的神经查询:红色、红色和<strong>白色</strong>，然后通过颜色过滤它们，只保留白色的一个。<br/>对于<em> k </em> =6也是如此，我们得到:红色、红色、<strong>白色</strong>、橙色、蓝色和绿色，只有一个白色文档。<br/>然后对于<em> k </em> =7我们得到:红色，红色，<strong>白色</strong>，橙色，蓝色，绿色，<strong>白色</strong>，总共2次命中。</p>
+<p class="translated"><!-- /wp:paragraph -->T50】</p>
+<p class="has-text-align-justify translated">即使在k-NN搜索插件中也有预过滤功能，但在neural插件中还没有。<br/>事实上，如果您试图在神经查询中添加一个<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/2.4/search-plugins/knn/filter-search-knn/#step-3-search-your-data-with-a-filter">过滤器参数</a>，例如针对k-NN的查询，您会得到以下错误:</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-0eb83c1 elementor-widget elementor-widget-html" data-id="0eb83c1" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<pre>{
+  "error": {
+    "root_cause": [
+      {
+        "type": "parsing_exception",
+        "reason": "[neural] unknown token [START_OBJECT] after [filter]",
+        "line": 12,
+        "col": 27
+      }
+    ],
+    "type": "parsing_exception",
+    "reason": "[neural] unknown token [START_OBJECT] after [filter]",
+    "line": 12,
+    "col": 27
+  },
+  "status": 400
+}</pre>		</div>
+				</div>
+				<div class="elementor-element elementor-element-3bc2cc3 elementor-widget elementor-widget-text-editor" data-id="3bc2cc3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这是因为神经查询中目前没有<em>过滤器</em> <a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/2.4/neural-search-plugin/index/#neural-request-fields">参数支持</a>，只有:<em> vector_field </em>，<em> query_text </em>，<em> model_id </em>，<em> k </em>。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-db8ace4 elementor-widget elementor-widget-iheading" data-id="db8ace4" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h5 class="main-heading translated">6.3神经结果示例</h5>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-45f845e elementor-widget elementor-widget-text-editor" data-id="45f845e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">以下是通过运行从MS MARCO passage排名数据集中提取的一些神经查询得到的一些神经结果示例。为了简单起见，我们只返回了<em> <code>general_text</code> </em>字段，而不是<em> knn_vector </em>字段。</p>
+<p class="translated"><!-- /wp:paragraph -->T73】</p>
+<p class="translated"><strong> query_text </strong>:“定义极限”</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-5a9ef7e elementor-widget elementor-widget-image" data-id="5a9ef7e" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="54819" data-permalink="https://web.archive.org/web/20221226170401/https://sease.io/2022/12/opensearch-neural-search-plugin-tutorial.html/schermata-2022-12-08-alle-10-19-11" data-orig-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?fit=1616%2C390&amp;ssl=1" data-orig-size="1616,390" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata-2022-12-08-alle-10.19.11" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?fit=300%2C72&amp;ssl=1" data-large-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?fit=1024%2C247&amp;ssl=1" decoding="async" width="1024" height="247" src="../Images/b51f9896a59fd35ccb85e972d097d8c3.png" class="attachment-large size-large wp-image-54819" alt="" loading="lazy" srcset="https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?w=1616&amp;ssl=1 1616w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?resize=300%2C72&amp;ssl=1 300w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?resize=1024%2C247&amp;ssl=1 1024w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?resize=768%2C185&amp;ssl=1 768w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?resize=1536%2C371&amp;ssl=1 1536w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?resize=720%2C174&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.11.png?fit=1024%2C247&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-60c088a elementor-widget elementor-widget-text-editor" data-id="60c088a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><strong> query_text </strong>:“定义激烈”</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-f00bb71 elementor-widget elementor-widget-image" data-id="f00bb71" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="54820" data-permalink="https://web.archive.org/web/20221226170401/https://sease.io/2022/12/opensearch-neural-search-plugin-tutorial.html/schermata-2022-12-08-alle-10-19-18" data-orig-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?fit=1584%2C398&amp;ssl=1" data-orig-size="1584,398" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata-2022-12-08-alle-10.19.18" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?fit=300%2C75&amp;ssl=1" data-large-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?fit=1024%2C257&amp;ssl=1" decoding="async" width="1024" height="257" src="../Images/a7533562b3b62479dd172dbfa05d2d0b.png" class="attachment-large size-large wp-image-54820" alt="" loading="lazy" srcset="https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?w=1584&amp;ssl=1 1584w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?resize=300%2C75&amp;ssl=1 300w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?resize=1024%2C257&amp;ssl=1 1024w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?resize=768%2C193&amp;ssl=1 768w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?resize=1536%2C386&amp;ssl=1 1536w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?resize=720%2C181&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.18.png?fit=1024%2C257&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-af98afe elementor-widget elementor-widget-text-editor" data-id="af98afe" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><strong> query_text </strong>:“定义医学领域的极端”</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-26cbb90 elementor-widget elementor-widget-image" data-id="26cbb90" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="54821" data-permalink="https://web.archive.org/web/20221226170401/https://sease.io/2022/12/opensearch-neural-search-plugin-tutorial.html/schermata-2022-12-08-alle-10-19-24" data-orig-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?fit=1610%2C408&amp;ssl=1" data-orig-size="1610,408" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata-2022-12-08-alle-10.19.24" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?fit=300%2C76&amp;ssl=1" data-large-file="https://web.archive.org/web/20221226170401/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?fit=1024%2C259&amp;ssl=1" decoding="async" width="1024" height="259" src="../Images/a1fee2e068c51a7dfa54c8ed12472089.png" class="attachment-large size-large wp-image-54821" alt="" loading="lazy" srcset="https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?w=1610&amp;ssl=1 1610w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?resize=300%2C76&amp;ssl=1 300w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?resize=1024%2C259&amp;ssl=1 1024w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?resize=768%2C195&amp;ssl=1 768w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?resize=1536%2C389&amp;ssl=1 1536w, https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?resize=720%2C182&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221226170401im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-08-alle-10.19.24.png?fit=1024%2C259&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-bbf0b16 elementor-widget elementor-widget-text-editor" data-id="bbf0b16" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">从结果中可以看出，由于使用了语言模型，返回的文档与执行的查询非常接近，神经搜索似乎可以处理“同义词”和类似的上下文。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-4e572e6 elementor-widget elementor-widget-iheading" data-id="4e572e6" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">摘要</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-bb60641 elementor-widget elementor-widget-text-editor" data-id="bb60641" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">新的OpenSearch Neural插件将神经搜索向前推进了一步，使操纵语言模型、创建文本嵌入和执行k-NN查询变得更加容易。仍然有一些工作可以做，以使文档不那么分散，但它写得很好，并且该工具很有价值并且易于使用。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">在我们的实验中，模型加载时间和索引时间是可以接受的，但是应该进行深入的研究来分析插件的性能。</p>
+<p class="translated"><!-- /wp:paragraph --> <!-- wp:paragraph {"align":"justify"} --></p>
+<p class="has-text-align-justify translated">如果将来还能集成预过滤和高亮显示功能，那就太好了，因为目前它们还不可用。仅允许后置过滤。<!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e93b67b elementor-widget elementor-widget-iheading" data-id="e93b67b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// REFERENCES</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-60d72f6 elementor-widget elementor-widget-text-editor" data-id="60d72f6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">神经插件库:<a href="https://web.archive.org/web/20221226170401/https://github.com/opensearch-project/neural-search">https://github.com/opensearch-project/neural-search</a><br data-rich-text-line-break="true"/>神经插件Git issue:<a href="https://web.archive.org/web/20221226170401/https://github.com/opensearch-project/neural-search/issues/11">https://github . com/open search-project/Neural-search/issues/11</a><br data-rich-text-line-break="true"/>神经插件文档:<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/neural-search-plugin/index/">https://open search . org/docs/latest/Neural-search-plugin/index/</a><br data-rich-text-line-break="true"/>k-NN插件库:<a href="https://web.archive.org/web/20221226170401/https://github.com/opensearch-project/k-NN">https://github.com/opensearch-project/k-NN</a><br data-rich-text-line-break="true"/>k-NN插件文档:<a href="https://web.archive.org/web/20221226170401/https://opensearch.org/docs/latest/search-plugins/knn/index/">https://open search . org/k</a></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3caabc7a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3caabc7a" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-226d8e2e ot-flex-column-vertical" data-id="226d8e2e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2958bbbd elementor-widget elementor-widget-iheading" data-id="2958bbbd" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">无耻的为我们服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-35f35bb5 elementor-widget elementor-widget-text-editor" data-id="35f35bb5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们提供OpenSearch技术的咨询吗？如果你想让你的搜索引擎更上一层楼，请联系我们！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2dd807ee ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2dd807ee" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7ef077ae ot-flex-column-vertical" data-id="7ef077ae" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1751309a elementor-widget elementor-widget-iheading" data-id="1751309a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-dcb5e0f elementor-widget elementor-widget-text-editor" data-id="dcb5e0f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这个关于OpenSearch神经搜索插件教程的帖子吗？不要忘记订阅我们的时事通讯，以保持对信息检索世界的不断更新！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-295fecd4 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="295fecd4" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.12 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20221226170401/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1672074243"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

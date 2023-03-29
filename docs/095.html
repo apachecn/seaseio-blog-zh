@@ -1,0 +1,739 @@
+<html>
+<head>
+<title>From Training to Ranking: Using BERT to Improve Search Relevance</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">从训练到排名:使用BERT提高搜索相关性</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2021/12/using-bert-to-improve-search-relevance.html#0001-01-01">https://web.archive.org/web/sease.io/2021/12/using-bert-to-improve-search-relevance.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-d24b8d9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d24b8d9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-09db604 ot-flex-column-vertical" data-id="09db604" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-659360d elementor-widget elementor-widget-text-editor" data-id="659360d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果你参加过我们的<a href="https://web.archive.org/web/20221130074157/https://sease.io/event/artificial-intelligence-in-search-training" target="_blank" rel="noreferrer noopener">人工智能搜索培训</a>，你现在应该熟悉应用于搜索的<strong>自然语言处理</strong>和<strong>深度学习</strong>。如果你还没有，不要担心，因为我们正计划安排另一个日期，我们将通过我们的<a href="https://web.archive.org/web/20221130074157/https://sease.io/newsletter">时事通讯</a>向你发布消息，所以请确保你订阅了。与此同时，你可以通过阅读这篇博客开始了解使用深度学习(DL)的文本排名。</p>
+<p class="translated">我们越来越频繁地听说人工智能如何渗透到我们日常生活的方方面面。当我们谈论人工智能时，我们指的是使机器能够像人类一样学习和推理的一系列技术。人工智能自50年代以来就已经存在，但只是在最近随着深度学习的出现才出现爆炸式增长。事实上，深度学习是人工智能的一部分，它利用特殊的<strong>神经网络</strong>来解决无法简单通过算法解决的复杂问题。</p>
+<p class="translated">就搜索引擎而言，深度学习可以帮助执行几项任务，如查询理解、个性化或推荐。在这篇文章中，我们将重点放在文本排名。</p>
+<p class="translated">我们将解决的问题通常被称为“特定检索”，这是一个标准的检索任务，其中用户通过一个查询指定他的信息需求，该查询启动对可能与用户相关的文档的搜索。基本上，给定一个查询和一组文档，我们需要返回一个排序的结果列表，使<em>最大化一个感兴趣的度量<strong>。</strong>T15】</em></p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">搜索是文本排序的最常见的实际实现，其中搜索引擎被用作检索系统，以产生网页、pdf、新闻文章、tweets或任何其他形式的文本的排序列表，该列表根据相对于用户意图的估计相关性来排序。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-17484cd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="17484cd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2439beb ot-flex-column-vertical" data-id="2439beb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e7b2d9a elementor-widget elementor-widget-text-editor" data-id="e7b2d9a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":43743,"sizeSlug":"large","linkDestination":"none"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="43743" data-permalink="https://web.archive.org/web/20221130074157/https://sease.io/screen-shot-2021-11-01-at-3-15-20-pm-2" data-orig-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?fit=2172%2C924&amp;ssl=1" data-orig-size="2172,924" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Text Ranking" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?fit=300%2C128&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?fit=1024%2C436&amp;ssl=1" decoding="async" loading="lazy" width="2172" height="924" class="wp-image-43743" src="../Images/0685aecdee37f78407c6ac85c5c71a25.png" alt="Text Ranking" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?w=2172&amp;ssl=1 2172w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?resize=300%2C128&amp;ssl=1 300w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?resize=1024%2C436&amp;ssl=1 1024w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?resize=768%2C327&amp;ssl=1 768w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?resize=1536%2C653&amp;ssl=1 1536w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?resize=2048%2C871&amp;ssl=1 2048w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?resize=720%2C306&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-01-at-3.15.20-PM-1.png?resize=1024%2C436&amp;ssl=1"/>
+<figcaption>A figure representing ad hoc retrieval.</figcaption>
+</figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3f288d9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3f288d9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8e6b10b ot-flex-column-vertical" data-id="8e6b10b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-356e32a elementor-widget elementor-widget-iheading" data-id="356e32a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">伯特</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1c47739 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1c47739" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-697d979 ot-flex-column-vertical" data-id="697d979" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-11cf0ec elementor-widget elementor-widget-text-editor" data-id="11cf0ec" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">信息检索的最新进展表明，通过利用大规模预训练的<strong>基于转换器的语言模型</strong>，如伯特<a href="https://web.archive.org/web/20221130074157/https://arxiv.org/pdf/1810.04805.pdf">【1】</a>，有望提高性能。<br/>谷歌发明的BERT是这些预训练模型中最著名的例子，这些模型是采用自我注意机制<a href="https://web.archive.org/web/20221130074157/https://arxiv.org/pdf/1706.03762.pdf">【2】</a>的神经网络家族，这是一种模仿认知注意力的技术。<strong>注意机制</strong>试图将单个序列的不同位置联系起来，以计算其表示，增强输入的重要部分并淡出其余部分。变形金刚，这种用注意力机制构建的网络，收集关于给定单词的相关上下文的信息，然后将上下文编码成一个丰富的向量，智能地表示该单词。</p>
+<p class="translated">下图描述了BERT模型的内部架构以及所使用的输入/输出表示。首先使用一种称为<strong>单词块</strong><a href="https://web.archive.org/web/20221130074157/https://static.googleusercontent.com/media/research.google.com/ja//pubs/archive/37842.pdf">【3】</a>的算法对输入进行标记化，并添加特殊标记:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">[CLS] -&gt;称为分类标记，用在序列的开始。</li>
+<li class="translated">[SEP] -&gt;表示两个序列的分隔，充当分隔符。</li>
+<li class="translated">【MASK】--&gt;用于表示MLM任务中被屏蔽的令牌。</li>
+</ul>
+</li>
+</ul>
+<p class="translated">然后，标记化的输入被转换成<em>标记嵌入</em>以及另外的<em>片段嵌入</em>和<em>位置嵌入</em>。标记嵌入是每个标记的词汇id。句子嵌入只是一个数字类，用于在使用分隔符标记提供两个或更多句子时区分句子。位置嵌入<strong> </strong>只是表示每个单词在序列中的位置。最后，模型架构使用的嵌入是令牌嵌入、位置嵌入以及段嵌入的总和。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph -->T30】</p>
+<p class="translated">生成的令牌嵌入然后通过由12层(至少在基本版本中)转换器编码器组成的BERT模型。BERT的输出是对应于输入序列中每个标记的预定义隐藏大小的隐藏状态向量。在BERT基的情况下，这些输出嵌入的大小为768。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0f3f59b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0f3f59b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4908703 ot-flex-column-vertical" data-id="4908703" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-69606e5 elementor-widget elementor-widget-text-editor" data-id="69606e5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":44147,"sizeSlug":"large","linkDestination":"none"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="44147" data-permalink="https://web.archive.org/web/20221130074157/https://sease.io/bert" data-orig-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?fit=1310%2C1590&amp;ssl=1" data-orig-size="1310,1590" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="BERT" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?fit=247%2C300&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?fit=844%2C1024&amp;ssl=1" decoding="async" loading="lazy" width="1310" height="1590" class="wp-image-44147" src="../Images/03a63bb7433e8482eafd8cc8cbdc82e1.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?w=1310&amp;ssl=1 1310w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?resize=247%2C300&amp;ssl=1 247w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?resize=844%2C1024&amp;ssl=1 844w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?resize=768%2C932&amp;ssl=1 768w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?resize=1266%2C1536&amp;ssl=1 1266w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?resize=720%2C874&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/BERT.png?resize=844%2C1024&amp;ssl=1"/>
+<figcaption>A figure depicting the internal architecture of the BERT model.</figcaption>
+</figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3d65b8e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3d65b8e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7fa853b ot-flex-column-vertical" data-id="7fa853b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8a9b7b9 elementor-widget elementor-widget-text-editor" data-id="8a9b7b9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">像<strong>谷歌</strong><a href="https://web.archive.org/web/20221130074157/https://blog.google/products/search/search-language-understanding-bert/">【4】</a>或者<strong>微软</strong><a href="https://web.archive.org/web/20221130074157/https://azure.microsoft.com/en-us/blog/bing-delivers-its-largest-improvement-in-search-experience-using-azure-gpus/">【5】</a>这样的大公司已经公开证实了在商业Web引擎中使用BERT。正如他们所说，对于传统方法来说，更长更会话式的查询更难，而语境化语言模型方法可以更好地理解介词“for”和“to”的含义，能够捕捉查询中单词的上下文。基于Transformer的模型理解句子中每个单词及其周围所有单词之间的上下文和关系。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-933e9ee ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="933e9ee" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fa99913 ot-flex-column-vertical" data-id="fa99913" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d6cd577 elementor-widget elementor-widget-text-editor" data-id="d6cd577" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":44057,"sizeSlug":"full","linkDestination":"none"} -->T9】</p>
+<figure class="wp-block-image size-full"><img data-attachment-id="44057" data-permalink="https://web.archive.org/web/20221130074157/https://sease.io/query-2019braziltravelertousaneedavisa-max-1000x1000" data-orig-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Query-2019BrazilTravelerToUSANeedAVisa.max-1000x1000-1.jpg?fit=1000%2C625&amp;ssl=1" data-orig-size="1000,625" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Query-2019BrazilTravelerToUSANeedAVisa.max-1000×1000" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Query-2019BrazilTravelerToUSANeedAVisa.max-1000x1000-1.jpg?fit=300%2C188&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Query-2019BrazilTravelerToUSANeedAVisa.max-1000x1000-1.jpg?fit=1000%2C625&amp;ssl=1" decoding="async" loading="lazy" width="1000" height="625" class="wp-image-44057" src="../Images/0ed3e0c43d4c59b68065babdfc67492e.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Query-2019BrazilTravelerToUSANeedAVisa.max-1000x1000-1.jpg?w=1000&amp;ssl=1 1000w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Query-2019BrazilTravelerToUSANeedAVisa.max-1000x1000-1.jpg?resize=300%2C188&amp;ssl=1 300w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Query-2019BrazilTravelerToUSANeedAVisa.max-1000x1000-1.jpg?resize=768%2C480&amp;ssl=1 768w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Query-2019BrazilTravelerToUSANeedAVisa.max-1000x1000-1.jpg?resize=720%2C450&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Query-2019BrazilTravelerToUSANeedAVisa.max-1000x1000-1.jpg?ssl=1"/>
+<figcaption>An example of the improvement introduced by BERT on a commercial search engine</figcaption>
+</figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-29d7daf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="29d7daf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-572e9e9 ot-flex-column-vertical" data-id="572e9e9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-14cb80d elementor-widget elementor-widget-text-editor" data-id="14cb80d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">上面的例子清楚地证明了单词“to”及其与查询中其他单词的关系对于理解其含义尤为重要。这个查询显示了BERT理解用户查询背后意图的能力，这个用户查询是关于一个去美国旅行的巴西人，而不是相反。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-196a159 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="196a159" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ac3d320 ot-flex-column-vertical" data-id="ac3d320" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9f3a777 elementor-widget elementor-widget-iheading" data-id="9f3a777" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">神经排序</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-800dd28 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="800dd28" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8d8f93f ot-flex-column-vertical" data-id="8d8f93f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2bc22e4 elementor-widget elementor-widget-text-editor" data-id="2bc22e4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">预训练的上下文语言模型的一个最简单但仍然非常有效的应用是“<strong> vanilla BERT </strong>”设置，其中查询和文档被联合编码，模型的分类组件被调整以提供排名分数。人们有时也把这种方法称为CLS、莫诺贝特[3]、伯特卡特或简称为交叉编码器。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a657f88 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a657f88" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9b9b820 ot-flex-column-vertical" data-id="9b9b820" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-36ceb61 elementor-widget elementor-widget-text-editor" data-id="36ceb61" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"align":"center","id":44005,"width":475,"height":472,"sizeSlug":"full","linkDestination":"none"} -->T13】</p>
+<figure class="wp-block-image aligncenter size-full is-resized"><img data-attachment-id="44005" data-permalink="https://web.archive.org/web/20221130074157/https://sease.io/untitled-2021-11-14-1721" data-orig-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?fit=950%2C944&amp;ssl=1" data-orig-size="950,944" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="corss-encoder architecture" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?fit=300%2C298&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?fit=950%2C944&amp;ssl=1" decoding="async" loading="lazy" class="wp-image-44005 aligncenter" src="../Images/0b15203a5600eb72f475d991bd1d6c85.png" alt="" width="475" height="472" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?w=950&amp;ssl=1 950w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?resize=300%2C298&amp;ssl=1 300w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?resize=150%2C150&amp;ssl=1 150w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?resize=768%2C763&amp;ssl=1 768w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?resize=720%2C715&amp;ssl=1 720w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?resize=45%2C45&amp;ssl=1 45w" sizes="(max-width: 475px) 100vw, 475px" data-original-src="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Untitled-2021-11-14-1721.png?resize=475%2C472&amp;ssl=1"/>
+<figcaption>Cross-encoder architecture.</figcaption>
+</figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-90dba09 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="90dba09" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-39f7cef ot-flex-column-vertical" data-id="39f7cef" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-daa04ee elementor-widget elementor-widget-text-editor" data-id="daa04ee" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><strong>交叉编码器是一种昂贵的方法</strong>,因为查询和文档需要在查询时由BERT模型同时处理，这使得它们在用作先前使用传统倒排索引和快速评分功能(如BM25)生成的候选人池的重新排序器时成为更好的解决方案。</p>
+<p class="translated"><!-- wp:paragraph -->T17<!-- wp:paragraph -->T19】</p>
+<p class="translated">该模型将一个由与文档连接的查询组成的序列作为输入，这些序列由一个[SEP]标记分隔。输入还以一个[CLS]标记开头，以另一个[SEP]标记结尾。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e4fb8e0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e4fb8e0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5adbe67 ot-flex-column-vertical" data-id="5adbe67" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-67b713b elementor-widget elementor-widget-text-editor" data-id="67b713b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><pre><code>[CLS] QUERY [SEP] DOCUMENT [SEP]</code></pre></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-55859f5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="55859f5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9022260 ot-flex-column-vertical" data-id="9022260" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c450060 elementor-widget elementor-widget-text-editor" data-id="c450060" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">经过适当标记化的上述序列被传递给BERT作为输入，它为输入序列中的每个标记生成一个上下文化的表示向量。基本上，查询和文档的每个单词，以及特殊的记号，都将得到一个向量表示。</p>
+<p class="translated">在这种相关性分类方法中，对应于[CLS]标记的向量表示是用于推断查询文档相关性分数的向量表示。为了将[CLS]令牌的向量投影成标量值，使用了单层全连接神经网络。这个单层网络最初未经训练，因为我们从零开始初始化它，并且在微调整个模型时调整权重。</p>
+<p class="translated">准确地说，为了估计查询-文档对的得分，首先生成[CLS]向量表示，丢弃所有其他标记的向量。我们将自己局限于[CLS]标记，因为它是序列(与文档连接的查询)的聚合表示，它能够捕获全局上下文，并且可以被视为单词的加权平均，从而捕获整个序列的表示。</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated">在BERT基本模型中，[CLS]向量只是一个大小为768的浮点数组。BERT模型顶部的线性层需要是一个大小为(768，1)的数组，这样两者的点积将产生一个标量值。这个标量是文档与查询的估计相关性。通过收集给定查询的候选库的每个文档的分数，可以按照与用户意图的相关性递减来对它们进行排序。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a2dc628 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a2dc628" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e0c864c ot-flex-column-vertical" data-id="e0c864c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e473240 elementor-widget elementor-widget-iheading" data-id="e473240" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">微调</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e76ca63 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e76ca63" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-eea2c5e ot-flex-column-vertical" data-id="eea2c5e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3ca3a06 elementor-widget elementor-widget-text-editor" data-id="3ca3a06" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">语境化的语言模型通常是预先训练好的。<br/>在没有监督的情况下，在非常大的数据集上执行预训练。在BERT的情况下，该模型已经在无监督的维基百科和图书语料库数据集上进行了预训练。执行两个任务，即<strong>掩蔽语言模型</strong> (MLM)和<strong>下一句预测</strong> (NSP)。</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">在屏蔽语言模型中，来自每个序列的15%的标记被随机屏蔽(替换为标记[MASK])，并且该模型被训练为使用该序列的所有其他标记来预测这些标记。</li>
+<li class="translated">在下一个句子预测中，模型被提供有两个句子作为输入，并且必须预测语料库中第二个句子是否在第一个句子之后。</li>
+</ul>
+</li>
+</ul>
+<p class="translated"><!-- wp:paragraph -->T14<!-- wp:list -->T16<!-- wp:paragraph -->T18】</p>
+<p class="translated">提高所采用的模型的有效性的一种常见方法是利用微调步骤，向它传递关于要解决的任务的更好的知识。一种微调用于重新排列文档的模型的方法是设置目标，确定文档是否与具有成对策略的查询相关。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-118cea5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="118cea5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-efae2c7 ot-flex-column-vertical" data-id="efae2c7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-00a1e9f elementor-widget elementor-widget-text-editor" data-id="00a1e9f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"align":"center","id":44286,"width":512,"height":472,"sizeSlug":"large","linkDestination":"none"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image aligncenter size-large is-resized"><img data-attachment-id="44286" data-permalink="https://web.archive.org/web/20221130074157/https://sease.io/2021/12/using-bert-to-improve-search-relevance.html/pairwise-1" data-orig-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?fit=1830%2C1685&amp;ssl=1" data-orig-size="1830,1685" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Pairwise-1" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?fit=300%2C276&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?fit=1024%2C943&amp;ssl=1" decoding="async" loading="lazy" class="wp-image-44286 aligncenter" src="../Images/dfc8e80dfc9e3b5ecaa7b2d1bb30480d.png" alt="" width="512" height="472" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?w=1830&amp;ssl=1 1830w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?resize=300%2C276&amp;ssl=1 300w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?resize=1024%2C943&amp;ssl=1 1024w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?resize=768%2C707&amp;ssl=1 768w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?resize=1536%2C1414&amp;ssl=1 1536w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?resize=720%2C663&amp;ssl=1 720w" sizes="(max-width: 512px) 100vw, 512px" data-original-src="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Pairwise-1.png?resize=512%2C472&amp;ssl=1"/>
+<figcaption>Pairwise fine-tuning a “vanilla” BERT model.</figcaption>
+</figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d6178d9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d6178d9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6da08fc ot-flex-column-vertical" data-id="6da08fc" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-fdfbcc8 elementor-widget elementor-widget-text-editor" data-id="fdfbcc8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">BERT可用于为每个文档单独生成一个分数，并通过计算分数上的成对softmax交叉熵损失进行优化<br/>。</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated">交叉输入损失:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-076786c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="076786c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-363479c ot-flex-column-vertical" data-id="363479c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-40e760e elementor-widget elementor-widget-text-editor" data-id="40e760e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":44031,"width":344,"height":70,"sizeSlug":"full","linkDestination":"none"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image size-full is-resized"><img data-attachment-id="44031" data-permalink="https://web.archive.org/web/20221130074157/https://sease.io/screen-shot-2021-11-14-at-7-15-08-pm" data-orig-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-14-at-7.15.08-PM.png?fit=688%2C140&amp;ssl=1" data-orig-size="688,140" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Screen Shot 2021-11-14 at 7.15.08 PM" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-14-at-7.15.08-PM.png?fit=300%2C61&amp;ssl=1" data-large-file="https://web.archive.org/web/20221130074157/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-14-at-7.15.08-PM.png?fit=688%2C140&amp;ssl=1" decoding="async" loading="lazy" class="wp-image-44031" src="../Images/8723d677391350f1c1f241b640a8d59e.png" alt="" width="344" height="70" data-recalc-dims="1" srcset="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-14-at-7.15.08-PM.png?w=688&amp;ssl=1 688w, https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-14-at-7.15.08-PM.png?resize=300%2C61&amp;ssl=1 300w" sizes="(max-width: 344px) 100vw, 344px" data-original-src="https://web.archive.org/web/20221130074157im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/11/Screen-Shot-2021-11-14-at-7.15.08-PM.png?resize=344%2C70&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f07fa7a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f07fa7a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2d220b1 ot-flex-column-vertical" data-id="2d220b1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e2ea9a7 elementor-widget elementor-widget-text-editor" data-id="e2ea9a7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">其中J <sub> pos </sub>是相关候选的索引集，J <sub> neg </sub>是不相关文档的索引集。在成对训练中，我们当时只考虑两个文档，并且这两个文档中只有一个是相关的。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-916c33b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="916c33b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2c95b82 ot-flex-column-vertical" data-id="2c95b82" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d29c89b elementor-widget elementor-widget-iheading" data-id="d29c89b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">履行</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7cee6cc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7cee6cc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f6b5a3b ot-flex-column-vertical" data-id="f6b5a3b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-75af15f elementor-widget elementor-widget-text-editor" data-id="75af15f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在这个例子中，我们将展示我们刚刚描述的概念的实现。特别是，我们将看到如何定义模型以及成对训练步骤是什么样子的。我们将使用py torch<a href="https://web.archive.org/web/20221130074157/https://pytorch.org/">【6】</a>和hugging face Transformers<a href="https://web.archive.org/web/20221130074157/https://github.com/huggingface/transformers">【7】</a>，这是一个实现基于Transformer的架构并为这些架构和预训练模型提供API的库。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7da2edb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7da2edb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-15fe20f ot-flex-column-vertical" data-id="15fe20f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b79cd06 elementor-widget elementor-widget-iheading" data-id="b79cd06" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">模型</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-aa98538 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="aa98538" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-50a8dcb ot-flex-column-vertical" data-id="50a8dcb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4b45c96 elementor-widget elementor-widget-text-editor" data-id="4b45c96" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在下面的代码片段中，我们将定义我们的模型。我们依赖于由transformers库提供的BertForSequenceClassification模型。<br/>BertForSequenceClassification只是一个顶部带有序列分类/回归头的Bert模型转换器，它是一个位于合并输出顶部的线性层。在这个例子中，我们将标签的数量设置为等于1，这将导致模型能够为每个查询-文档对学习单个分数。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-84a3a31 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="84a3a31" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-70a68f3 ot-flex-column-vertical" data-id="70a68f3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cee5027 elementor-widget elementor-widget-text-editor" data-id="cee5027" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre><code>from transformers import *
+
+class MonoBERT(BertPreTrainedModel):
+    def __init__(self, config):
+        config.num_labels = 1
+        super(MonoBERT, self).__init__(config)
+        self.bert = BertForSequenceClassification(config)
+        self.init_weights()
+
+    def forward(self, input_ids, attention_mask, token_type_ids):
+        outputs = self.bert(input_ids, attention_mask, token_type_ids)
+        logits = outputs[0]
+        return logits</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4c836bd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4c836bd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f2cc1d7 ot-flex-column-vertical" data-id="f2cc1d7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-08407b6 elementor-widget elementor-widget-iheading" data-id="08407b6" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">训练步骤</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bcc6293 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bcc6293" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-febe82c ot-flex-column-vertical" data-id="febe82c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8433b18 elementor-widget elementor-widget-text-editor" data-id="8433b18" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">为了微调我们的模型，我们需要利用一些三元组形式的训练数据。每个三元组由一个查询和两个文档组成。第一个文档已经被标记为与查询直接相关(肯定的例子)，而第二个文档没有被标记为相关(否定的例子)。以下代码片段是执行培训步骤所需步骤的示例。请注意，下面的示例没有考虑使训练有效的几个基本组件，如较大的批量或梯度裁剪。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6047712 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6047712" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6658be7 ot-flex-column-vertical" data-id="6658be7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-06c3c80 elementor-widget elementor-widget-text-editor" data-id="06c3c80" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre><code>import torch
+from torch.nn.functional import cross_entropy
+from transformers import AdamW
+
+model = MonoBERT.from_pretrained("bert-base-uncased"
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+
+optimizer = AdamW(model.parameters(), lr=1e-5, eps=1e-8)
+optimizer.zero_grad()
+
+pos_text = "{} [SEP] {}".format(query, pos_doc) // query, pos_doc and neg_doc can be 
+neg_text = "{} [SEP] {}".format(query, neg_doc) // retrieved from the training triples
+
+pos_encoded = tokenizer.encode_plus(pos_text, return_tensors="pt")
+neg_encoded = tokenizer.encode_plus(neg_text, return_tensors="pt")
+
+pos_output = model.forward(**pos_encoded).squeeze(1)
+neg_output = model.forward(**neg_encoded).squeeze(1)
+
+labels = torch.zeros(1, dtype=torch.long)
+
+loss = cross_entropy(torch.stack((pos_output, neg_output), dim=1), labels)
+
+loss.backward()
+optimizer.step()</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1bdc34c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1bdc34c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-dceaa37 ot-flex-column-vertical" data-id="dceaa37" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0bfa919 elementor-widget elementor-widget-text-editor" data-id="0bfa919" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在加载模型和标记器之后，训练三元组被格式化为两个查询-文档对，其中相同的查询使用分隔符标记与每个文档连接两次。这两个格式化的字符串在被标记化并转换成张量之后，被用作模型的输入，该模型返回每一对的得分作为输出。</p>
+<p class="translated"><!-- wp:paragraph -->T17<!-- wp:paragraph -->T19】</p>
+<p class="translated">这两个推断出的分数，结合指示相关文档的标签，然后被用于计算训练损失。有了损失，梯度可以计算出来，权重最终由优化器的步骤更新。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-33f1e59 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="33f1e59" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7a0e017 ot-flex-column-vertical" data-id="7a0e017" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-78a4b4c elementor-widget elementor-widget-iheading" data-id="78a4b4c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">摘要</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bffb58d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bffb58d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bb45e01 ot-flex-column-vertical" data-id="bb45e01" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-04e5da0 elementor-widget elementor-widget-text-editor" data-id="04e5da0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在这篇文章中，我们已经了解了如何利用BERT进行更准确的文档排序。特别地，我们已经研究了能够推断查询-文档对的相关性分数的交叉编码器技术。此外，我们已经快速浏览了使用成对方法的相关性分类任务的模型微调。</p>
+<p class="translated">虽然实现简单，但基于变压器的模型非常强大。如果您打算尝试一下，请注意，训练一个transformer模型是一项对错误非常敏感的任务，它可能会导致失败。此外，在您非常熟悉这些工具之前，解释哪里出错并不容易。如果在第一次尝试时，你的模型不像预期的那样工作，不要放弃并认为它不适合你的数据，而是<a href="https://web.archive.org/web/20221130074157/https://sease.io/contacts">向专家</a>寻求帮助。</p>
+<p class="translated"><!-- wp:paragraph -->T3<!-- wp:paragraph -->T5<!-- wp:paragraph -->T7】</p>
+<p class="translated">最后，如果你有兴趣听到更多关于深度学习在搜索中的应用，请继续关注我们下一集的文档扩展。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-572fb874 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="572fb874" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5b5fc326 ot-flex-column-vertical" data-id="5b5fc326" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bf170de elementor-widget elementor-widget-iheading" data-id="bf170de" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-64175c11 elementor-widget elementor-widget-text-editor" data-id="64175c11" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20221130074157/https://sease.io/learning-to-rank-training">学习排名</a>和<a href="https://web.archive.org/web/20221130074157/https://sease.io/training/search-relevance-training/search-relevance-training-solr">搜索相关性</a>培训？<br/>我们还提供这些主题的咨询，<a href="https://web.archive.org/web/20221130074157/https://sease.io/contacts">如果您想让您的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9b4fcdd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9b4fcdd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-89a8aa0 ot-flex-column-vertical" data-id="89a8aa0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-47c831f elementor-widget elementor-widget-iheading" data-id="47c831f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-aa7cdfd elementor-widget elementor-widget-text-editor" data-id="aa7cdfd" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于使用BERT提高搜索相关性的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-f30054a elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="f30054a" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.11 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20221130074157/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1669794117"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

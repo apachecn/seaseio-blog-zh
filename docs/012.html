@@ -1,0 +1,194 @@
+<html>
+<head>
+<title>Give the height the right weight: quantities detection in Apache Solr</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">给身高一个合适的权重:Apache Solr中的数量检测</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2018/04/solr-quantity-detection-plugin.html#0001-01-01">https://web.archive.org/web/sease.io/2018/04/solr-quantity-detection-plugin.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-156db57 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="156db57" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2243d9a ot-flex-column-vertical" data-id="2243d9a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4e603af elementor-widget elementor-widget-iheading" data-id="4e603af" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">数量检测？什么是数量？为什么我们需要检测它？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d7b0f9a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d7b0f9a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-278263c ot-flex-column-vertical" data-id="278263c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6d96f63 elementor-widget elementor-widget-text-editor" data-id="6d96f63" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">马丁·福勒(Martin Fowler)在他的《分析模式》(Analysis Patterns)<a href="https://web.archive.org/web/20220929233733/https://martinfowler.com/books/ap.html" target="_blank" rel="noopener">【1】</a>中所描述的一个量，被定义为一个量和单位(如30升，0.25 cl，或140 cm)相结合的一对。在基于搜索的应用程序中，在许多情况下，您可能希望使用维度属性对可搜索数据集进行分类，因为这些数量在您所处理的业务环境中具有特殊的意义。我想到的第一个例子？</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-90c90e9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="90c90e9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bbbc3f0 ot-flex-column-vertical" data-id="bbbc3f0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-34d1903 elementor-widget elementor-widget-text-editor" data-id="34d1903" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="672" data-permalink="https://web.archive.org/web/20220929233733/https://sease.io/2018/04/solr-quantity-detection-plugin.html/aamabadgaagaaqaaaaaaaaxqaaaajdbkzdc4ywjkltmwnzqtndexny04mtbjlwm5mzhhowi2mdliyg" data-orig-file="https://web.archive.org/web/20220929233733/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMABADGAAgAAQAAAAAAAAxQAAAAJDBkZDc4YWJkLTMwNzQtNDExNy04MTBjLWM5MzhhOWI2MDliYg.jpg?fit=630%2C200&amp;ssl=1" data-orig-size="630,200" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="AAMABADGAAgAAQAAAAAAAAxQAAAAJDBkZDc4YWJkLTMwNzQtNDExNy04MTBjLWM5MzhhOWI2MDliYg" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220929233733/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMABADGAAgAAQAAAAAAAAxQAAAAJDBkZDc4YWJkLTMwNzQtNDExNy04MTBjLWM5MzhhOWI2MDliYg.jpg?fit=300%2C95&amp;ssl=1" data-large-file="https://web.archive.org/web/20220929233733/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMABADGAAgAAQAAAAAAAAxQAAAAJDBkZDc4YWJkLTMwNzQtNDExNy04MTBjLWM5MzhhOWI2MDliYg.jpg?fit=630%2C200&amp;ssl=1" loading="lazy" class="aligncenter wp-image-672" src="../Images/fd77f865e827b3540108d697fd8773be.png" alt="Apache Solr Quantity Detection Plugin" width="585" height="185" data-recalc-dims="1" srcset="https://web.archive.org/web/20220929233733im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMABADGAAgAAQAAAAAAAAxQAAAAJDBkZDc4YWJkLTMwNzQtNDExNy04MTBjLWM5MzhhOWI2MDliYg.jpg?w=630&amp;ssl=1 630w, https://web.archive.org/web/20220929233733im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMABADGAAgAAQAAAAAAAAxQAAAAJDBkZDc4YWJkLTMwNzQtNDExNy04MTBjLWM5MzhhOWI2MDliYg.jpg?resize=300%2C95&amp;ssl=1 300w" sizes="(max-width: 585px) 100vw, 585px" data-original-src="https://web.archive.org/web/20220929233733im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/04/AAMABADGAAgAAQAAAAAAAAxQAAAAJDBkZDc4YWJkLTMwNzQtNDExNy04MTBjLWM5MzhhOWI2MDliYg.jpg?resize=585%2C185&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c4abb89 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c4abb89" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ff71d30 ot-flex-column-vertical" data-id="ff71d30" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cedca1e elementor-widget elementor-widget-text-editor" data-id="cedca1e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">啤酒以多种容器(如罐、瓶)提供；每一种都有多种尺寸可供选择(例如25厘升、50厘升、75厘升或0.25升、0.50升、0.75升)。一个好的目录应该在专门的字段中捕获这些信息，比如“容器”(瓶子、罐子)和“容量”(上面例子中的25cl、50cl、75cl):这样搜索逻辑就可以正确地使用它们。分面(和随后的过滤)是一个很好的例子，说明了用户在执行了第一次搜索后可以做什么:他可以过滤和提炼结果，希望找到他想要的东西。</p><p class="translated">但是如果我们从用户交互的起点开始，根本没有结果:只有用户将要输入内容的空白文本字段。“某物”可以是任何东西，任何与他想找的产品相关的东西(在他的脑海中):品牌、容器类型、型号名称、数量。简而言之:代表他所寻找的产品的一个或多个相关特征的任何东西。</p><p class="translated">因此，在实现搜索逻辑时，主要的挑战之一是了解输入术语的含义。这通常是一个非常困难的话题，通常涉及复杂的东西(例如，机器学习)，但有时事情会向更容易的一面发展，特别是当我们想要检测的概念遵循一个共同的规则模式时:像一个量。</p><p class="translated">我们在Sease开发的数量检测插件<a href="https://web.archive.org/web/20220929233733/https://github.com/SeaseLtd/solr-quantities-detection-qparsers" target="_blank" rel="noopener">【2】</a>背后的主要思想如下:从用户输入的查询开始，首先，它检测数量(即金额和相应的单位)；然后，这些信息将从主查询中分离出来，并用于提升与这些数量相关的所有产品。这里的相关性可以有不同的含义:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-600e438 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="600e438" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-339ce95 ot-flex-column-vertical" data-id="339ce95" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cd52513 elementor-widget elementor-widget-text-editor" data-id="cd52513" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul><li style="list-style-type: none;"><ul><li class="translated"><strong>精确匹配</strong>:所有容量为25cl的瓶子</li><li class="translated"><strong>范围匹配</strong>:所有容量在50cl到75cl之间的瓶子。</li><li class="translated"><strong>等效精确匹配</strong>:所有容量为0.5升(1lt = 100cl)的瓶子</li><li class="translated"><strong>等效范围匹配</strong>:所有容量在0.5到1升之间的瓶子(1lt = 100cl)</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-820d0cc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="820d0cc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-139a599 ot-flex-column-vertical" data-id="139a599" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-da2a729 elementor-widget elementor-widget-text-editor" data-id="da2a729" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">以下是所有支持功能的简短描述:</p><ul><li style="list-style-type: none;"><ul><li class="translated"><strong>变体</strong>:一个单元可以有一个首选形式和(可选)几个变体。这可以包括相同单位的不同形式(例如，mt、meter)或不同公制中的等效单位(例如，cl、once)</li><li class="translated"><strong>当量</strong>:可以定义一个当量表，以便在运行时转换单位(“啤酒0.25升”与“啤酒25升”含义相同)。等价表用换算系数映射一个单位。</li><li class="translated"><strong>助推</strong>:每个单位可以有一个专用的助推，特别是对多个匹配单位的加权有用。</li><li class="translated"><strong>范围</strong>:每个单元可以有一个配置的间隙，触发范围查询，检测量可以在生成范围的中间(枢轴)、开始(最小)或结束(最大)</li><li class="translated"><strong>多字段</strong>:如果我们有多个属性使用相同的单位(如高度、宽度、深度)</li><li class="translated"><strong>假设</strong>:如果检测到“孤儿”金额(即没有单位的金额)，可以定义一个假设表，让Solr猜测单位。</li></ul></li></ul><p class="translated">请随意尝试，如果您认为它有用，请与我们分享您的想法和/或您的反馈。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b85e48d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b85e48d" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-59a96ae ot-flex-column-vertical" data-id="59a96ae" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-09750dd elementor-widget elementor-widget-iheading" data-id="09750dd" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-0ec7f6b elementor-widget elementor-widget-text-editor" data-id="0ec7f6b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20220929233733/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220929233733/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训？<br/>我们也提供这些主题的咨询，<a href="https://web.archive.org/web/20220929233733/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1f52385 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1f52385" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b47237b ot-flex-column-vertical" data-id="b47237b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6634ff9 elementor-widget elementor-widget-iheading" data-id="6634ff9" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-e71dce6 elementor-widget elementor-widget-text-editor" data-id="e71dce6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Apache Solr中数量检测的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-2facd55 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="2facd55" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929233733/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664494652"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

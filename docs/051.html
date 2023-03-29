@@ -1,0 +1,666 @@
+<html>
+<head>
+<title>Offline Search Quality Evaluation: Rated Ranking Evaluator (RRE)</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">离线搜索质量评估:分级评价员(RRE)</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2021/01/offline-search-quality-evaluation-rated-ranking-evaluator-rre.html#0001-01-01">https://web.archive.org/web/sease.io/2021/01/offline-search-quality-evaluation-rated-ranking-evaluator-rre.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-25881ac ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="25881ac" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-00da107 ot-flex-column-vertical" data-id="00da107" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4f1b4fc elementor-widget elementor-widget-iheading" data-id="4f1b4fc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">介绍</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a5084cb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a5084cb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cfb4ae1 ot-flex-column-vertical" data-id="cfb4ae1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6feeae0 elementor-widget elementor-widget-text-editor" data-id="6feeae0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">随着<a href="https://web.archive.org/web/20220929231153/https://sease.io/2019/12/road-to-rated-ranking-evaluator-enterprise.html">Rated Ranking Evaluator Enterprise</a>即将推出，我们借此机会详细解释为什么离线搜索质量评估在当今如此重要，以及您已经可以使用Rated Ranking Evaluator开源库做些什么。<br/>随着V1发布日期的临近，更多的消息将会很快到来。<br/>敬请期待！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0f30bae ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0f30bae" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e40ed24 ot-flex-column-vertical" data-id="e40ed24" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4ad30f3 elementor-widget elementor-widget-iheading" data-id="4ad30f3" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">搜索质量评估</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d727e13 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d727e13" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2b969d5 ot-flex-column-vertical" data-id="2b969d5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b190049 elementor-widget elementor-widget-text-editor" data-id="b190049" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div class="page" title="Page 1"><div class="layoutArea"><div class="column"><p class="translated">评估是每一项科学发展的基础。<br/>科学家提出假设来模拟现实世界的现象，并通过将它们的输出与自然界的观察结果进行比较来验证它们。</p><p class="translated">评价在信息检索领域起着非常关键的作用。<br/>研究人员和实践者开发排名模型来解释用户表达的信息需求<strong>(查询)</strong>和包含在可用资源<strong>(语料库)</strong>中的信息<strong>(搜索结果)</strong>之间的关系，并通过将它们的结果与一组观察结果<strong>(隐式/显式用户反馈)</strong>进行比较来测试这些模型。</p><p class="translated">搜索质量有多种解释，但是，本博客只关注其中一种:搜索系统找到与用户相关的信息的有效性<strong>(搜索相关性)</strong>。</p><div class="page" title="Page 1"><div class="layoutArea"><div class="column"><p class="translated">有两种类型的观察用于评估目的:<br/> <strong> (a)显式反馈</strong>(相关性注释)，以及<strong> (b)隐式反馈</strong>(可观察的用户交互)。</p></div></div></div></div></div></div><p class="translated">大多数情况下，对信息检索系统的评估是在离线和/或在线的情况下进行的，一个或多个利益相关者运行一组不可重复的查询，并根据当时的感觉(以后可能会改变)评估搜索结果。</p><p class="translated">有必要在这个过程中引入科学的结构:</p><ul><li style="list-style-type: none;"><ul><li class="translated">收集基本事实观察<strong>(来自隐式/显式反馈的评级)</strong></li><li class="translated">针对搜索系统运行有限且明确定义的相应查询列表</li><li class="translated">将结果与<strong>基本事实</strong>进行比较，探索不同的<strong>搜索质量指标</strong></li></ul></li></ul><p class="translated">这必须是<strong>可再现的、</strong>持久的和<strong>可解释的</strong>。</p><p class="translated">下面是<strong>评级评估员</strong>(以下简称<strong> RRE </strong>)基于<strong> Apache Lucene </strong>的搜索引擎<strong> Apache Solr </strong>和<strong> Elasticsearch </strong>的<strong>离线搜索质量评估库</strong></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8913328 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8913328" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2a00b6f ot-flex-column-vertical" data-id="2a00b6f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0052fb5 elementor-widget elementor-widget-iheading" data-id="0052fb5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">这是什么？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5229b42 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5229b42" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-15c2fcd ot-flex-column-vertical" data-id="15c2fcd" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1b2822b elementor-widget elementor-widget-text-editor" data-id="1b2822b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><a href="https://web.archive.org/web/20220929231153/https://github.com/SeaseLtd/rated-ranking-evaluator" target="_blank" rel="noopener noreferrer">Rated rank Evaluator(RRE)</a>是一个搜索质量评估库，用于评估来自搜索系统的结果的质量。</p><p class="translated">它帮助搜索工程师和商业利益相关者:</p><ul><li style="list-style-type: none;"><ul><li class="translated">您是否正在调整/实施/更改/配置搜索基础架构？</li><li class="translated">你想要从你最近的改变中得到改进的证据吗？</li></ul></li></ul><p class="translated">RRE会帮你的。</p><p class="translated">RRE在“技术”层面上正式确定了搜索系统满足用户信息需求的程度，结合了表达基本事实评级的可能性和用几个评估指标评估搜索系统质量。<br/> RRE提供人类可读的输出，对非技术利益相关者也很有用。</p><p class="translated">在搜索系统的开发和发展过程中，它鼓励一种<strong>增量</strong> / <strong>迭代</strong> / <strong>可重复</strong>的方法:假设我们从x.y版本开始我们的系统:当需要对它的配置应用一些相关的更改时，新版本被单独评估(源代码控制在这里有助于跟踪发展的配置文件)。</p><p class="translated">RRE对input中的所有搜索系统版本执行评估过程，并提供它们之间的差值/趋势，因此您可以立即发现您感兴趣的指标中的改进或退步。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6e283e3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6e283e3" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7386595 ot-flex-column-vertical" data-id="7386595" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bb83fb4 elementor-widget elementor-widget-iheading" data-id="bb83fb4" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">投入</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dfa466b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dfa466b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-22d7d04 ot-flex-column-vertical" data-id="22d7d04" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6e62752 elementor-widget elementor-widget-text-editor" data-id="6e62752" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">为了执行评估，RRE需要以下东西:</p><p> </p><ul><li style="list-style-type: none;"><ul><li class="translated">一个或多个<a href="https://web.archive.org/web/20220929231153/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/What%20We%20Need%20To%20Provide#corpus" target="_blank" rel="noopener noreferrer"> <strong>语料库</strong> / <strong>测试集</strong> </a>:这些是特定领域的代表性数据集，将用于填充和查询目标搜索平台</li><li class="translated">一个或多个<a href="https://web.archive.org/web/20220929231153/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/What%20We%20Need%20To%20Provide#configuration-sets" target="_blank" rel="noopener noreferrer"> <strong>配置集</strong> </a>:管理目标搜索引擎的Apache Solr/Elasticsearch配置。</li><li class="translated">一个或多个<a href="https://web.archive.org/web/20220929231153/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/What%20We%20Need%20To%20Provide#ratings" target="_blank" rel="noopener noreferrer"> <strong>评级集</strong> </a>:地面真相、&lt;查询列表、关联到相关性评级的文档&gt;对</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-70877a8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="70877a8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-eccaeb3 ot-flex-column-vertical" data-id="eccaeb3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3b1f734 elementor-widget elementor-widget-iheading" data-id="3b1f734" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">基本事实定义(评级)</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-178fb84 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="178fb84" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a93752a ot-flex-column-vertical" data-id="a93752a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-58ef85c elementor-widget elementor-widget-text-editor" data-id="58ef85c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">首先，您需要定义您的基本事实:<br/> <strong> &lt;查询，标记有<strong>相关性标签</strong>的文档&gt; </strong>对，该标签说明文档与给定查询的相关性。</p><p class="translated">评级文件以JSON格式提供，是RRE的核心输入。<br/>每个评级文件都是一组结构化的<strong> &lt;查询、文档&gt; </strong>对(即给定查询的相关文档)。</p><p class="translated">在收视率文件中，我们可以定义RRE支持的各方面的信息需求:<strong>语料库</strong>，<strong>主题</strong>，<strong>查询组</strong>，以及<strong>查询</strong>。</p><p class="translated">当前实施使用可配置的判断范围:</p><p class="translated">例如</p><ul><li style="list-style-type: none;"><ul><li class="translated">1 = &gt;勉强相关</li><li class="translated">2 = &gt;相关</li><li class="translated">3 = &gt;非常相关</li></ul></li></ul><p class="translated">在“relevant_documents”节点中，您可以通过以下方式之一提供判断:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bd6b9ba ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bd6b9ba" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4006b3f ot-flex-column-vertical" data-id="4006b3f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-dad5ca4 elementor-widget elementor-widget-text-editor" data-id="dad5ca4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><pre>"relevant_documents": {
+   "docid1": {
+       "gain": 2
+   }, 
+   "docid2": {
+       "gain": 2
+   }, 
+   "docid3": {
+       "gain": 3
+   }, 
+   "docid5": {
+       "gain": 2
+   }, 
+   "docid99": {
+       "gain": 3
+   }
+}</pre></div><div><pre>"relevant_documents": {
+   "2": ["docid1", "docid2", "docid5"],
+   "3": ["docid3", "docid99"]   
+}</pre></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dc205e8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dc205e8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cf29591 ot-flex-column-vertical" data-id="cf29591" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ce67adb elementor-widget elementor-widget-text-editor" data-id="ce67adb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">请注意，如果某个文档与给定的查询不相关，它不会出现在相关列表中。换句话说，没有“0”判断值。</p><p class="translated">评级文件的更完整示例:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fb2039e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fb2039e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0f5cd13 ot-flex-column-vertical" data-id="0f5cd13" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-021a35e elementor-widget elementor-widget-text-editor" data-id="021a35e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><pre>{
+  "index": "&lt;string&gt;",
+  "corpora_field": "&lt;string&gt;",
+  "id_field": "&lt;string&gt;",
+  "topics": [
+    {
+      "description": "&lt;string&gt;",
+      "query_groups": [
+        {
+          "name": "&lt;string&gt;",
+          "queries": [
+            {
+              "template": "&lt;string&gt;",
+              "placeholders": {
+                "$key": "&lt;value&gt;",
+              }
+            }
+          ],
+          "relevant_documents": [
+            {
+              "document_id": {
+                "gain": "&lt;number&gt;"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "query_groups": [
+    {
+      "name": "&lt;string&gt;",
+      "queries": [
+        {
+          "template": "&lt;string&gt;",
+          "placeholders": {
+            "$key": "&lt;value&gt;",
+          }
+        }
+      ],
+      "relevant_documents": [
+        {
+          "document_id": {
+            "gain": "&lt;number&gt;"
+          }
+        }
+      ]
+    }
+  ],
+  "queries": [
+    {
+      "template": "&lt;string&gt;",
+      "placeholders": {
+        "$key": "&lt;value&gt;",
+      }
+    }
+  ]
+}</pre></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-82857e1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="82857e1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5c8d113 ot-flex-column-vertical" data-id="5c8d113" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-88f9697 elementor-widget elementor-widget-text-editor" data-id="88f9697" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul><li style="list-style-type: none;"><ul><li class="translated"><code>index</code>:弹性搜索中的索引名Solr中的集合名</li><li class="translated"><code>corpora_field</code>:外部Solr/ElasticSearch不需要，对应于语料库文件名</li><li class="translated"><code>id_field</code>:模式中代表文档ID的字段</li><li class="translated"><code>topics</code>:主题和/或查询组的可选列表<ul><li class="translated"><code>description</code>:报告输出中使用的主题标题</li><li class="translated"><code>query_groups</code>:以相同名称和主题分组的查询列表<ul><li class="translated"><code>name</code>:用于报告的查询名称</li><li class="translated"><code>queries</code>:针对主题执行的查询列表<ul><li class="translated"><code>template</code>:该查询使用的模板的字符串名称</li><li class="translated">占位符:模板中要替换的键值对的对象</li></ul></li></ul></li><li class="translated"><code>relevant_documents</code>:列出带有映射文档的对象，以获得或关联值</li></ul></li><li class="translated"><code>query_groups</code>:带有相关查询的对象列表。可以存在于<code>topics</code>之外，是可选的</li><li class="translated"><code>queries</code>:必选*用于评估的模板和占位符替换的对象列表。<ul><li class="translated">*如果<code>topics</code>和<code>query_groups</code>不存在</li></ul></li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2f95141 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2f95141" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1734307 ot-flex-column-vertical" data-id="1734307" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-419158b elementor-widget elementor-widget-iheading" data-id="419158b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">查询模板</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b9b6ce0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b9b6ce0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-08938ac ot-flex-column-vertical" data-id="08938ac" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-249fc52 elementor-widget elementor-widget-text-editor" data-id="249fc52" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">对于每个查询(或每个查询组)，可以定义一个查询模板，它是包含一个或多个占位符的查询的定义。然后，在评级文件中，您可以引用其中一个已定义的模板，并为每个占位符提供一个值。<br/>引入模板是为了:</p><ul><li style="list-style-type: none;"><ul><li class="translated">允许搜索平台之间的通用查询管理</li><li class="translated">定义复杂查询</li><li class="translated">定义不能静态确定的运行时参数(如过滤器)</li></ul></li></ul><p class="translated">在下图中你可以看到三个例子:前两个是Solr查询的例子，而第三个是使用Elasticsearch。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-198dffe ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="198dffe" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-50ac45d ot-flex-column-vertical" data-id="50ac45d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6f111e4 elementor-widget elementor-widget-text-editor" data-id="6f111e4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img src="../Images/563976f8897cf58e5873008c56f080be.png" alt="query_templates" data-recalc-dims="1" data-original-src="https://web.archive.org/web/20220929231153im_/https://i0.wp.com/user-images.githubusercontent.com/7569632/42095548-38ffb2ba-7bb3-11e8-9d0a-36c74cd4f954.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e114807 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e114807" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a1fa40d ot-flex-column-vertical" data-id="a1fa40d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4bce081 elementor-widget elementor-widget-text-editor" data-id="4bce081" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">您还可以创建多个版本文件夹(1.0版、1.1版、1.2版等)，并在这些文件夹中保存不同的查询模板版本。这将为每个查询模板版本运行评估，并允许您轻松地比较查询模板的更改。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d49914e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d49914e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bfa2dbf ot-flex-column-vertical" data-id="bfa2dbf" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b0cf06d elementor-widget elementor-widget-iheading" data-id="b0cf06d" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">搜索引擎配置/外部搜索引擎</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-42b566a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="42b566a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-63f21be ot-flex-column-vertical" data-id="63f21be" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f74a97a elementor-widget elementor-widget-text-editor" data-id="f74a97a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">一旦定义了基本事实，就有可能为评估定义一个目标搜索系统。<br/>RRE的开源版本支持<strong>嵌入一个搜索实例</strong>(来自配置文件)和一个<strong>外部运行实例</strong>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ca19a7b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ca19a7b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ec9283c ot-flex-column-vertical" data-id="ec9283c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5cbc30f elementor-widget elementor-widget-iheading" data-id="5cbc30f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">配置集</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4481bdc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4481bdc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5b02e80 ot-flex-column-vertical" data-id="5b02e80" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-601726f elementor-widget elementor-widget-text-editor" data-id="601726f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">RRE鼓励一种可重复的方法:跟踪你的版本，并清楚地给你的每个版本分配一个不可变的标签。通过这种方式，我们将结束我们系统的历史进程，RRE将能够进行比较并重现评估。<br/>配置集的实际内容实际上取决于目标搜索平台。对于Apache Solr，每个版本文件夹(见下图)包含一个或多个Solr核心。相反，Elasticsearch包含一个JSON文件(下图中的“index-shape.json ”),该文件包含索引设置&amp;映射。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6c91a7f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6c91a7f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ed57fc6 ot-flex-column-vertical" data-id="ed57fc6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d2e818a elementor-widget elementor-widget-text-editor" data-id="d2e818a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img src="../Images/47d91522e72e694a8132bd89b0d3ee6c.png" alt="configuration_sets" data-recalc-dims="1" data-original-src="https://web.archive.org/web/20220929231153im_/https://i0.wp.com/user-images.githubusercontent.com/7569632/42095032-cccc6d64-7bb1-11e8-8523-42fa33f1f9e0.png?ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8ae36a9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8ae36a9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-195e97e ot-flex-column-vertical" data-id="195e97e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b8e14e5 elementor-widget elementor-widget-iheading" data-id="b8e14e5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">执行</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f05774a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f05774a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b28a133 ot-flex-column-vertical" data-id="b28a133" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-220ef6c elementor-widget elementor-widget-text-editor" data-id="220ef6c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">运行RRE评估的最佳方式是使用maven插件，建立一个maven项目来导入RRE库并执行它们。<br/>详细的分步指南在此链接:<br/> <a href="https://web.archive.org/web/20220929231153/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/Maven%20Archetype">运行您的评估！</a></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-388ab64 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="388ab64" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2b593c1 ot-flex-column-vertical" data-id="2b593c1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-312c6e4 elementor-widget elementor-widget-iheading" data-id="312c6e4" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">输出</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0e5e344 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0e5e344" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-254bd3c ot-flex-column-vertical" data-id="254bd3c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7bd510a elementor-widget elementor-widget-text-editor" data-id="7bd510a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><span style="font-size: inherit;">输出评估数据可用:</span></p><ul><li class="translated">作为一个<strong> JSON文件</strong>:用于进一步阐述</li><li class="translated">作为<strong>电子表格</strong>:用于将评估结果交付给其他人(如商业利益相关者)</li><li class="translated">在一个<a href="https://web.archive.org/web/20220929231153/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/RRE%20Server" target="_blank" rel="noopener noreferrer"> <strong> Web控制台</strong> </a>中，度量及其值被实时刷新(在每次构建之后)</li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a783604 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a783604" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0983989 ot-flex-column-vertical" data-id="0983989" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-32ed753 elementor-widget elementor-widget-text-editor" data-id="32ed753" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="902" data-permalink="https://web.archive.org/web/20220929231153/https://sease.io/2018/07/rated-ranking-evaluator.html/rre-spreadsheet" data-orig-file="https://web.archive.org/web/20220929231153/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?fit=1958%2C414&amp;ssl=1" data-orig-size="1958,414" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="rre-spreadsheet" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220929231153/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?fit=300%2C63&amp;ssl=1" data-large-file="https://web.archive.org/web/20220929231153/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?fit=1024%2C217&amp;ssl=1" loading="lazy" class="alignnone wp-image-902" src="../Images/cb040a0da353767db738adfedbe98da3.png" alt="" width="600" height="126" data-recalc-dims="1" srcset="https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?w=1958&amp;ssl=1 1958w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=300%2C63&amp;ssl=1 300w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=768%2C162&amp;ssl=1 768w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=1024%2C217&amp;ssl=1 1024w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=1080%2C228&amp;ssl=1 1080w" sizes="(max-width: 600px) 100vw, 600px" data-original-src="https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=600%2C126&amp;ssl=1"/></p><p class="translated"><img data-attachment-id="891" data-permalink="https://web.archive.org/web/20220929231153/https://sease.io/2018/07/rated-ranking-evaluator.html/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192" data-orig-file="https://web.archive.org/web/20220929231153/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=2546%2C1137&amp;ssl=1" data-orig-size="2546,1137" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="42096917-edefdd50-7bb6-11e8-9d1a-21356b453192" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220929231153/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=300%2C134&amp;ssl=1" data-large-file="https://web.archive.org/web/20220929231153/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=1024%2C457&amp;ssl=1" loading="lazy" class="alignnone wp-image-891" src="../Images/879e4d05d1dc4a69ceb27da09397193f.png" alt="offline search quality evaluation" width="598" height="267" data-recalc-dims="1" srcset="https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?w=2546&amp;ssl=1 2546w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=300%2C134&amp;ssl=1 300w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=768%2C343&amp;ssl=1 768w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=1024%2C457&amp;ssl=1 1024w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=1080%2C482&amp;ssl=1 1080w, https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?w=2000&amp;ssl=1 2000w" sizes="(max-width: 598px) 100vw, 598px" data-original-src="https://web.archive.org/web/20220929231153im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=598%2C267&amp;ssl=1"/></p><h6> </h6><h6> </h6><h6 class="translated">链接</h6><ul><li class="translated">项目<a href="https://web.archive.org/web/20220929231153/https://github.com/SeaseLtd/rated-ranking-evaluator" target="_blank" rel="noopener noreferrer">储存库</a></li><li class="translated">项目<a href="https://web.archive.org/web/20220929231153/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki" target="_blank" rel="noopener noreferrer">维基</a></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4940befc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4940befc" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-31c7c195 ot-flex-column-vertical" data-id="31c7c195" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5828fdd3 elementor-widget elementor-widget-iheading" data-id="5828fdd3" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-6b6b2ca0 elementor-widget elementor-widget-text-editor" data-id="6b6b2ca0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220929231153/https://sease.io/training/search-quality-evaluation-trainings/search-quality-evaluation-training">搜索质量评估</a>和<a href="https://web.archive.org/web/20220929231153/https://sease.io/training/search-relevance-training/search-relevance-training-solr">搜索相关性</a>培训吗？<br/>我们还提供这些主题的咨询，<a href="https://web.archive.org/web/20220929231153/https://sease.io/contacts">如果您想让您的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-26359c6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="26359c6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-315c68e ot-flex-column-vertical" data-id="315c68e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b2ec414 elementor-widget elementor-widget-iheading" data-id="b2ec414" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-badf987 elementor-widget elementor-widget-text-editor" data-id="badf987" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div class="elementor-element elementor-element-374409a elementor-widget elementor-widget-text-editor" data-id="374409a" data-element_type="widget" data-widget_type="text-editor.default"><div class="elementor-widget-container"><div class="elementor-text-editor elementor-clearfix"><p class="translated">你喜欢这篇关于离线搜索质量评估的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p></div></div></div><div class="elementor-element elementor-element-5bd6e23 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="5bd6e23" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default"><div class="elementor-widget-container"><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields"> </div></form></div></div>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-f242e3f elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="f242e3f" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929231153/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664493113"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

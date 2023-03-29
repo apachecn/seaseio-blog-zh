@@ -1,0 +1,985 @@
+<html>
+<head>
+<title>Elasticsearch Neural Search Tutorial (Platinum/Enterprise)</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">Elasticsearch神经搜索教程(白金级/企业级)</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2023/03/elasticsearch-neural-search-tutorial-platinum-enterprise.html#0001-01-01">https://web.archive.org/web/sease.io/2023/03/elasticsearch-neural-search-tutorial-platinum-enterprise.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-3b2fdca ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3b2fdca" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c81fb43 ot-flex-column-vertical" data-id="c81fb43" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b2e1876 elementor-widget elementor-widget-text-editor" data-id="b2e1876" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">正如在关于Elasticsearch 中的<a href="https://web.archive.org/web/20230316140007/https://sease.io/2023/03/elasticsearch-neural-search-tutorial.html">神经搜索的博文中已经提到的，Elastic 8.0允许用户使用自定义或第三方语言模型(在PyTorch中开发)直接在Elasticsearch中执行推理，但需要白金或企业订阅才能体验完整的机器学习功能。</a></p>
+<p class="has-text-align-justify translated">如果您有基本(免费和开放)订阅，Elasticsearch让您能够在有限的时间内尝试自然语言处理任务(带试用)。</p>
+<p class="translated">这篇博文以一种非常简单的方式解释了<strong>在Elasticsearch </strong>中直接实现文本嵌入和矢量搜索所需的所有步骤。</p>
+<p class="translated">本教程使用了<strong> cURL命令</strong>，Kibana的安装不是强制性的。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-81c67bf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="81c67bf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5e289ad ot-flex-column-vertical" data-id="5e289ad" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e3aed38 elementor-widget elementor-widget-iheading" data-id="e3aed38" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">神经搜索管道</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-6a0acb2 elementor-widget elementor-widget-text-editor" data-id="6a0acb2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">以下只是一个示意图，用于轻松展示如何将矢量搜索集成到Elasticsearch中:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b6b63ba elementor-widget elementor-widget-image" data-id="b6b63ba" data-element_type="widget" data-widget_type="image.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-image">
+												<img data-attachment-id="55912" data-permalink="https://web.archive.org/web/20230316140007/https://sease.io/2023/03/elasticsearch-neural-search-tutorial.html/schermata-2022-12-26-alle-15-16-24" data-orig-file="https://web.archive.org/web/20230316140007/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?fit=2532%2C814&amp;ssl=1" data-orig-size="2532,814" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Schermata-2022-12-26-alle-15.16.24" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20230316140007/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?fit=300%2C96&amp;ssl=1" data-large-file="https://web.archive.org/web/20230316140007/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?fit=1024%2C329&amp;ssl=1" decoding="async" width="1024" height="329" src="../Images/41b84e31fd726f3ce937fc37f7ac417a.png" class="attachment-large size-large wp-image-55912" alt="" loading="lazy" srcset="https://web.archive.org/web/20230316140007im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?w=2532&amp;ssl=1 2532w, https://web.archive.org/web/20230316140007im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?resize=300%2C96&amp;ssl=1 300w, https://web.archive.org/web/20230316140007im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?resize=1024%2C329&amp;ssl=1 1024w, https://web.archive.org/web/20230316140007im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?resize=768%2C247&amp;ssl=1 768w, https://web.archive.org/web/20230316140007im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?resize=1536%2C494&amp;ssl=1 1536w, https://web.archive.org/web/20230316140007im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?resize=2048%2C658&amp;ssl=1 2048w, https://web.archive.org/web/20230316140007im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?resize=720%2C231&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20230316140007im_/https://i0.wp.com/sease.io/wp-content/uploads/2022/12/Schermata-2022-12-26-alle-15.16.24.png?fit=1024%2C329&amp;ssl=1"/>														</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-88ffd81 elementor-widget elementor-widget-text-editor" data-id="88ffd81" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">您必须在Elastic之外执行您的模型开发，然后您可以轻松地导入它；如果你不想担心模型训练，Elasticsearch提供了从公共库(拥抱脸、PyTorch等)导入现成模型的可能性。)借助<a href="https://web.archive.org/web/20230316140007/https://pypi.org/project/eland/"> Eland </a>库。<br/>您可以接收数据集，并即时应用导入的模型来执行推理和向量化数据。<br/>您可以接受传入的查询(也由模型编码)，然后使用相似性度量(内部利用HNSW数据结构)来排列和返回最佳搜索结果，并改善用户的搜索体验。</p>
+<p class="has-text-align-justify translated">在这个简短的描述之后，这里是在Elasticsearch中实现神经搜索的端到端管道:</p>
+<ol>
+<li class="translated"><a href="#download">下载Elasticsearch </a></li>
+<li class="translated"><a href="#start">开始免费试用</a></li>
+<li class="translated"><a href="#deploy">部署文本嵌入模型</a></li>
+<li class="translated"><a href="#createindex">创建弹性搜索指数</a></li>
+<li class="translated"><a href="#createtext">创建文本嵌入摄取管道</a></li>
+<li class="translated"><a href="#index">索引文件</a></li>
+<li class="translated"><a href="#search">利用矢量场进行搜索</a></li>
+</ol>
+<p class="translated">让我们开始探索每一部分吧！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c232689 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c232689" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2f9b88c ot-flex-column-vertical" data-id="2f9b88c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-06941f4 elementor-hidden-tablet elementor-hidden-mobile elementor-widget elementor-widget-spacer" data-id="06941f4" data-element_type="widget" id="download" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-610e7d2 elementor-widget elementor-widget-iheading" data-id="610e7d2" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">1.下载Elasticsearch</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-8391f2b elementor-widget elementor-widget-text-editor" data-id="8391f2b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果你已经阅读了这篇文章的第一部分，你应该已经在你的系统上安装了Elasticsearch。如果没有，请参考该教程的<a href="https://web.archive.org/web/20230316140007/https://sease.io/wp-admin/post.php?post=55826&amp;action=edit">下载部分</a>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ab30f79 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ab30f79" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-18ced0a ot-flex-column-vertical" data-id="18ced0a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0722216 elementor-hidden-tablet elementor-hidden-mobile elementor-widget elementor-widget-spacer" data-id="0722216" data-element_type="widget" id="start" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-da241d8 elementor-widget elementor-widget-iheading" data-id="da241d8" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">2.开始免费试用</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-d2eef81 elementor-widget elementor-widget-text-editor" data-id="d2eef81" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">为了使用Elasticsearch (es)内置的NLP功能，您必须拥有白金或企业许可证，否则，ES将提供30天免费试用<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/guide/en/elasticsearch/reference/current/start-trial.html">来访问(和探索)所有订阅功能</a>。</p>
+<p class="translated">下面是开始试验的命令:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-6d5224b elementor-widget elementor-widget-text-editor" data-id="6d5224b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl -XPOST http://localhost:9200/_license/start_trial?acknowledge=true</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-9e03dae elementor-widget elementor-widget-iheading" data-id="9e03dae" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-886c03c elementor-widget elementor-widget-text-editor" data-id="886c03c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>{
+	"acknowledged": true,
+	"trial_was_started": true,
+	"type": "trial"
+}</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-941af84 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="941af84" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a9dc214 ot-flex-column-vertical" data-id="a9dc214" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b01a591 elementor-hidden-tablet elementor-hidden-mobile elementor-widget elementor-widget-spacer" data-id="b01a591" data-element_type="widget" id="deploy" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-4384deb elementor-widget elementor-widget-iheading" data-id="4384deb" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">3.部署文本嵌入模型</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-4aab0d7 elementor-widget elementor-widget-text-editor" data-id="4aab0d7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">必须<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-deploy-models.html">导入并部署</a>一个经过适当训练的模型，以便在集群中执行文本嵌入任务。</p>
+<p class="has-text-align-justify translated">正如在其他教程中一样，我们使用了来自拥抱脸的预训练模型，这种语言模型称为<strong><a href="https://web.archive.org/web/20230316140007/https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a></strong>(<em>BERT</em>)，它将句子映射到384维的密集向量空间。</p>
+<p class="has-text-align-justify translated">在ES中导入模型，可以使用<strong> <a href="https://web.archive.org/web/20230316140007/https://github.com/elastic/eland"> Eland库</a></strong>(elastic search中机器学习的Python客户端)。<br/>首先要做的是打开终端并安装Eland Python客户端(带有PyTorch额外的依赖项):</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-3e22984 elementor-widget elementor-widget-text-editor" data-id="3e22984" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted">python -m pip install 'eland[pytorch]'</pre>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-de73a93 elementor-widget elementor-widget-text-editor" data-id="de73a93" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">安装后，下面是运行<code>eland_import_hub_model</code> <a href="https://web.archive.org/web/20230316140007/https://github.com/elastic/eland/blob/main/bin/eland_import_hub_model">脚本</a>的命令:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b8c92e5 elementor-widget elementor-widget-iheading" data-id="b8c92e5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>REQUEST</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-8f36a18 elementor-widget elementor-widget-text-editor" data-id="8f36a18" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>eland_import_hub_model --url http://localhost:9200/ --hub-model-id sentence-transformers/all-MiniLM-L6-v2 --task-type text_embedding --start</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a0e09fb elementor-widget elementor-widget-text-editor" data-id="a0e09fb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">此脚本将从拥抱脸模型中心复制一个模型到Elasticsearch集群中；事实上，我们已经定义了:<br/> <strong> <code>--url</code> : </strong>你的Elasticsearch集群的URL<strong><br/><code>--hub-model-id</code>:</strong>拥抱脸模型的标识符<strong><br/><code>--task-type</code>:</strong>NLP任务的类型，文本嵌入在我们的案例中<strong><br/><code>--start</code></strong>:elastic search将模型部署到所有可用的机器学习节点，并将模型加载到内存中</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-46dd021 elementor-widget elementor-widget-iheading" data-id="46dd021" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-b5e9fff elementor-widget elementor-widget-text-editor" data-id="b5e9fff" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>INFO : Establishing connection to Elasticsearch
+INFO : Connected to cluster named 'elasticsearch' (version: 8.5.3)
+INFO : Loading HuggingFace transformer tokenizer and model 'sentence-transformers/all-MiniLM-L6-v2'
+INFO : Creating model with id 'sentence-transformers__all-minilm-l6-v2'
+INFO : Uploading model definition
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████| 22/22 [00:04&lt;00:00,  5.34 parts/s]
+INFO : Uploading model vocabulary
+INFO : Starting model deployment
+INFO : Model successfully imported with id 'sentence-transformers__all-minilm-l6-v2'</code></pre>
+<!-- /wp:code -->
+					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-be9d909 elementor-widget elementor-widget-text-editor" data-id="be9d909" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">从响应中，您可以很容易地看到模型被成功导入，但是您也可以使用这个API来检查模型统计信息:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a0ddd54 elementor-widget elementor-widget-text-editor" data-id="a0ddd54" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl -XGET http://localhost:9200/_ml/trained_models/_stats</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-83ddd55 elementor-widget elementor-widget-iheading" data-id="83ddd55" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>RESPONSE</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-b0bb9a3 elementor-widget elementor-widget-text-editor" data-id="b0bb9a3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>{
+	"count": 2,
+	"trained_model_stats": [{
+		"model_id": "lang_ident_model_1",
+		"model_size_stats": {
+			"model_size_bytes": 1053992,
+			"required_native_memory_bytes": 0
+		},
+		"pipeline_count": 0
+	}, {
+		<strong>"model_id": "sentence-transformers__all-minilm-l6-v2"</strong>,
+		"model_size_stats": {
+			"model_size_bytes": 90303761,
+			"required_native_memory_bytes": 432265762
+		},
+		...,
+				<strong>"routing_state": {
+					"routing_state": "started"</strong>
+				},
+                                ...
+			}]
+		}
+	}]
+}</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a5aa5b2 elementor-widget elementor-widget-text-editor" data-id="a5aa5b2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated"><code>lang_ident_model_1</code>是一个内置模型(用于执行语言识别)，已经在集群中提供。</p>
+<p class="has-text-align-justify translated">为了便于阅读，我们减少了“我们的”模型的响应主体，但是如果您对此感兴趣<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/guide/en/elasticsearch/reference/8.5/get-trained-models-stats.html">在这里</a>您可以找到更多细节。<br/> <code>"routing_state": "started"</code>表示模型被分配，准备接受推理请求。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e2c10b1 elementor-widget elementor-widget-iheading" data-id="e2c10b1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">其他请求:</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-7a562cf elementor-widget elementor-widget-text-editor" data-id="7a562cf" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">向<span style="color: #993366;"> <strong>开始</strong> </span>一个训练有素的模型部署:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7d68a5f elementor-widget elementor-widget-text-editor" data-id="7d68a5f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl -XPOST http://localhost:9200/_ml/trained_models/sentence-transformers__all-minilm-l6-v2/deployment/<strong>_start</strong></code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-e084de5 elementor-widget elementor-widget-text-editor" data-id="e084de5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><span style="color: #993366;">到<strong>停止</strong>到</span>一个训练好的模型部署:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-9f77c4e elementor-widget elementor-widget-text-editor" data-id="9f77c4e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl -XPOST http://localhost:9200/_ml/trained_models/sentence-transformers__all-minilm-l6-v2/deployment/<strong>_stop</strong></code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b5b7541 elementor-widget elementor-widget-text-editor" data-id="b5b7541" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">对<span style="color: #993366;"> <strong>删除</strong> </span>一个训练好的模型:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-19a0843 elementor-widget elementor-widget-text-editor" data-id="19a0843" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl -XDELETE http://localhost:9200/_ml/trained_models/sentence-transformers__all-minilm-l6-v2</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-41c5f7b elementor-widget elementor-widget-iheading" data-id="41c5f7b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">替代方式:</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-d813f23 elementor-widget elementor-widget-text-editor" data-id="d813f23" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">用Eland在Elasticsearch中导入模型的另一种方法是使用下面的Python脚本(也可以在我们的<a href="https://web.archive.org/web/20230316140007/https://github.com/SeaseLtd/vector-search-elastic-tutorial/blob/main/nlp_models/import_model.py"> GitHub项目</a>中找到):</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-0d91fea elementor-widget elementor-widget-text-editor" data-id="0d91fea" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>import elasticsearch
+from pathlib import Path
+from eland.ml.pytorch import PyTorchModel
+from eland.ml.pytorch.transformers import TransformerModel
+
+# Elastic configuration.
+ELASTIC_ADDRESS = "http://localhost:9200"
+
+def main():
+        # Load a Hugging Face transformers model directly from the model hub
+        tm = TransformerModel("sentence-transformers/all-MiniLM-L6-v2", "text_embedding")
+
+        # Export the model in a TorchScript representation which Elasticsearch uses
+        tmp_path = "models"
+        Path(tmp_path).mkdir(parents=True, exist_ok=True)
+        model_path, config, vocab_path = tm.save(tmp_path)
+
+        # Import model into Elasticsearch
+        client = elasticsearch.Elasticsearch(hosts=[ELASTIC_ADDRESS])
+        ptm = PyTorchModel(client, tm.elasticsearch_model_id())
+        ptm.import_model(model_path=model_path, config_path=None, vocab_path=vocab_path, config=config)
+
+if __name__ == "__main__":
+    main()</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-9b37e64 elementor-widget elementor-widget-text-editor" data-id="9b37e64" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我们使用以下命令执行该脚本:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-6ab1e00 elementor-widget elementor-widget-text-editor" data-id="6ab1e00" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>python import_model.py</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-bbdbe69 elementor-widget elementor-widget-text-editor" data-id="bbdbe69" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">请记住，在这一步之后，模型被导入到Elasticsearch中，但是您需要手动启动部署以便使用它。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0ff7d25 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0ff7d25" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-62b9b9a ot-flex-column-vertical" data-id="62b9b9a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-07cecfd elementor-hidden-tablet elementor-hidden-mobile elementor-widget elementor-widget-spacer" data-id="07cecfd" data-element_type="widget" id="createindex" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-e6ab2f1 elementor-widget elementor-widget-iheading" data-id="e6ab2f1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">4.创建弹性搜索索引</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-e9775ca elementor-widget elementor-widget-text-editor" data-id="e9775ca" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">为了创建和定义目标索引的显式映射，可以使用<em>索引API</em>；在本教程中，创建了<strong> neural_index </strong>:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-af73c7f elementor-widget elementor-widget-text-editor" data-id="af73c7f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl http://localhost:9200/<strong>neural_index</strong> -XPUT -H 'Content-Type: application/json' -d '
+{
+  "mappings": {
+    "properties": {
+      <strong>"general_text_vector.predicted_value": {
+        "type": "dense_vector",
+        "dims": 384,
+        "index": true,
+        "similarity": "cosine"</strong>
+      },
+      "general_text": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  }
+}'</code></pre>
+<!-- /wp:code -->
+					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-daffb4a elementor-widget elementor-widget-text-editor" data-id="daffb4a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">按照我们的映射中的定义，文档由3个简单的字段组成:</p>
+<ol>
+<li class="translated"><code><strong>general_text_vector.predicted_value</strong></code> ( <em> dense_vector </em>)将存储摄取管道<br/> <br/>生成的嵌入</li>
+<li class="translated">将文档<code><strong>general_text</strong></code> ( <em>文本</em>)，源字段与文本一起转换成矢量<br/> <br/></li>
+<li class="translated"><strong>颜色</strong> ( <em>文本</em>)，一个额外的字段，只是用来显示过滤查询行为</li>
+</ol>
+<p class="has-text-align-justify translated">关于<code><a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/guide/en/elasticsearch/reference/8.5/dense-vector.html">dense_vector</a></code>字段类型参数的解释已经在第一篇博文中解决了，所以请参考<a href="https://web.archive.org/web/20230316140007/https://sease.io/wp-admin/post.php?post=55826&amp;action=edit"> 3。为教程的矢量搜索</a>创建一个弹性搜索索引。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1f8cfce ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1f8cfce" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-820dd7d ot-flex-column-vertical" data-id="820dd7d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a7b47e7 elementor-hidden-tablet elementor-hidden-mobile elementor-widget elementor-widget-spacer" data-id="a7b47e7" data-element_type="widget" id="createtext" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-e449738 elementor-widget elementor-widget-iheading" data-id="e449738" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">5.创建文本嵌入摄取管道</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-dc609d3 elementor-widget elementor-widget-text-editor" data-id="dc609d3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">可以在Elasticsearch中处理数据并自动从文本创建向量，定义一个文本嵌入<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-inference.html#ml-nlp-inference-processor">摄取管道</a>。<br/>使用以下命令，您可以创建<strong>文本嵌入</strong>管道:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7a51175 elementor-widget elementor-widget-text-editor" data-id="7a51175" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl http://localhost:9200/<strong>_ingest/pipeline/text-embeddings</strong> -XPUT -H 'Content-Type: application/json' -d '
+{
+  "description": "Text embedding pipeline",
+  <strong>"processors": [
+    {
+      "inference": {
+        "model_id": "sentence-transformers__all-minilm-l6-v2",
+        "target_field": "general_text_vector",
+        "field_map": {
+          "general_text": "text_field"
+        }
+      }
+    }
+  ]</strong>,
+  "on_failure": [
+    {
+      "set": {
+        "description": "Index document to <strong>'\''</strong>failed-&lt;index&gt;<strong>'\''</strong>",
+        "field": "_index",
+        "value": "failed-{{{_index}}}"
+      }
+    },
+    {
+      "set": {
+        "description": "Set error message",
+        "field": "ingest.failure",
+        "value": "{{_ingest.on_failure_message}}"
+      }
+    }
+  ]
+}'</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-301fcf6 elementor-widget elementor-widget-text-editor" data-id="301fcf6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">将为每个段落添加嵌入的<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-processor.html">推理处理器</a>被指定为:<br/> <strong> <code>model_id</code> </strong>:已训练模型的ID(或别名)<br/> <code><strong>target_field</strong>:</code>将包含结果对象(嵌入)<br/> <strong> <code>field_map</code> </strong>的字段:定义为将<code>general_text</code>(段落/文档所在的位置)映射到模型期望的字段<code>text_field</code></p>
+<p class="has-text-align-justify translated">我们还添加了一个额外的参数(<code>on_failure</code> handler)来处理不同索引中的异常和索引失败，名为<code>failed-neural_index</code>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d880c2b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d880c2b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c066935 ot-flex-column-vertical" data-id="c066935" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b7600f5 elementor-hidden-tablet elementor-hidden-mobile elementor-widget elementor-widget-spacer" data-id="b7600f5" data-element_type="widget" id="index" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-90e831c elementor-widget elementor-widget-iheading" data-id="90e831c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">6.索引文档</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-d0da33e elementor-widget elementor-widget-text-editor" data-id="d0da33e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">一旦我们创建了索引和接收管道，我们就可以推送一些文档了。</p>
+<p class="translated">这里是批量索引请求，其中必须指定<strong> <code>pipeline</code>查询参数</strong>，以便使用我们的“文本嵌入”管道:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-492637f elementor-widget elementor-widget-text-editor" data-id="492637f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl http://localhost:9200/neural_index/<strong>_bulk<strong>?pipeline=text-embeddings</strong></strong> -XPOST -H 'Content-Type: application/json' -d '
+{"index": {"_id": "0"}}
+{"general_text": "The presence of communication amid scientific minds was equally important to the success of the Manhattan Project as scientific intellect was. The only cloud hanging over the impressive achievement of the atomic researchers and engineers is what their success truly meant; hundreds of thousands of innocent lives obliterated.", "color": "red"}
+'</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-bf50624 elementor-widget elementor-widget-text-editor" data-id="bf50624" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><a href="https://web.archive.org/web/20230316140007/https://github.com/SeaseLtd/vector-search-elastic-tutorial/blob/main/indexing_phase/create_body_for_bulk.py">在这里</a>您可以找到如何自动创建批量API请求的主体。</p>
+<p class="has-text-align-justify translated">在上面的简单例子中，只有一个文档被索引。<br/>正如在第一个教程中已经建议的，对于索引许多文档，本地批量API可能是有问题的并且非常低效；我们建议使用<a href="https://web.archive.org/web/20230316140007/https://elasticsearch-py.readthedocs.io/en/v8.5.3/helpers.html"> bulk helper </a> (Pyhton ES客户端)和以下定制脚本，您可以从一个文件中一次索引一批文档，并使用摄取管道将数据转换为向量:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-feb73c9 elementor-widget elementor-widget-text-editor" data-id="feb73c9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>import sys
+import time
+import random
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
+
+BATCH_SIZE = 1000
+
+# Elastic configuration.
+ELASTIC_ADDRESS = "http://localhost:9200"
+INDEX_NAME = "neural_index"
+<strong>PIPELINE_NAME = "text-embeddings"</strong>
+
+def index_documents(documents_filename, client):
+    # Open the file containing text.
+    with open(documents_filename, "r") as documents_file:
+            documents = []
+            # For each document creates a JSON document including text (and id).
+            for index, document in enumerate(documents_file):
+                # Generate color value randomly (additional feature to show FILTER query behaviour).
+                color = random.choice(['red', 'green', 'white', 'black'])
+                # Create the JSON document including index name and pipeline.
+                <strong>doc = {
+                    "_index": INDEX_NAME,
+                    "pipeline": PIPELINE_NAME,
+                    "_id": str(index),
+                    "general_text": document,
+                    "color": color,
+                }</strong>
+                # Append JSON document to a list.
+                documents.append(doc)
+
+                # To index batches of documents at a time.
+                if index % BATCH_SIZE == 0 and index != 0:
+                    # How you'd index data to Elastic.
+                    indexing = bulk(client, documents)
+                    documents = []
+                    print("Success - %s , Failed - %s" % (indexing[0], len(indexing[1])))
+            # To index the rest, when 'documents' list &lt; BATCH_SIZE.
+            if documents:
+                bulk(client, documents)
+            print("Finished")
+
+def main():
+    document_filename = sys.argv[1]
+
+    # Declare a client instance of the Python Elasticsearch library.
+    client = Elasticsearch(hosts=[ELASTIC_ADDRESS])
+
+    initial_time = time.time()
+    index_documents(document_filename, client)
+    finish_time = time.time()
+    print('Documents indexed in {:f} seconds\n'.format(finish_time - initial_time))
+
+if __name__ == "__main__":
+    main()</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-2545659 elementor-widget elementor-widget-text-editor" data-id="2545659" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">您也可以在我们的<a href="https://web.archive.org/web/20230316140007/https://github.com/SeaseLtd/vector-search-elastic-tutorial/blob/main/indexing_phase/indexer_elastic_with_pipeline.py"> GitHub项目</a>中找到它，并且您可以使用以下命令执行该脚本:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-56c0dfb elementor-widget elementor-widget-text-editor" data-id="56c0dfb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>python indexer_elastic_with_pipeline.py "../from_text_to_vectors/example_input/documents_10k.tsv"</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-8a2d314 elementor-widget elementor-widget-iheading" data-id="8a2d314" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">重新索引</h4>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-5d37252 elementor-widget elementor-widget-text-editor" data-id="5d37252" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果数据已经被索引，您还可以在reindex请求中传递'<code>pipeline</code>'参数:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-cf416bf elementor-widget elementor-widget-text-editor" data-id="cf416bf" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl http://localhost:9200/<strong>_reindex</strong> -XPOST -H 'Content-Type: application/json' -d '
+{
+  "source": {
+    "index": "general_index"
+  },
+  "dest": {
+    "index": "neural_index",
+    <strong>"pipeline": "text-embeddings"</strong>
+  }
+}'</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-64dc860 elementor-widget elementor-widget-text-editor" data-id="64dc860" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">当前索引(<em>源</em>)中的所有文档被复制到具有新映射的新索引(<em>目标</em>)中(之前已创建)，摄取管道功能用于为每个文档添加嵌入。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7461223 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7461223" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a9348f1 ot-flex-column-vertical" data-id="a9348f1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5492285 elementor-hidden-tablet elementor-hidden-mobile elementor-widget elementor-widget-spacer" data-id="5492285" data-element_type="widget" id="search" data-widget_type="spacer.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-spacer">
+			<div class="elementor-spacer-inner"/>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-fb39ad6 elementor-widget elementor-widget-iheading" data-id="fb39ad6" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">7.利用向量场的搜索</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-54d0f00 elementor-widget elementor-widget-text-editor" data-id="54d0f00" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated"><span style="text-decoration: underline;">当前不支持在搜索请求期间从查询词隐式生成矢量嵌入。</span></p>
+<p class="has-text-align-justify translated">因此，您可以使用模型的<strong> _infer API </strong>，将查询转换成向量:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-7e4c45d elementor-widget elementor-widget-text-editor" data-id="7e4c45d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl http://localhost:9200/_ml/trained_models/sentence-transformers__all-minilm-l6-v2/deployment/_infer -XPOST -H 'Content-Type: application/json' -d '{
+  "docs": {
+    "text_field": "what is a bank transit number"
+  }
+}'</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-6274239 elementor-widget elementor-widget-iheading" data-id="6274239" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>response</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-edec560 elementor-widget elementor-widget-text-editor" data-id="edec560" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>{"predicted_value":[-0.009013667702674866,-0.07266351580619812,-0.01738189533352852,..., -0.11632353067398071]}</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-a99dc88 elementor-widget elementor-widget-text-editor" data-id="a99dc88" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">为了便于阅读，我们通过插入点来缩短响应。</p>
+<p class="has-text-align-justify translated">在获得作为文本查询“什么是银行转帐号”的密集向量的嵌入之后，您可以复制并使用在kNN查询中获得的向量。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-fdf76ea elementor-widget elementor-widget-iheading" data-id="fdf76ea" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">近似kNN示例</h6>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-45da3ff elementor-widget elementor-widget-text-editor" data-id="45da3ff" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>curl http://localhost:9200/neural_index/_search -XPOST -H 'Content-Type: application/json' -d '{
+<strong>"knn": {
+    "field": "<strong>general_text_vector.predicted_value</strong>",
+    "query_vector": [-9.01364535e-03, -7.26634488e-02, ..., -1.16323479e-01],
+    "k": 3,
+    "num_candidates": 10
+}</strong>,
+"_source": [
+    "general_text",
+    "color"
+]}'</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-538e6dc elementor-widget elementor-widget-text-editor" data-id="538e6dc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">对于向量相似性搜索，请参考第一篇博文中已经描述的查询(<a href="https://web.archive.org/web/20230316140007/https://sease.io/wp-admin/post.php?post=55826&amp;action=edit"> 5。搜索利用矢量场</a>)。<br/>唯一的区别是<code>knn</code>对象的<code>field</code>属性的值:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-b3d7dfd elementor-widget elementor-widget-text-editor" data-id="b3d7dfd" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>"knn": {
+    "field": "<strong>general_text_vector.predicted_value",</strong></code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-bb34303 elementor-widget elementor-widget-text-editor" data-id="bb34303" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><span style="text-decoration: underline;">代替</span>:</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-db91d25 elementor-widget elementor-widget-text-editor" data-id="db91d25" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<!-- wp:code -->
+<pre class="wp-block-code"><code>"knn": {
+    "field": "general_text_vector",</code></pre>
+<!-- /wp:code -->					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8a4b881 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8a4b881" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-55ac480 ot-flex-column-vertical" data-id="55ac480" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-421038a elementor-widget elementor-widget-iheading" data-id="421038a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">摘要</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-9263fca elementor-widget elementor-widget-text-editor" data-id="9263fca" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-justify translated">我们希望这篇教程能帮助你理解如何使用cURL命令代替Kibana控制台，在Elasticsearch中直接实现文本嵌入和矢量搜索。</p>
+<p class="has-text-align-justify translated">这个最近的实现提供了将定制模型集成到Elasticsearch中并在内部创建嵌入的能力，与第一篇博客文章中描述的功能相比，这无疑更快且更易于管理，但不幸的是这不是免费的。</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-dbfcb9e elementor-widget-divider--view-line elementor-widget elementor-widget-divider" data-id="dbfcb9e" data-element_type="widget" data-widget_type="divider.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-divider">
+			<span class="elementor-divider-separator">
+						</span>
+		</div>
+				</div>
+				</div>
+				<div class="elementor-element elementor-element-53d185d elementor-widget elementor-widget-iheading" data-id="53d185d" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// references</span>
+	        	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-1abaed1 elementor-widget elementor-widget-text-editor" data-id="1abaed1" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">NLP:<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/guide/en/machine-learning/current/ml-nlp.html">https://www . elastic . co/guide/en/machine-learning/current/ml-NLP . html</a><br/>矢量搜索:<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/what-is/vector-search">https://www.elastic.co/what-is/vector-search</a><br/>elastic Search 8中的矢量搜索(Talk):<a href="https://web.archive.org/web/20230316140007/https://www.youtube.com/watch?v=CM0OSbHTaeA">https://www.youtube.com/watch?v=CM0OSbHTaeA</a><br/><strong>博文:</strong><br/>–<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/blog/introduction-to-nlp-with-pytorch-models">elastic Search中使用PyTorch的现代NLP介绍</a><br/>–<a href="https://web.archive.org/web/20230316140007/https://www.elastic.co/blog/how-to-deploy-natural-language-processing-nlp-getting-started">如何部署自然语言处理</a><br/>–</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-136216d0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="136216d0" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-236574f ot-flex-column-vertical" data-id="236574f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-30c50098 elementor-widget elementor-widget-iheading" data-id="30c50098" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">还在纠结Elasticsearch里的神经搜索？</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-4ce516b9 elementor-widget elementor-widget-text-editor" data-id="4ce516b9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果你在Elasticsearch中难以实现神经搜索，不要担心——我们会帮助你！<br/>我们的团队提供<span style="color: #ffcc00;"> <strong>专家服务和培训</strong> </span>帮助您优化Elasticsearch搜索引擎，充分利用您的系统。立即联系我们，了解更多信息！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-708451c2 elementor-widget elementor-widget-ibutton" data-id="708451c2" data-element_type="widget" data-widget_type="ibutton.default">
+				<div class="elementor-widget-container">
+					<div class="ot-button">
+			<a href="https://web.archive.org/web/20230316140007/mailto:info@sease.io" class="octf-btn octf-btn-primary">Send us an e-mail</a>
+	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2ec31108 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2ec31108" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7679a7a1 ot-flex-column-vertical" data-id="7679a7a1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a0b3692 elementor-widget elementor-widget-iheading" data-id="a0b3692" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-40af31ee elementor-widget elementor-widget-text-editor" data-id="40af31ee" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这个关于Elasticsearch神经搜索教程(白金级/企业级)的帖子吗？不要忘记订阅我们的时事通讯，以便在信息检索世界中保持最新状态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-1ba0c248 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="1ba0c248" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.9.1 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20230316140007/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1678975209"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

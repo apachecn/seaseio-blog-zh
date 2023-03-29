@@ -1,0 +1,368 @@
+<html>
+<head>
+<title>Solr Document Classification – Part 1 – Indexing Time</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">Solr文件分类-第1部分-索引时间</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2015/07/solr-document-classification-part-1-indexing-time.html#0001-01-01">https://web.archive.org/web/sease.io/2015/07/solr-document-classification-part-1-indexing-time.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-ee92add ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ee92add" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3ad5cc5 ot-flex-column-vertical" data-id="3ad5cc5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5e21231 elementor-widget elementor-widget-iheading" data-id="5e21231" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">介绍</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-09d80d9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="09d80d9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-51a19f0 ot-flex-column-vertical" data-id="51a19f0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-db261f0 elementor-widget elementor-widget-text-editor" data-id="db261f0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这篇博文是关于Solr分类模块和Lucene分类在索引时的集成方式。</p><div>In the <a href="https://web.archive.org/web/20220930000700/https://sease.io/2015/07/lucene-document-classification.html">previous blog</a> we have explored the world of Lucene Classification and the extension to use it for Document Classification.</div><div>It comes natural to integrate Solr with the Classification module and allow Solr users to easily manage the Classification out of the box.</div><div> </div><h6 class="translated"><span style="color: #808080;"> <strong>注意:</strong>Solr 6.1</span>支持此功能</h6>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-02c5611 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="02c5611" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-12e9829 ot-flex-column-vertical" data-id="12e9829" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9788130 elementor-widget elementor-widget-iheading" data-id="9788130" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">Solr文件分类</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-642ec46 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="642ec46" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-304f135 ot-flex-column-vertical" data-id="304f135" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8198eda elementor-widget elementor-widget-text-editor" data-id="8198eda" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>Taking inspiration from the work of a dear friend <a href="https://web.archive.org/web/20220930000700/https://www.slideshare.net/teofili/text-categorization-with-lucene-and-solr" target="_blank" rel="noopener">[2]</a><span style="color: var( --e-global-color-text ); font-weight: var( --e-global-typography-text-font-weight );">, integrating the classification in Solr can happen 2 sides :</span></div><div><ul><li class="translated">索引时间–通过更新请求处理器</li><li class="translated">查询时间——通过请求处理程序(类似于更像这样的)</li></ul><div>In this first article we are going to explore the Indexing time integration :</div></div><div>The Classification Update Request Processor.</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-829d2ae ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="829d2ae" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-69d5b71 ot-flex-column-vertical" data-id="69d5b71" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bed9e0a elementor-widget elementor-widget-iheading" data-id="bed9e0a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">分类更新请求处理器</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-678d8d7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="678d8d7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a729e73 ot-flex-column-vertical" data-id="a729e73" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5439992 elementor-widget elementor-widget-text-editor" data-id="5439992" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>First of all let’s describe some basic concepts :</div>
+<div>An <b>Update Request Processor Chain</b>, associated to an Update handler, is a pipeline of Update processors, that will be executed in sequence.<br/>It takes in input the added Document (to be indexed) and return the document after it has been processed by all the processors in the chain in sequence.</div>
+<div>Finally the document is indexed.</div>
+<div>An <b>Update Request Processor</b> is the unit of processing of a chain, it takes in input a Document and operates some processing before it is passed to the following processor in the chain if any.</div>
+<div> </div>
+<div>The main reason for the Update processor is to add intermediate processing steps that can enrich, modify and possibly filter documents , before they are indexed.<br/>It is important because the processor has a view of the entire Document, so it can operate on all the fields the Document is composed.</div>
+<div>For further details, follow the official documentation <a href="https://web.archive.org/web/20220930000700/https://solr.apache.org/guide/6_6/update-request-processors.html" target="_blank" rel="noopener">[3]</a>.</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dc181f3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dc181f3" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3e6fe5e ot-flex-column-vertical" data-id="3e6fe5e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-21a6378 elementor-widget elementor-widget-iheading" data-id="21a6378" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">描述</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8bfe2de ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8bfe2de" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-42c5c99 ot-flex-column-vertical" data-id="42c5c99" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c61bcc1 elementor-widget elementor-widget-text-editor" data-id="c61bcc1" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>The Classification Update Request Processor is a simple processor that will <b>automatically classify</b> a document ( the classification will be based on the latest index available) adding a new field  containing the class, before the document is indexed.</div><div>After an initial valuable index has been built with human assigned labels to the documents, thanks to this Update Request Processor will be possible to ingest documents with automatically assigned classes.</div><div>The processing steps are quite simple :</div><div>When a document to be indexed enters the Update Processor Chain, and arrives to the Classification step, this sequence of operations will be executed :</div><div><ul><li class="translated"><b>最新索引阅读器</b>从最新打开的搜索器中检索</li><li class="translated">用solrconfig.xml中的配置参数实例化一个<b> Lucene文档分类器</b></li><li class="translated">考虑到来自输入文档的所有相关字段，分类器分配一个<b>类</b></li><li class="translated">一个<b>新字段被添加</b>到原始文档，带有类</li><li class="translated">文档进入下一个处理步骤</li></ul></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-60aefdb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="60aefdb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-76ea573 ot-flex-column-vertical" data-id="76ea573" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b88b2b5 elementor-widget elementor-widget-iheading" data-id="b88b2b5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">配置</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-be3846f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="be3846f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6bb51d8 ot-flex-column-vertical" data-id="6bb51d8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-37b06fc elementor-widget elementor-widget-text-editor" data-id="37b06fc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="margin-top: 10px; margin-bottom: 0px; padding: 0px 0px 0px 40px; caret-color: #172b4d; color: #172b4d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; font-size: 14px;" class="translated"><span style="color: #808080;"> <strong> K近邻分类器</strong> </span></p><p style="margin-top: 10px; margin-bottom: 0px; padding: 0px 0px 0px 40px; caret-color: #172b4d; color: #172b4d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; font-size: 14px;" class="translated"><span style="font-weight: normal;">&lt;updateRequestProcessorChain name = " class ification "&gt;</span><br/><span style="font-weight: normal;">&lt;处理器class="solr。classificationupdateprocessorfactory "&gt;</span><br/><span style="font-weight: normal;">&lt;str name = " input fields "&gt;title^1.5,content,author&lt;/str&gt;</span><br/><span style="font-weight: normal;">&lt;str name = " class field "&gt;cat&lt;/str&gt;</span><br/><span style="font-weight: normal;">&lt;str name = " algorithm "&gt;KNN&lt;/str&gt;</span><br/><br/></p><p style="margin-top: 10px; margin-bottom: 0px; padding: 0px 0px 0px 40px; caret-color: #172b4d; color: #172b4d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; font-size: 14px;" class="translated"><span style="color: #808080;"> <strong>简单朴素贝叶斯分类器</strong> </span></p><p style="margin-top: 10px; margin-bottom: 0px; padding: 0px 0px 0px 40px; caret-color: #172b4d; color: #172b4d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; font-size: 14px;" class="translated"><span style="font-weight: normal;">&lt;updateRequestProcessorChain name = " classification "&gt;</span><br/><span style="font-weight: normal;">&lt;处理器class="solr。classificationupdateprocessorfactory "&gt;</span><br/><span style="font-weight: normal;">&lt;str name = " input fields "&gt;title^1.5,content,author&lt;/str&gt;</span><br/><span style="font-weight: normal;">&lt;str name = " class field "&gt;cat&lt;/str&gt;</span><br/><span style="font-weight: normal;">&lt;str name = " algorithm "&gt;Bayes&lt;/str&gt;</span></p><p style="margin-top: 10px; margin-bottom: 0px; padding: 0px 0px 0px 40px; caret-color: #172b4d; color: #172b4d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; font-size: 14px;" class="translated"><span style="color: #808080;"> <strong>更新处理器配置</strong> </span></p><p style="font-weight: normal; margin-top: 10px; margin-bottom: 0px; padding: 0px 0px 0px 40px; caret-color: #172b4d; color: #172b4d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; font-size: 14px;" class="translated"><span style="font-weight: normal;">&lt;request handler name = "/update "&gt;</span><br/><span style="font-weight: normal;">&lt;lst name = " defaults "&gt;</span><br/><span style="font-weight: normal;">&lt;str name = " update . chain "&gt;分类&lt;/str&gt;</span><br/><span style="font-weight: normal;">&lt;/lst&gt;</span><br/>&lt;/request handler&gt;</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2525d5c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2525d5c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-10e1093d ot-flex-column-vertical" data-id="10e1093d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7a807d0e elementor-widget elementor-widget-text-editor" data-id="7a807d0e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><table><tbody><tr><th class="translated">参数</th><th class="translated">默认</th><th class="translated">描述</th></tr><tr><td class="translated"><pre style="font-size: 15px; line-height: 15px; orphans: 2; text-align: -webkit-auto; widows: 2;">inputFields</pre></td><td class="translated">此配置参数是必需的</td><td class="translated">进行分类时要考虑的字段列表(用逗号分隔)。<br/>每个字段都支持Boosting语法。</td></tr><tr><td class="translated"><pre style="font-size: 15px; line-height: 15px; orphans: 2; text-align: -webkit-auto; widows: 2;">classField</pre></td><td class="translated">此配置参数是必需的</td><td class="translated">包含文档类别的字段。它必须出现在索引文档中。<br/>如果<b> knn </b>算法它必须被<b>存储。</b> <br/>如果<b>贝叶斯</b>算法，它必须<b>索引</b>并且理想情况下<b>不会被大量分析。</b></td></tr><tr><td class="translated"><pre style="font-size: 15px; line-height: 15px; orphans: 2; text-align: -webkit-auto; widows: 2;">algorithm</pre></td><td class="translated">knn</td><td class="translated">用于分类的算法:<br/>–KNN(K最近邻)<br/>–Bayes(简单朴素贝叶斯)</td></tr><tr><td class="translated"><pre style="font-size: 15px; line-height: 15px; orphans: 2; text-align: -webkit-auto; widows: 2;">knn.k</pre></td><td>10</td><td class="translated"><i>高级</i>–在MLT结果中选择的用于查找最近邻的顶级文档的数量</td></tr><tr><td class="translated"><pre style="font-size: 15px; line-height: 15px; orphans: 2; text-align: -webkit-auto; widows: 2;">knn.minDf</pre></td><td>1</td><td class="translated"><i>高级</i>–只有在索引中至少出现这一最小数量的文档时，算法才会考虑某个术语(来自输入文本)</td></tr><tr><td class="translated"><pre style="font-size: 15px; line-height: 15px; orphans: 2; text-align: -webkit-auto; widows: 2;">knn.minTf</pre></td><td>1</td><td class="translated"><i>高级</i>–一个术语(来自输入文本)只有在输入中出现至少这个最小次数时，算法才会考虑它</td></tr></tbody></table></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7fdc591 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7fdc591" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-91db085 ot-flex-column-vertical" data-id="91db085" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e42e4a1 elementor-widget elementor-widget-iheading" data-id="e42e4a1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">使用</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-31ee7b4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="31ee7b4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5b4e3e4 ot-flex-column-vertical" data-id="5b4e3e4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ead87d0 elementor-widget elementor-widget-text-editor" data-id="ead87d0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">索引新闻文档？我们可以使用已经编入索引的新闻类别，在没有人工干预的情况下自动标记即将发生的故事。<br/>电子商务搜索系统？在用手动分配类别索引了有效的初始产品集之后，类别分配将需要很少的人工交互。<br/>这个更新请求处理器的可能用途数不胜数。<br/>在任何情况下，如果我们的搜索系统中有手动指定类别或分类的文档，自动分类会是一个完美的选择。<br/>利用现有的索引，分类处理的开销将是最小的。<br/>在最初人类努力获得一个好的分类文档语料库之后，搜索系统将能够为即将到来的文档自动索引类别。<br/>当然，我们必须记住，对于需要深度调优的高级分类场景，这种解决方案可能不是最佳的。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-587dace ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="587dace" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-de09268 ot-flex-column-vertical" data-id="de09268" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-af4a765 elementor-widget elementor-widget-iheading" data-id="af4a765" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">密码</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0996955 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0996955" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bfa9763 ot-flex-column-vertical" data-id="bfa9763" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6847f3b elementor-widget elementor-widget-text-editor" data-id="6847f3b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>
+<div>The patch is attached to this Jira Issue :</div>
+<div> </div>
+<div><i><a href="https://web.archive.org/web/20220930000700/https://issues.apache.org/jira/browse/SOLR-7739">SOLR-7739</a></i></div>
+<div> </div>
+<div>This has been officially merged to Apache Solr starting with 6.1. version.</div>
+<p class="translated"><span style="color: #990000;"> </span></p></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3ce95c09 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3ce95c09" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-227b3819 ot-flex-column-vertical" data-id="227b3819" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-28f1ee05 elementor-widget elementor-widget-iheading" data-id="28f1ee05" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-5d38cabb elementor-widget elementor-widget-text-editor" data-id="5d38cabb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220930000700/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220930000700/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训吗？<br/>我们还提供这些主题的咨询，<a href="https://web.archive.org/web/20220930000700/https://sease.io/contacts">如果您想让您的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7c118b9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7c118b9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-56ccaf9 ot-flex-column-vertical" data-id="56ccaf9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a57ce71 elementor-widget elementor-widget-iheading" data-id="a57ce71" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-5abc4b5 elementor-widget elementor-widget-text-editor" data-id="5abc4b5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于索引时Solr文档分类的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-c3b5d87 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="c3b5d87" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220930000700/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664496420"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

@@ -1,0 +1,573 @@
+<html>
+<head>
+<title>Solr Is Learning To Rank Better – Part 2 – Model Training</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">Solr正在学习如何更好地排名——第2部分——模型训练</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2016/08/apache-solr-learning-to-rank-part-2-model-training.html#0001-01-01">https://web.archive.org/web/sease.io/2016/08/apache-solr-learning-to-rank-part-2-model-training.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-81940f9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="81940f9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e072399 ot-flex-column-vertical" data-id="e072399" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9c14a7f elementor-widget elementor-widget-iheading" data-id="9c14a7f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">Apache Solr学习排名的模型培训</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7bbd89e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7bbd89e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-005b8f5 ot-flex-column-vertical" data-id="005b8f5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2b6666a elementor-widget elementor-widget-text-editor" data-id="2b6666a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果你想为Apache Solr学习排名训练一个模型，你来对地方了。<br/>这篇博客文章是关于Apache Solr Learning To Rank integration的模型培训阶段。</p>
+<div>We modelled our dataset, collected the data and refined it in <a href="https://web.archive.org/web/20220930000224/https://sease.io/2016/07/apache-solr-learning-to-rank-part-1-data-collection.html">Part 1</a>.</div>
+<div>We have now a shiny lot-of-rows training set ready to be used to train the mathematical model that will re-rank the resulting documents coming out from our queries.</div>
+<div>The very first activity to carry on is to decide the model that fits best our requirements.</div>
+<p/>
+<div>I will focus in this blog post on two types of models, the ones currently supported by the Apache Solr Learning To Rank integration <a style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;" href="https://web.archive.org/web/20220930000224/https://issues.apache.org/jira/browse/SOLR-8542">[1]</a><span style="color: var( --e-global-color-text ); font-weight: var( --e-global-typography-text-font-weight );">.</span></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fb0d8ec ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fb0d8ec" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-73f51cc ot-flex-column-vertical" data-id="73f51cc" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-66c17dd elementor-widget elementor-widget-iheading" data-id="66c17dd" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">SVM排名</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f18a6b4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f18a6b4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-efdd167 ot-flex-column-vertical" data-id="efdd167" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b1e6e15 elementor-widget elementor-widget-text-editor" data-id="b1e6e15" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>Ranking SVM is a linear model based on Support Vector Machines.</div><p class="translated">SVM排序算法是一种成对排序方法，它根据结果与特定查询的“相关性”来自适应地对结果进行排序(我们在第1部分看到了成对文档-查询的相关性评级的例子)。</p><p class="translated">排名SVM函数将每个搜索查询映射到每个样本的特征。<br/>这个映射函数将每个数据对投影到一个特征空间。</p><div><p class="translated">训练数据的每个样本(查询文档)将被用于排序SVM算法以改进映射。</p><p class="translated">一般来说，SVM排名在训练时包括三个步骤:</p><ul><li style="list-style-type: none;"><ul><li class="translated">它将查询和点击结果之间的相似性映射到某个特征空间。</li><li class="translated">它计算步骤1中获得的任意两个向量之间的距离。</li><li class="translated">它形成了一个类似于标准SVM分类的优化问题，并使用常规SVM求解器来解决该问题</li></ul></li></ul><div>Given the list of the features that describe our problem, an SVM model will assign a numerical weight to each of them, the resulting function will assign a score to a document given in input the feature vector that describes it.</div><div>Let’s see an example SVM Model in the Json format expected by the Solr plugin :</div><div><i>e.g.</i></div></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-833c93f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="833c93f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-762465d ot-flex-column-vertical" data-id="762465d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4efe3d7 elementor-widget elementor-widget-text-editor" data-id="4efe3d7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace; font-size: 14px; background-color: #f7f7f7; line-height: 1.45; padding: 16px; border-radius: 3px; color: #333333; word-break: normal; overflow-wrap: normal;"><span style="color: #808080;">{
+    <span class="pl-s"><span class="pl-pds">"</span>class<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>org.apache.solr.ltr.ranking.RankSVMModel<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>myModelName<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>features<span class="pl-pds">"</span></span>:[
+        { <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>userTextTitleMatch<span class="pl-pds">"</span></span>},
+        { <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>originalScore<span class="pl-pds">"</span></span>},
+        { <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>isBook<span class="pl-pds">"</span></span>}
+    ],
+    <span class="pl-s"><span class="pl-pds">"</span>params<span class="pl-pds">"</span></span>:{
+        <span class="pl-s"><span class="pl-pds">"</span>weights<span class="pl-pds">"</span></span>: {
+            <span class="pl-s"><span class="pl-pds">"</span>userTextTitleMatch<span class="pl-pds">"</span></span>: <span class="pl-c1">1.0</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>originalScore<span class="pl-pds">"</span></span>: <span class="pl-c1">0.5</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>isBook<span class="pl-pds">"</span></span>: <span class="pl-c1">0.1</span>
+        }</span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1301f89 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1301f89" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-48eaa98 ot-flex-column-vertical" data-id="48eaa98" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e6ad517 elementor-widget elementor-widget-text-editor" data-id="e6ad517" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">给定3个示例特征:<br/><b>userTextTitleMatch</b>–(查询相关特征)–(二进制)<br/><b>originalScore</b>–(查询相关特征)–(序数)<br/><b>is book</b>–(文档相关特征)–(二进制)</p><p class="translated">示例中的排名SVM模型构建了变量的线性函数，并为每个变量分配了不同的权重。</p><p class="translated">给定文档(用其特征向量表示):<br/><b><i>D1</i></b>【1.0，100，1】<br/><b><i>D2</i></b>【0.0，80，1】</p><p class="translated">应用该模型，我们得到分数:</p><p class="translated"><b>得分(D1)</b>= 1.0 * userTextTitleMatch(1.0)+0.5 * originalScore(100)+0.1 * is book(1.0)=<b>51.1</b><br/><b>得分(D2)</b>= 1.0 * userTextTitleMatch(0.0)+0.5 * originalScore(80)+0.1 * is book(1.0)=<b>40.1</b></p><p class="translated"><b>要点</b>:</p><ul><li style="list-style-type: none;"><ul><li class="translated">易于调试和理解</li><li class="translated">线性函数</li></ul></li></ul><p class="translated">这里可以找到一些不错的训练SVM模型的开源库<a href="https://web.archive.org/web/20220930000224/https://www.csie.ntu.edu.tw/%7Ecjlin/libsvm/" target="_blank" rel="noopener">【2】</a><a href="https://web.archive.org/web/20220930000224/https://www.csie.ntu.edu.tw/%7Ecjlin/liblinear/">【2.1】</a>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-29ed9e8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="29ed9e8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5b9c7ad ot-flex-column-vertical" data-id="5b9c7ad" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c82a417 elementor-widget elementor-widget-iheading" data-id="c82a417" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">兰达马特</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-534bd24 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="534bd24" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bcd9625 ot-flex-column-vertical" data-id="bcd9625" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-77995b3 elementor-widget elementor-widget-text-editor" data-id="77995b3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">LambdaMART是一个基于树集合的模型。<br/>集合的每棵树都是加权回归树，并且最终预测得分是每个回归树的预测的加权和。<br/>回归树是一种决策树，它将特征向量作为输入，并在输出中返回标量数值。<br/>在高层次上，LambdaMART是一种使用梯度推进来直接优化学习以对特定成本函数(如NDCG)进行排序的算法。</p><p class="translated">为了理解LambdaMART，让我们来探讨主要的两个方面:Lambda和MART。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-44642c5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="44642c5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f23e65a ot-flex-column-vertical" data-id="f23e65a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cf04b6f elementor-widget elementor-widget-text-editor" data-id="cf04b6f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b> MART </b> <br/> LambdaMART是梯度推进回归树的一个具体实例，也称为多重加法回归树(MART)。<br/>梯度增强是一种用于形成模型的技术，该模型是“弱学习者”集合的加权组合。在我们的例子中，每个“弱学习者”都是一棵决策树。<br/><b>λ</b><br/>在每个训练点，我们需要提供一个梯度，使我们能够最小化成本函数(无论我们选择什么，例如NDCG)。<br/>为了解决这个问题，LambdaMART使用了一个来自lambdaRank的想法:<br/>在每个特定点，我们计算一个值，作为我们需要的梯度，这个组件将有效地修改排序，向上或向下推动文档组，并有效地影响叶值的规则，这些规则覆盖了用于计算lambda的点。<br/>关于其他详细信息，这些资源非常有用<a href="https://web.archive.org/web/20220930000224/https://wellecks.wordpress.com/2015/02/21/peering-into-the-black-box-visualizing-lambdamart/" target="_blank" rel="noopener">【3】</a><span style="color: var( --e-global-color-text ); font-weight: var( --e-global-typography-text-font-weight );"/><a href="https://web.archive.org/web/20220930000224/https://www.microsoft.com/en-us/research/publication/ranking-boosting-and-model-adaptation/?from=http%3A%2F%2Fresearch.microsoft.com%2Fpubs%2F69536%2Ftr-2008-109.pdf" target="_blank" rel="noopener">【4】</a><span style="color: var( --e-global-color-text ); font-weight: var( --e-global-typography-text-font-weight );">。</span></p><p class="translated">LambdaMART目前被认为是最有效的模型之一，它已经被许多获奖的竞赛所证明。</p><p class="translated">让我们看看lambdaMART模型是什么样子的</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6668e9f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6668e9f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4ee4954 ot-flex-column-vertical" data-id="4ee4954" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0e6aea4 elementor-widget elementor-widget-text-editor" data-id="0e6aea4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: Consolas, 'Liberation Mono', Menlo, Courier, monospace; font-size: 14px; background-color: #f7f7f7; line-height: 1.45; padding: 16px; border-radius: 3px; color: #333333; word-break: normal; overflow-wrap: normal;"><span style="color: #808080;">{
+    <span class="pl-s"><span class="pl-pds">"</span>class<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>org.apache.solr.ltr.ranking.LambdaMARTModel<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>lambdamartmodel<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>features<span class="pl-pds">"</span></span>:[
+        { <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>userTextTitleMatch<span class="pl-pds">"</span></span>},
+        { <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>originalScore<span class="pl-pds">"</span></span>}
+    ],
+    <span class="pl-s"><span class="pl-pds">"</span>params<span class="pl-pds">"</span></span>:{
+        <span class="pl-s"><span class="pl-pds">"</span>trees<span class="pl-pds">"</span></span>: [
+            {
+                <span class="pl-s"><span class="pl-pds">"</span>weight<span class="pl-pds">"</span></span> : <span class="pl-c1">1</span>,
+                <span class="pl-s"><span class="pl-pds">"</span>root<span class="pl-pds">"</span></span>: {
+                    <span class="pl-s"><span class="pl-pds">"</span>feature<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>userTextTitleMatch<span class="pl-pds">"</span></span>,
+                    <span class="pl-s"><span class="pl-pds">"</span>threshold<span class="pl-pds">"</span></span>: <span class="pl-c1">0.5</span>,
+                    <span class="pl-s"><span class="pl-pds">"</span>left<span class="pl-pds">"</span></span> : {
+                        <span class="pl-s"><span class="pl-pds">"</span>value<span class="pl-pds">"</span></span> : <span class="pl-c1">-100</span>
+                    },
+                    <span class="pl-s"><span class="pl-pds">"</span>right<span class="pl-pds">"</span></span>: {
+                        <span class="pl-s"><span class="pl-pds">"</span>feature<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>originalScore<span class="pl-pds">"</span></span>,
+                        <span class="pl-s"><span class="pl-pds">"</span>threshold<span class="pl-pds">"</span></span>: <span class="pl-c1">10.0</span>,
+                        <span class="pl-s"><span class="pl-pds">"</span>left<span class="pl-pds">"</span></span> : {
+                            <span class="pl-s"><span class="pl-pds">"</span>value<span class="pl-pds">"</span></span> : <span class="pl-c1">50</span>
+                        },
+                        <span class="pl-s"><span class="pl-pds">"</span>right<span class="pl-pds">"</span></span> : {
+                            <span class="pl-s"><span class="pl-pds">"</span>value<span class="pl-pds">"</span></span> : <span class="pl-c1">75</span>
+                        }
+                    }
+                }
+            },
+            {
+                <span class="pl-s"><span class="pl-pds">"</span>weight<span class="pl-pds">"</span></span> : <span class="pl-c1">2</span>,
+                <span class="pl-s"><span class="pl-pds">"</span>root<span class="pl-pds">"</span></span>: {
+                    <span class="pl-s"><span class="pl-pds">"</span>value<span class="pl-pds">"</span></span> : <span class="pl-c1">-10</span>
+                }
+            }
+        ]
+    }
+}</span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-20db2bc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="20db2bc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6dbcf81 ot-flex-column-vertical" data-id="6dbcf81" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f8e4316 elementor-widget elementor-widget-text-editor" data-id="f8e4316" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><p class="translated">这个例子模型由两棵树组成，每个分支分割评估一个特征值上的条件表达式，如果特征值是:<br/> <i> &lt; =阈值</i>我们访问左边的分支<br/> <i> &gt;阈值</i>我们访问右边的分支</p></div><p> </p><div><p class="translated">到达一棵树的叶子将产生一个分数，该分数将根据树的权重进行加权，然后与产生的其他分数相加(该模型是树的集合)。<br/>鉴于文件:</p></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-49a6629 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="49a6629" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-78064df ot-flex-column-vertical" data-id="78064df" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b5e2c50 elementor-widget elementor-widget-text-editor" data-id="b5e2c50" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><p class="translated"><b>D1</b>【1，9】<br/><b>D2</b>【0，10】</p><p class="translated">应用该模型，我们得到分数:</p><p class="translated"><b>Score(D1)</b>= 1 *(userTextTitleMatch(1)&gt;0.5 go right，originalScore(9)&lt;10 = 50)+<br/>2 *-10 =<b>30</b></p></div><div> </div><p class="translated"><b>得分(D2)</b>= 1 *(userTextTitleMatch(0)&lt;= 0.5 =-100)+<br/>2 *-10 =<b>-120</b></p><div><p class="translated">根据这一模式，D1文件更为相关。</p><p class="translated"><b>要点</b>:</p><ul><li style="list-style-type: none;"><ul><li class="translated">树木的组合是有效的</li><li class="translated">难以调试</li><li class="translated">非线性函数</li></ul></li></ul><p class="translated">有很好的开源库来训练LambdaMART模型，我们将在这个研究案例中使用的库是<span style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;">RankLib</span><a style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;" href="https://web.archive.org/web/20220930000224/https://sourceforge.net/p/lemur/wiki/RankLib/" target="_blank" rel="noopener">【5】</a></p></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d2e25b5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d2e25b5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bf1d154 ot-flex-column-vertical" data-id="bf1d154" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-096088c elementor-widget elementor-widget-iheading" data-id="096088c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">评估指标</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d2947fb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d2947fb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-058979a ot-flex-column-vertical" data-id="058979a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-13e13b8 elementor-widget elementor-widget-text-editor" data-id="13e13b8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>Important phase of the journey is to validate the model :</div><div>How good is our model in re-ranking our dataset ?</div><div>How good is the model in re-ranking unknown data  ?</div><div>It is really important to carefully select the evaluation metric that best suites your algorithm and your needs.</div><div>Evaluating the model will be vital for the validation phase during the training, for testing the model against new data and to consistently being able to assess the predicting quality of the model trained.</div><div> </div><div><b>N.B</b>. this is particularly important: having a good understanding of the evaluation metric for the algorithm selected, can help a lot in tuning,  improving the model and finding anomalies in the training data.</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5870b70 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5870b70" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1c803b1 ot-flex-column-vertical" data-id="1c803b1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-49e0d41 elementor-widget elementor-widget-iheading" data-id="49e0d41" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">NDCG@K</h4>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6d162c5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6d162c5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d37b0ff ot-flex-column-vertical" data-id="d37b0ff" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6b5d89a elementor-widget elementor-widget-text-editor" data-id="6b5d89a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">选择lambdaMART时，归一化贴现累积增益@k是一个自然的拟合。<br/>该指标评估排名模型的性能，从0.0到1.0不等，1.0 <br/>代表理想的排名模型。<br/>以K为参数:<br/> K:返回的最大文档数。</p><p class="translated">K为每个查询指定重新排序后要评估的前K个结果。<br/> <b>注意:</b>将K设置为您想要优化的顶部文档的数量。<br/>通常是您在结果首页显示的文档数。</p><p class="translated">在输入测试集的情况下，通过queryId对其进行分组，并且对于每个查询，将理想排名(通过后代相关性对文档进行排序而获得)与由排名模型生成的排名进行比较。<br/>计算所有查询id的平均值。<br/>详细解释可以在维基百科上找到<a href="https://web.archive.org/web/20220930000224/https://en.wikipedia.org/wiki/Discounted_cumulative_gain#Normalized_DCG" target="_blank" rel="noopener">【6】</a>。</p><p class="translated">知道了它是如何工作的，在推理NDCG时有两个因素听起来非常重要:<br/> 1)每个查询Id在测试集中的相关性分数的分布<br/> 2)每个查询Id的样本数</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-58d9074 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="58d9074" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f4fb895 ot-flex-column-vertical" data-id="f4fb895" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-445ad3d elementor-widget elementor-widget-text-editor" data-id="445ad3d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b> <i>战争故事1:高度相关样本太多- &gt;高NDCG </i> </b> <br/>给定测试集A:<br/>5 qid:1 1:1…<br/>5 qid:1 1:1…<br/>4 qid:1 1:1…<br/>5 qid:2 1:1…<br/>4 qid:2 1:1…<br/>4 qid:2 1:1…</p><p class="translated">即使排名模型做得不好，相关样本的高分布也增加了在度量中达到高分的概率。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0dd7e9d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0dd7e9d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-82e229f ot-flex-column-vertical" data-id="82e229f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-85b0da1 elementor-widget elementor-widget-text-editor" data-id="85b0da1" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><b><i>War Story 2: small RankLists -&gt; high NDCG</i></b><br/>Having few samples (&lt;K) per queryId means that we will not evaluate the performance of our ranking model with accuracy.</div><div> </div><div>In the edge case of 1 sample per queryId, our NDCG@10 will be perfect, but actually this reflect simply a really poor training/test set.</div><div> </div><div><b>N.B.</b> be careful on how you generate your queryId as you can end up in this edge case and have a wrong perception of the quality of your ranking model.</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c3fabef ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c3fabef" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-81213cc ot-flex-column-vertical" data-id="81213cc" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d415b32 elementor-widget elementor-widget-iheading" data-id="d415b32" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">模特培训</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-42de8ff ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="42de8ff" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a9c59f2 ot-flex-column-vertical" data-id="a9c59f2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-98e09ce elementor-widget elementor-widget-text-editor" data-id="98e09ce" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>Focus of this section will be how to train a LambdaMART model using <span style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;">RankLib </span><a style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;" href="https://web.archive.org/web/20220930000224/https://sourceforge.net/p/lemur/wiki/RankLib/" target="_blank" rel="noopener">[5]</a>,</div><div>Let’s see an example and analyse all the parameters:</div><div> </div><div><i><b>java  -jar RankLib-2.7.jar </b></i></div><div><i>–<b>train </b>/var/trainingSets/trainingSet_2016-07-20.txt </i></div><div><i><b>-feature </b>/var/ltr/trainingSets/trainingSet_2016-07-20_features.txt </i></div><div><i><b>-ranker </b>6 </i></div><div><i><b>-leaf </b>75</i></div><div><i><b> –</b></i><i style="color: #333333;"><b><span style="color: #808080;">mls</span> </b><span style="color: #808080;">5000<b> </b></span></i></div><div><i><b>-metric2t </b>NDCG@20 </i></div><div><i>–<b>kcv </b>5<b> </b></i></div><div><i><b>-tvs </b>0.8 </i></div><div><i><b>-kcvmd </b>/var/models </i></div><div><i><b>-kcvmn </b>model-name.xml<b> </b></i></div><div><i><b>-sparse </b></i></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b67a432 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b67a432" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-12dc943 ot-flex-column-vertical" data-id="12dc943" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8f5ec05 elementor-widget elementor-widget-text-editor" data-id="8f5ec05" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table class="tg" style="width: 840px; color: #6d6d6d;"><tbody><tr><th class="tg-s8ba translated">参数</th><th class="tg-s8ba translated">描述</th></tr><tr><td class="tg-vc88 translated"><b>列车</b>列车<b/></td><td class="tg-vyw9 translated">定型集文件的路径</td></tr><tr><td class="tg-vc88 translated"><b>功能</b></td><td class="tg-vyw9 translated">特性描述文件，列出学员需要考虑的特性id，每一个id占一行。如果未指定，将使用所有功能。</td></tr><tr><td class="tg-vc88 translated"><b>排名者</b></td><td class="tg-vyw9 translated">指定要使用的分级算法，例如6: LambdaMART</td></tr><tr><td class="tg-vc88 translated"><b> metric2t </b></td><td class="tg-vyw9 translated">用于优化训练数据的度量。支持:地图，NDCG@k，DCG@k，P@k，RR@k，ERR@k(默认=ERR@10)</td></tr><tr><td class="tg-vc88 translated"><b>电视</b></td><td class="tg-vyw9 translated">将训练验证分割设置为(x)(1.0-x)。<br/> x *(训练集的大小)将用于训练<br/> (1.0 -x) *(训练集的大小)将用于验证</td></tr><tr><td class="tg-vc88 translated"><b> kcv </b></td><td class="tg-vyw9"><p class="translated">代表k交叉验证指定是否希望仅使用指定的训练数据执行k重交叉验证(默认值=NoCV)。这意味着我们将训练数据分成k个子集，并执行k次训练。<br/>在每次执行中，1个子集将用作测试集，k-1个子集将用于训练。<br/> <b>注意:</b>在tvs和kcv都被定义的情况下，首先我们为交叉验证进行拆分，然后生成的训练集将在训练/验证中进行拆分。<i>例如</i> <i>初始训练集大小:100行</i></p><div><i>-kcv 5<b> </b></i></div><div><i>-tvs<b> </b>0.8 </i> </div><div><i>-Test Set : 20 rows</i> </div><div><i>-Training Set :  64 ( 0.8 * 80)</i> </div><div><i>-Validation Set : 16 (0.2 * 80)</i></div></td></tr><tr><td class="tg-vc88 translated"><b> kcvmd </b></td><td class="tg-vyw9 translated">保存通过交叉验证训练的模型的目录(默认为不保存)。</td></tr><tr><td class="tg-vc88 translated"><b> kcvmn </b></td><td class="tg-vyw9 translated">在每个文件夹中学习模型的名称。它将以折叠号为前缀(默认为空)。</td></tr><tr><td class="tg-vc88 translated"><b>稀疏</b></td><td class="tg-vyw9 translated">允许对训练集进行稀疏数据处理(这意味着您不需要为每个样本指定所有没有值的特征)</td></tr><tr><td class="tg-vc88 translated"><b>树</b></td><td class="tg-vyw9 translated">集合的树的数量(默认值=1000)。<br/>学习问题越复杂，我们需要的树就越多，但是一定要小心，不要过拟合训练数据</td></tr><tr><td class="tg-vc88 translated"><b>叶子</b></td><td class="tg-vyw9 translated">每棵树的叶子数(默认值=100)。<br/>根据树的数量，仔细调整该值以避免过拟合树是很重要的。</td></tr><tr><td class="tg-vc88 translated"><b>收缩</b></td><td class="tg-vyw9 translated">这是算法的学习率(默认值=0.1) <br/>如果这过于激进，排名模型将快速适应训练集，但不会对验证集评估做出正确反应，这意味着整体模型较差。</td></tr><tr><td class="tg-vc88 translated"><b> tc </b></td><td class="tg-vyw9 translated">树分裂的候选阈值数。<br/> -1使用所有特征值(默认值=256) <br/>增加该值会增加模型的复杂性和可能的过拟合。建议从一个较低的值开始，然后根据您的要素的一般基数增加它。</td></tr><tr><td class="tg-vc88 translated"><b>大联盟</b></td><td class="tg-vyw9 translated">最小叶片支持–每个叶片必须包含的最小样本数(默认值=1)。如果我们想要处理异常值，这是一个非常重要的参数。<br/>我们可以调整该参数，使其仅包含具有大量样本的叶片，丢弃由弱支持验证的模式。</td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-42cdc13 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="42cdc13" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-096b003 ot-flex-column-vertical" data-id="096b003" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-dde1152 elementor-widget elementor-widget-text-editor" data-id="dde1152" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">调整模型训练参数不是一件容易的事情。<br/>除了一般建议之外，仔细比较评估指标得分的试验&amp;误差是一条可行之路。<br/>当我们用不同的调整配置生成了许多模型时，在一个通用测试集上比较不同的模型会有所帮助。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b674f4c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b674f4c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6fecbba ot-flex-column-vertical" data-id="6fecbba" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7345035 elementor-widget elementor-widget-iheading" data-id="7345035" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">将模型转换为Json</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bda056a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bda056a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-794e179 ot-flex-column-vertical" data-id="794e179" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5786f24 elementor-widget elementor-widget-text-editor" data-id="5786f24" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>We finally produced a model which is performing quite well on our Test set.</div><div>Cool, it’s the time to push it to Solr and see the magic in action.</div><div>But before we can do that, we need to convert the model generated by the Machine Learning libraries into the Json format Solr expects ( you remember the section about the models supported ? )</div><div> </div><div>Taking as example a LambdaMART model, Ranklib will produce an xml model.</div><div>So you will need to parse it and convert it to the Json format.</div><div>Would be interesting to implement directly in RankLib the possibility of selecting in output the Json format expected by Solr.</div><div>Any contribution is welcome, <a style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;" href="https://web.archive.org/web/20220930000224/https://sease.io/2022/07/rre-enterprise-evaluation-overview-dashboard.html">RankLib Extension for Json Models</a><span style="color: var( --e-global-color-text ); font-weight: var( --e-global-typography-text-font-weight );">!</span></div><div>In the next part, we’ll see how to visualise and understand better the model generated.</div><div>This activity can be vital to debug the model, see the most popular features, find out some anomalies in the training set and actually assess the validity of the model itself.</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1047369 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1047369" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-238c9e3 ot-flex-column-vertical" data-id="238c9e3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-15cd344 elementor-widget elementor-widget-iheading" data-id="15cd344" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-1cc6d85 elementor-widget elementor-widget-text-editor" data-id="1cc6d85" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20220930000224/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220930000224/https://sease.io/training/learning-to-rank-training">学习排名</a>培训？<br/>我们也提供这些主题的咨询，<a href="https://web.archive.org/web/20220930000224/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1341116 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1341116" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-39af152 ot-flex-column-vertical" data-id="39af152" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-df18b5e elementor-widget elementor-widget-iheading" data-id="df18b5e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-00b1a1c elementor-widget elementor-widget-text-editor" data-id="00b1a1c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Solr正在学习更好地排名的帖子吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-0b6925a elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="0b6925a" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220930000224/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664496143"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

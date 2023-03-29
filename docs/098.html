@@ -1,0 +1,164 @@
+<html>
+<head>
+<title>RRE-Enterprise: How to Manage Your Data Collections</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">RRE企业:如何管理您的数据收集</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2022/06/rre-enterprise-how-to-manage-your-data-collections.html#0001-01-01">https://web.archive.org/web/sease.io/2022/06/rre-enterprise-how-to-manage-your-data-collections.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-34d8f7c5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="34d8f7c5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2cc1c8b6 ot-flex-column-vertical" data-id="2cc1c8b6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-57441329 elementor-widget elementor-widget-text-editor" data-id="57441329" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">一旦配置了<a href="https://web.archive.org/web/20221203000538/https://sease.io/2021/12/rre-enterprise-how-to-manage-your-ratings.htm">黄金真理</a>和<a href="https://web.archive.org/web/20221203000538/https://sease.io/2021/12/rre-enterprise-how-to-set-up-your-target-search-engine.htm">目标搜索引擎</a>，现在是时候定义数据集合了。<br/>RRE企业中的每个数据集合都链接到一个<strong>弹性搜索索引</strong>或<strong> Apache Solr集合</strong>。<br/>它对一组共享相同数据模型和结构的数据进行建模。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:image {"id":44611,"sizeSlug":"large","linkDestination":"none"} --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="44611" data-permalink="https://web.archive.org/web/20221203000538/https://sease.io/2022/06/rre-enterprise-how-to-manage-your-data-collections.html/1-3" data-orig-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?fit=2510%2C434&amp;ssl=1" data-orig-size="2510,434" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="1-3" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?fit=300%2C52&amp;ssl=1" data-large-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?fit=1024%2C177&amp;ssl=1" decoding="async" loading="lazy" width="2510" height="434" class="wp-image-44611" src="../Images/f853886d4fa970179ef77a002ec394f9.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?w=2510&amp;ssl=1 2510w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?resize=300%2C52&amp;ssl=1 300w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?resize=1024%2C177&amp;ssl=1 1024w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?resize=768%2C133&amp;ssl=1 768w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?resize=1536%2C266&amp;ssl=1 1536w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?resize=2048%2C354&amp;ssl=1 2048w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?resize=720%2C124&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/1-3.png?resize=1024%2C177&amp;ssl=1"/></figure>
+<p class="translated"><!-- /wp:image --></p>
+<p class="translated"><!-- wp:heading --></p>
+<h2 class="translated">映射</h2>
+<p class="translated"><!-- /wp:heading --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated"><strong> Elasticsearch </strong>和<strong> Solr </strong>中的一个文档被表示为一个映射<strong>字段名</strong> - &gt; <strong>值</strong>，可能包含几十个字段。<br/>为了简化RRE企业搜索结果列表的浏览和调试，可以定义感兴趣字段的子集。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:image {"id":44613,"sizeSlug":"large","linkDestination":"none"} --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="44613" data-permalink="https://web.archive.org/web/20221203000538/https://sease.io/2022/06/rre-enterprise-how-to-manage-your-data-collections.html/2-2" data-orig-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?fit=2468%2C539&amp;ssl=1" data-orig-size="2468,539" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="2-2" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?fit=300%2C66&amp;ssl=1" data-large-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?fit=1024%2C224&amp;ssl=1" decoding="async" loading="lazy" width="2468" height="539" class="wp-image-44613" src="../Images/a73b4f2dea43cb1bea4b03e438fc675e.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?w=2468&amp;ssl=1 2468w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?resize=300%2C66&amp;ssl=1 300w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?resize=1024%2C224&amp;ssl=1 1024w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?resize=768%2C168&amp;ssl=1 768w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?resize=1536%2C335&amp;ssl=1 1536w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?resize=2048%2C447&amp;ssl=1 2048w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?resize=720%2C157&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/2-2.png?resize=1024%2C224&amp;ssl=1"/>
+<p> </p>
+<figcaption>Currently, it’s supported to define: <br/>– a unique identifier field for the collection<br/>– the field containing a descriptive title <br/>…and you are good to go.<br/>The name of the collection must be associated with the mapping so that it can be retrieved at evaluation time.</figcaption>
+</figure>
+<p class="translated"><!-- /wp:image --></p>
+<p class="translated"><!-- wp:heading --></p>
+<h2 class="translated">测试数据集</h2>
+<p class="translated"><!-- /wp:heading --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">如果你在一个嵌入式搜索引擎实例上处理一个集合，当你在评估时启动它们时，有必要将一些数据推送到<strong> Elasticsearch </strong>或<strong> Solr </strong>。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">具体来说，您需要向<strong> RRE企业</strong>提供准备黄金真理评级集时使用的相同数据。<br/> <strong>用于嵌入式评估<strong>的每个评级集</strong>恰好与一个测试数据集</strong>相关联。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">上传测试数据集非常简单:</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:image {"id":44616,"sizeSlug":"large","linkDestination":"none"} --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="44616" data-permalink="https://web.archive.org/web/20221203000538/https://sease.io/2022/06/rre-enterprise-how-to-manage-your-data-collections.html/3-2" data-orig-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?fit=2636%2C1358&amp;ssl=1" data-orig-size="2636,1358" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="3-2" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?fit=300%2C155&amp;ssl=1" data-large-file="https://web.archive.org/web/20221203000538/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?fit=1024%2C528&amp;ssl=1" decoding="async" loading="lazy" width="2636" height="1358" class="wp-image-44616" src="../Images/d7ec2027800e5c367d16f6a6af28113a.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?w=2636&amp;ssl=1 2636w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?resize=300%2C155&amp;ssl=1 300w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?resize=1024%2C528&amp;ssl=1 1024w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?resize=768%2C396&amp;ssl=1 768w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?resize=1536%2C791&amp;ssl=1 1536w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?resize=2048%2C1055&amp;ssl=1 2048w, https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?resize=720%2C371&amp;ssl=1 720w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20221203000538im_/https://i0.wp.com/sease.io/wp-content/uploads/2021/12/3-2.png?resize=1024%2C528&amp;ssl=1"/></figure>
+<p class="translated"><!-- /wp:image --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated"><strong>注意</strong>如果你正在评估一个外部搜索引擎，你不需要担心RRE企业版的测试数据集。但是你需要格外小心，确保运行评估时其中的数据与评级一致。</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">我们现在准备运行我们的第一个评估！</p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated">请继续关注我们的下一篇博文！</p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0625848 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0625848" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9ad8ddc ot-flex-column-vertical" data-id="9ad8ddc" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-56baef2 elementor-widget elementor-widget-html" data-id="56baef2" data-element_type="widget" data-widget_type="html.default">
+				<div class="elementor-widget-container">
+			<iframe loading="lazy" width="560" height="515" src="https://web.archive.org/web/20221203000538if_/https://www.youtube.com/embed/32a6D3p2Yyc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""/>		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6605ca62 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6605ca62" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3d94d4f8 ot-flex-column-vertical" data-id="3d94d4f8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6ca0bc3f elementor-widget elementor-widget-iheading" data-id="6ca0bc3f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// BEGIN YOUR JOURNEY INTO THE SEARCH QUALITY EVALUATION</span>
+	        <h2 class="main-heading translated">评级评估企业</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-23ab4e2 elementor-align-center elementor-widget elementor-widget-ibutton" data-id="23ab4e2" data-element_type="widget" data-widget_type="ibutton.default">
+				<div class="elementor-widget-container">
+					<div class="ot-button">
+			<a href="https://web.archive.org/web/20221203000538/https://sease.io/rated-ranking-evaluator-enterprise" class="octf-btn octf-btn-primary">Discover more and download</a>
+	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-153e741 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="153e741" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2963c3be ot-flex-column-vertical" data-id="2963c3be" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-580de82e elementor-widget elementor-widget-iheading" data-id="580de82e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-16307656 elementor-widget elementor-widget-text-editor" data-id="16307656" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Drop constant features:一个现实世界的学习排名场景的帖子吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-18564461 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="18564461" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.11 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20221203000538/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1670025938"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

@@ -1,0 +1,356 @@
+<html>
+<head>
+<title>Distributed Search Tips for Apache Solr</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">Apache Solr的分布式搜索技巧</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2017/11/distributed-search-tips-for-apache-solr.html#0001-01-01">https://web.archive.org/web/sease.io/2017/11/distributed-search-tips-for-apache-solr.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-17a3b08 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="17a3b08" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fee466b ot-flex-column-vertical" data-id="fee466b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-23f8f36 elementor-widget elementor-widget-text-editor" data-id="23f8f36" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">分布式搜索是Apache Solr可伸缩性的基础:</p><p class="translated">可以跨同一集合的不同Apache Solr节点进行分布式搜索(在传统的<a href="https://web.archive.org/web/20220929234349/https://lucene.apache.org/solr/guide/6_6/distributed-search-with-index-sharding.html">【1】</a>或SolrCloud<a href="https://web.archive.org/web/20220929234349/https://lucene.apache.org/solr/guide/6_6/solrcloud.html" target="_blank" rel="noopener">【2】</a>架构中)，但也可以跨Solr cloud集群中的不同集合进行分布式搜索。<br/>当您将不同的系统(本应是独立的)放在适当的位置，并且您后来意识到聚合结果可能是一个额外的有用用例时，聚合来自不同集合的结果可能是有用的。<br/>这篇博客将关注在运行分布式搜索时可能发生的一些棘手情况(关于配置或细节，您可以参考Solr wiki)。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4b08b13 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4b08b13" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d477b5f ot-flex-column-vertical" data-id="d477b5f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-666d03f elementor-widget elementor-widget-iheading" data-id="666d03f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">综合资料的文件（intergrated Data File）</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dbee210 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dbee210" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1e6b707 ot-flex-column-vertical" data-id="1e6b707" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e3e7c24 elementor-widget elementor-widget-text-editor" data-id="e3e7c24" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">逆文档频率影响得分。<br/>这意味着<strong>与来自较小集合的类似文档相比，来自较大集合的文档可以从IDF获得提升</strong>。<br/>这是因为maxDoc计数被考虑为语料库大小，因此即使一个术语具有相同的文档频率，IDF也会受到集合大小的强烈影响。<br/>分布式IDF<a href="https://web.archive.org/web/20220929234349/https://lucene.apache.org/solr/guide/6_6/distributed-requests.html#DistributedRequests-ConfiguringstatsCache_DistributedIDF_">【3】</a>部分解决了问题:</p><p class="translated">当在同一个集合的不同片段之间分配搜索时，它工作得相当好。<br/>但是<strong>使用ExactStatCache并在同一个SolrCloud集群中交替使用单集合分布和多集合分布会产生一些缓存冲突。</strong></p><p> </p><p class="translated">具体来说，如果我们首先执行集合间查询，缓存的全局统计信息将是集合间全局统计信息，因此，如果我们随后执行单个集合分布式搜索，预览全局统计信息将保持缓存(反之亦然)。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8ffda85 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8ffda85" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9914e8a ot-flex-column-vertical" data-id="9914e8a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c05123a elementor-widget elementor-widget-iheading" data-id="c05123a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">调试评分</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-24cdd09 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="24cdd09" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0c8c6f1 ot-flex-column-vertical" data-id="0c8c6f1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-69e57c8 elementor-widget elementor-widget-text-editor" data-id="69e57c8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">真实分数和调试分数与分布式IDF不一致，这意味着调试查询将不会显示正确的分布式IDF和用于分布式搜索的正确分数计算<a href="https://web.archive.org/web/20220929234349/https://issues.apache.org/jira/browse/SOLR-7759" target="_blank" rel="noopener">【4】</a>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7d72049 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7d72049" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-79ee8cb ot-flex-column-vertical" data-id="79ee8cb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c8eafd9 elementor-widget elementor-widget-iheading" data-id="c8eafd9" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">相关性调整</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-12011cf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="12011cf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b452549 ot-flex-column-vertical" data-id="b452549" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3eb1d93 elementor-widget elementor-widget-text-editor" data-id="3eb1d93" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">Lucene/Solr分数不是概率性的或标准化的。对于同一个集合，我们可以通过不同的查询获得完全不同的评分标准。<br/>当我们<strong>调整我们的相关性，增加乘法或加法提升</strong>时，情况变得更加复杂。<br/>不同的集合可能意味着完全不同的提升逻辑，这可能导致一个集合的分数与另一个集合相比处于完全不同的等级。<br/>在调整不同集合的搜索相关性时，我们需要格外小心，并尽可能以最兼容的方式配置分布式请求处理程序。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-97a429d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="97a429d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a2d690e ot-flex-column-vertical" data-id="a2d690e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7b25c69 elementor-widget elementor-widget-iheading" data-id="7b25c69" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">请求处理程序</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-763d63e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="763d63e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d9a8b98 ot-flex-column-vertical" data-id="d9a8b98" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7dd1c3a elementor-widget elementor-widget-text-editor" data-id="7dd1c3a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">使用分布式搜索时，仔细指定要使用的请求处理程序非常重要。<br/>请求将命中一个节点中的一个集合，然后在分布时，相同的请求处理程序将被跨其他节点的其他集合调用。<br/>如有必要，可以配置聚合器请求处理器和本地请求处理器(如果我们希望使用本地参数对每个集合使用不同的评分公式，这可能会很有用) :</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f47df09 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f47df09" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3b7fd81 ot-flex-column-vertical" data-id="3b7fd81" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2bd06bc elementor-widget elementor-widget-iheading" data-id="2bd06bc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">聚合器请求处理程序</h4>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9051c90 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9051c90" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4be35fb ot-flex-column-vertical" data-id="4be35fb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-fe87f04 elementor-widget elementor-widget-text-editor" data-id="fe87f04" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">它在接收请求的第一个节点上执行。<br/>它将分发请求，然后汇总结果。<br/>它必须描述搜索中所有集合共有的参数。<br/>是主请求中指定的。<br/>例如<br/><em><a href="https://web.archive.org/web/20220929234349/http://localhost:8983/solr/collection1/" rel="nofollow">http://localhost:8983/Solr/collection 1/</a><strong>选择</strong>？</em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e993931 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e993931" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5cdc705 ot-flex-column-vertical" data-id="5cdc705" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-051c016 elementor-widget elementor-widget-iheading" data-id="051c016" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">本地请求处理程序</h4>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6a2432a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6a2432a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fef12f0 ot-flex-column-vertical" data-id="fef12f0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d943c51 elementor-widget elementor-widget-text-editor" data-id="d943c51" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">它是通过参数指定的:<strong> shards.qt= <br/> </strong>在第一个接收到分布式查询的节点上执行。<br/>这可用于在每个集合的基础上使用特定字段或参数。<br/>本地请求处理器可以使用感兴趣的集合本地的字段和搜索组件。</p><p class="translated">例如<br/><a href="https://web.archive.org/web/20220929234349/http://localhost:8983/solr/collection1/select?q=*:*&amp;collection=collection1,collection2" rel="nofollow">http://localhost:8983/Solr/collection 1/select？q=*:* &amp;集合=集合1，集合2 </a> <strong> &amp;碎片. Qt =局部选择</strong></p><p class="translated"><strong> N.B. </strong>如果您想要定义本地查询解析器规则，例如影响分数的本地edismax配置，使用本地请求处理程序可能会很有用。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4faf894 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4faf894" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6cca4c8 ot-flex-column-vertical" data-id="6cca4c8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f60ddfa elementor-widget elementor-widget-iheading" data-id="f60ddfa" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">唯一键</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3213dfd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3213dfd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-dd25f22 ot-flex-column-vertical" data-id="dd25f22" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-14ef81f elementor-widget elementor-widget-text-editor" data-id="14ef81f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">不同集合的唯一键字段必须相同<strong>。<br/> </strong>此外，该值在不同的集合中应该是唯一的，以保证正确的行为。如果我们不遵守这条规则，Solr将无法聚集结果并引发一个异常。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6a59e8c8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6a59e8c8" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4d862bf4 ot-flex-column-vertical" data-id="4d862bf4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2c67a85b elementor-widget elementor-widget-iheading" data-id="2c67a85b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-2bd94bf2 elementor-widget elementor-widget-text-editor" data-id="2bd94bf2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20220929234349/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220929234349/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训？<br/>我们也提供这些主题的咨询，<a href="https://web.archive.org/web/20220929234349/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-af87903 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="af87903" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6d98ba9 ot-flex-column-vertical" data-id="6d98ba9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-47cc0d0 elementor-widget elementor-widget-iheading" data-id="47cc0d0" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-759202b elementor-widget elementor-widget-text-editor" data-id="759202b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Apache Solr分布式搜索技巧的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-07d1c97 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="07d1c97" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929234349/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664495028"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

@@ -1,0 +1,766 @@
+<html>
+<head>
+<title>Apache Solr Facets and ACL Filters Using Tag and Exclusion</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">使用标记和排除的Apache Solr方面和ACL过滤器</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2018/12/apache-solr-facets-and-acl-filters-using-tag-and-exclusion.html#0001-01-01">https://web.archive.org/web/sease.io/2018/12/apache-solr-facets-and-acl-filters-using-tag-and-exclusion.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-a886709 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a886709" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b97344b ot-flex-column-vertical" data-id="b97344b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5ce2354 elementor-widget elementor-widget-text-editor" data-id="5ce2354" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">当结果中的文档被访问控制列表过滤时，字段上的方面聚合会发生什么情况？在这种情况下，使用facet mincount参数很重要。<br/>指定结果集中出现在响应中的方面值的最小计数:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><strong> mincount=0 </strong>，在响应中返回语料库中存在的所有方面值。这包括与已被ACL过滤掉的文档相关的内容(0计数面)。这可能会导致一些不好的副作用:比如用户看到了他/她不应该看到的方面值(因为ACL从结果集中过滤掉了那个文档)。</li>
+<li class="translated"><strong> mincount=1 </strong>，只返回与结果集中至少一个文档匹配的方面值。这种配置是安全的，用户将只能看到由ACL控制的方面值。他们实际上只会看到他们应该看到的东西。</li>
+</ul>
+</li>
+</ul>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph -->T11】</p>
+<p class="translated">但是，如果您希望看到0计算方面值，但保留ACL，会发生什么情况呢？<br/>这可能有助于您更好地理解值在整个语料库中的分布，但是ACL仍然有效，因此用户仍然只能看到他们应该看到的可能值。<br/>标签和排除在这种情况下很方便。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c6b779f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c6b779f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1bcae65 ot-flex-column-vertical" data-id="1bcae65" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8caa8c0 elementor-widget elementor-widget-iheading" data-id="8caa8c0" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">刻面标记和排除</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b68012a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b68012a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b166e99 ot-flex-column-vertical" data-id="b166e99" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0a307e7 elementor-widget elementor-widget-text-editor" data-id="0a307e7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">标记和排除是Apache Solr中一个非常重要的特性，你不会相信它被误用或完全忽略了多少次，给用户带来了不稳定的体验。<br/>让我们看看它是如何工作的:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4d3d680 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4d3d680" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2e57864 ot-flex-column-vertical" data-id="2e57864" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c213fc1 elementor-widget elementor-widget-iheading" data-id="c213fc1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">磨尖</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d545c85 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d545c85" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b9585ba ot-flex-column-vertical" data-id="b9585ba" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5c97057 elementor-widget elementor-widget-text-editor" data-id="5c97057" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">您可以使用Solr本地参数语法标记过滤器查询:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0570174 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0570174" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a92de16 ot-flex-column-vertical" data-id="a92de16" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-57de2ff elementor-widget elementor-widget-text-editor" data-id="57de2ff" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;">fq={!tag=docTypeFilter}doctype:pdf</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3961cfa ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3961cfa" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4d62432 ot-flex-column-vertical" data-id="4d62432" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bd51059 elementor-widget elementor-widget-text-editor" data-id="bd51059" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这同样适用于主查询(如果您使用显式查询解析器，则有一些警告) :</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6fcdf4d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6fcdf4d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0e0b749 ot-flex-column-vertical" data-id="0e0b749" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0acd46d elementor-widget elementor-widget-text-editor" data-id="0acd46d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted" style="line-height: 1.71429; color: #6d6d6d;">q={!tag=mainQuery}I am the main query<br/><br/>q={!edismax qf=text title tag=mainQuery}I am the main query</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8aaaeb0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8aaaeb0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f806864 ot-flex-column-vertical" data-id="f806864" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-29eee4b elementor-widget elementor-widget-text-editor" data-id="29eee4b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">当分配一个标签时，我们给Solr单独识别各种搜索子句(例如主查询或过滤查询)的可能性。<br/>实际上，这是一种为搜索查询或过滤器分配标识符的方式。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-db92ba9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="db92ba9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0b68642 ot-flex-column-vertical" data-id="0b68642" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-528dc11 elementor-widget elementor-widget-iheading" data-id="528dc11" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">排除在传统刻面中</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-af26695 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="af26695" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-12c1714 ot-flex-column-vertical" data-id="12c1714" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5b31f6a elementor-widget elementor-widget-text-editor" data-id="5b31f6a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="has-text-align-left translated">当应用过滤器查询时，Solr减少了结果空间，消除了不满足附加过滤器的文档。<br/>让我们假设我们想要计算结果集上一个方面的值，忽略由过滤查询添加的额外过滤。<br/>实际上可以等效于在应用减少结果集的过滤器之前对结果集状态的方面值进行计数的概念。Apache Solr允许您这样做，而不会影响最终返回的结果。</p>
+<p class="translated"><!-- wp:paragraph {"align":"left"} --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated">这被称为排斥，可以逐个方面地应用。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d1fcfa1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d1fcfa1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c91444a ot-flex-column-vertical" data-id="c91444a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-12cf6be elementor-widget elementor-widget-text-editor" data-id="12cf6be" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;">fq={!tag=docTypeFilter}doctype:pdf...&amp;facet=true&amp;<br/>facet.field={!ex=docTypeFilter}doctype</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6b4a112 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6b4a112" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d510663 ot-flex-column-vertical" data-id="d510663" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ec491aa elementor-widget elementor-widget-text-editor" data-id="ec491aa" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这将计算结果集上的“doctype”字段方面，不包括带标记的筛选器(因此，在计算此类聚合时，将不应用“doctype:pdf”筛选器，而将在扩展的结果集上计算计数)。所有其他方面、聚合和结果集本身都不会受到影响。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6a69a73 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6a69a73" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f9de791 ot-flex-column-vertical" data-id="f9de791" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0931bf3 elementor-widget elementor-widget-text-editor" data-id="0931bf3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted" style="line-height: 1.71429; color: #6d6d6d;">1.&lt;Wanted Behaviour - applying tag and exclusion&gt;<br/><code>=== Document Type ===   </code><br/><code>[ ] Word (42)   </code><br/><code>[x] PDF  (96)   </code><br/><code>[ ] Excel(11)   </code><br/><code>[ ] HTML (63)</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-74f006a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="74f006a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-aa61989 ot-flex-column-vertical" data-id="aa61989" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-eeb22e6 elementor-widget elementor-widget-text-editor" data-id="eeb22e6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这对于单值字段尤其有用:<br/>当选择一个方面值并刷新搜索时，如果不应用标记和排除，您将只在方面中获得该值，从而破坏该字段的细化和探索方面功能。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-86385ad ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="86385ad" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9f9ac40 ot-flex-column-vertical" data-id="9f9ac40" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b0e8835 elementor-widget elementor-widget-text-editor" data-id="b0e8835" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted" style="line-height: 1.71429; color: #6d6d6d;">2.&lt;Unwanted Behaviour - out of the box&gt;<br/><code>=== Document Type ===   </code><br/><code>[ ] Word (0)   </code><br/><code>[x] PDF  (96)   </code><br/><code>[ ] Excel(0)   </code><br/><code>[ ] HTML (0)</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-75630d8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="75630d8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d5cb9ff ot-flex-column-vertical" data-id="d5cb9ff" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f025fca elementor-widget elementor-widget-text-editor" data-id="f025fca" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted" style="line-height: 1.71429; color: #6d6d6d;">3.&lt;Unwanted Behaviour - mincount=1&gt;<br/><code>=== Document Type ===     </code><br/><code>[x] PDF  (96)   </code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-32c9d8f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="32c9d8f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-16bd856 ot-flex-column-vertical" data-id="16bd856" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-947ffd6 elementor-widget elementor-widget-text-editor" data-id="947ffd6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">正如你在2中看到的。第三。方面变得几乎不可用于进一步探索结果，这可能会使用户体验被大量来回选择和取消选择过滤器的活动所分割。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5e3b993 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5e3b993" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e96fef3 ot-flex-column-vertical" data-id="e96fef3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1b0be4b elementor-widget elementor-widget-iheading" data-id="1b0be4b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">在Json Faceting中排除</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f1302e2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f1302e2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0c49abf ot-flex-column-vertical" data-id="0c49abf" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4245ded elementor-widget elementor-widget-text-editor" data-id="4245ded" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在标记过滤器之后，用json.facet方法应用排除非常简单:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7d7d0e8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7d7d0e8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-615998c ot-flex-column-vertical" data-id="615998c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f01be1d elementor-widget elementor-widget-text-editor" data-id="f01be1d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted" style="line-height: 1.71429; color: #6d6d6d;">visibleValues: {<br/>     type: terms,<br/>     field: cat,<br/>     mincount: 1,<br/>     limit: 100,<br/>     <strong>domain</strong>: {<br/>         <strong>excludeTags</strong>: &lt;tag&gt;<br/>     }<br/> }</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f6f2ca9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f6f2ca9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2370813 ot-flex-column-vertical" data-id="2370813" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4a4dc93 elementor-widget elementor-widget-text-editor" data-id="4a4dc93" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">定义json方面时，应用排除只是添加定义了excludeTags的域节点。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0439f22 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0439f22" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0d6ffd3 ot-flex-column-vertical" data-id="0d6ffd3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0d88e83 elementor-widget elementor-widget-iheading" data-id="0d88e83" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">标记和排除以在0次计数中保留Acl过滤</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5862f35 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5862f35" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3652eb2 ot-flex-column-vertical" data-id="3652eb2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c9033a6 elementor-widget elementor-widget-iheading" data-id="c9033a6" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">问题</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8cea421 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8cea421" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d2ddead ot-flex-column-vertical" data-id="d2ddead" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-363bfee elementor-widget elementor-widget-text-editor" data-id="363bfee" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">用户受制于一组限制其结果可见性ACL。</li>
+<li class="translated">他们还希望看到0计数方面，以便更好地理解结果集和语料库。</li>
+<li class="translated">您不想使ACL控制无效，所以您不希望它们看到合理的方面值。</li>
+</ul>
+</li>
+</ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1044825 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1044825" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a84a624 ot-flex-column-vertical" data-id="a84a624" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9680265 elementor-widget elementor-widget-iheading" data-id="9680265" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">标记主查询和Json Faceting</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f7b2725 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f7b2725" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-22fa6ed ot-flex-column-vertical" data-id="22fa6ed" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bf05b95 elementor-widget elementor-widget-text-editor" data-id="bf05b95" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这是通过Json faceting的标记和排除的组合实现的。<br/>首先，我们要标记主查询。<br/>我们假设ACL控制将是一个过滤查询(我们建议使用经过适当调整的过滤查询来应用ACL过滤)。<br/>标记主查询并将其从方面计算中排除将允许我们获得ACL过滤语料库中的所有方面值(主查询将被排除，但ACL过滤查询仍将被应用)。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a1b8ef8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a1b8ef8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bc1d12e ot-flex-column-vertical" data-id="bc1d12e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3b924a8 elementor-widget elementor-widget-text-editor" data-id="3b924a8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted" style="line-height: 1.71429; color: #6d6d6d;">q={!edismax tag=mainQuery qf=name}query&amp;fq=aclField:user1...<br/>json.facet={visibleValues: {<br/>     type: terms,<br/>     field: cat,<br/>     mincount: 1,<br/>     limit: 100,<br/>     <strong>domain</strong>: {<br/>         <strong>excludeTags</strong>: mainQuery<br/>     }<br/> }}</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8c98475 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8c98475" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9ca31c1 ot-flex-column-vertical" data-id="9ca31c1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-217d0e6 elementor-widget elementor-widget-text-editor" data-id="217d0e6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我们就快到了，这个方面聚合将给出原始语料库(应用了ACL)中对用户可见的所有方面值的计数。<br/>但是我们想要的是基于当前结果集和所有可见的0计数方面的正确计数。<br/>为此，我们可以向Json分面请求添加一个块:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b32b696 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b32b696" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-83e3193 ot-flex-column-vertical" data-id="83e3193" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3c54e41 elementor-widget elementor-widget-text-editor" data-id="3c54e41" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted" style="line-height: 1.71429; color: #6d6d6d;">q={!edismax tag=mainQuery qf=name}query&amp;fq=aclField:user1...<br/>json.facet={<br/>     resultSetCounts: {<br/>         type: terms,<br/>         field: category,<br/>         <strong>mincount</strong>: 1<br/>     },<br/>     visibleValues: {<br/>         type: terms,<br/>         field: category,<br/>         <strong>mincount</strong>: 1,<br/>         <strong>domain</strong>: {<br/>             <strong>excludeTags</strong>: mainQuery<br/>         }<br/>     }<br/> }</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-eb3024c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="eb3024c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e562d4e ot-flex-column-vertical" data-id="e562d4e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-afb93f4 elementor-widget elementor-widget-text-editor" data-id="afb93f4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><strong>resultset counts</strong>–是结果集中的计数，仅包括不为0的计数方面值。这是用户在具有正确计数的当前结果集上可见的值列表。</li>
+<li class="translated"><strong>visible values</strong>–用户应该可以看到结果集中的所有方面值吗</li>
+</ul>
+</li>
+</ul>
+<p class="translated"><!-- wp:list -->T12<!-- wp:paragraph -->T14】</p>
+<p class="translated">然后，根据我们想要提供的用户体验，我们可以使用这些信息块来适当地呈现最终的响应。<br/>例如，我们可能想要显示所有可见的值，并在可用时将结果集计数中的一个计数与它们相关联。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4d5554c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4d5554c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-38a132c ot-flex-column-vertical" data-id="38a132c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f57c450 elementor-widget elementor-widget-text-editor" data-id="f57c450" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre class="wp-block-preformatted" style="line-height: 1.71429; color: #6d6d6d;"><code>=== Document Type - Result Counts ===   </code><br/><code>[ ] Word (10)   </code><br/><code>[ ] PDF  (7)   </code><br/><code>[ ] Excel(5)   </code><br/><code>[ ] HTML (2)</code><br/><code><br/>=== Document Type - Visible Values ===   </code><br/><code>[ ] Word (100)   </code><br/><code>[ ] PDF  (75)   </code><br/><code>[ ] Excel(54)   </code><br/><code>[ ] HTML (34)</code><br/><code>[ ] Jpeg (31)   </code><br/><code>[ ] Mp4  (14)</code><br/><code><em> [ ] SecretDocType1 (0) -&gt; not visible, mincount=1 in visibleValues</em></code><em><br/></em><code><em> [ ] SecretDocType2 (0) -&gt; not visible, mincount=1 in visibleValues</em></code><br/><br/><code>=== Document Type - Final Result for users ===   </code><br/><code>[ ] Word (10) <em>-&gt; count is replaced with effective result count</em>  </code><br/><code>[ ] PDF  (7)  <em>-&gt; count is replaced with effective result count</em> </code><br/><code>[ ] Excel(5)  <em>-&gt; count is replaced with effective result count</em></code><br/><code>[ ] HTML (2)<em>-&gt; count is replaced with effective result count</em></code><br/><code>[ ] Jpeg (+31)   </code><br/><code>[ ] Mp4  (+14)</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-95da955 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="95da955" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2987a54 ot-flex-column-vertical" data-id="2987a54" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-200199e elementor-widget elementor-widget-iheading" data-id="200199e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">额外收获:如果我在Solrconfig.xml中定义查询解析器会怎么样</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-23873e4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="23873e4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-285f2d6 ot-flex-column-vertical" data-id="285f2d6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-91a32f7 elementor-widget elementor-widget-text-editor" data-id="91a32f7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果您使用solrconfig.xml中定义的查询解析器，这个解决方案仍然有效。需要格外小心来标记主查询。<br/>您可以使用Solr请求参数中的本地参数来实现:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-933e49c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="933e49c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7a3b198 ot-flex-column-vertical" data-id="7a3b198" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-65f0a19 elementor-widget elementor-widget-text-editor" data-id="65f0a19" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;"><strong><em>solrconfig.xml</em></strong><br/>&lt;lst name="defaults"&gt;<br/>...<br/>&lt;str name="q"&gt;{!type=edismax tag=mainQuery v=$qq}&lt;/str&gt;<br/>&lt;str name="qq"&gt;*:*&lt;/str&gt;<br/>...<br/><br/><strong><em>Query Time</em></strong><br/>.../solr/techproducts/browse?<strong>qq=ipod mini</strong>&amp;fq=acl:user1&amp;json.facet=...</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d76ce6b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d76ce6b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7746929 ot-flex-column-vertical" data-id="7746929" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0d46175 elementor-widget elementor-widget-text-editor" data-id="0d46175" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">希望这有助于处理ACL或通用过滤器查询和刻面！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3feadea9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3feadea9" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4f19f48 ot-flex-column-vertical" data-id="4f19f48" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7b02e414 elementor-widget elementor-widget-iheading" data-id="7b02e414" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-6a045c16 elementor-widget elementor-widget-text-editor" data-id="6a045c16" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220930004226/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220930004226/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训吗？<br/>我们还提供关于这些主题的咨询，<a href="https://web.archive.org/web/20220930004226/https://sease.io/contacts">如果您想让您的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3226cd83 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3226cd83" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-533cbde5 ot-flex-column-vertical" data-id="533cbde5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f5cbbff elementor-widget elementor-widget-iheading" data-id="f5cbbff" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-69072364 elementor-widget elementor-widget-text-editor" data-id="69072364" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Apache Solr方面和ACL过滤器的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-71e8fc30 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="71e8fc30" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220930004226/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664498546"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

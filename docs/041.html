@@ -1,0 +1,729 @@
+<html>
+<head>
+<title>Introducing Weighted Synonyms in Apache Lucene/Solr</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">在Apache Lucene/Solr中引入加权同义词</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2020/03/introducing-weighted-synonyms-in-apache-lucene.html#0001-01-01">https://web.archive.org/web/sease.io/2020/03/introducing-weighted-synonyms-in-apache-lucene.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-8007a44 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8007a44" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f7bc71d ot-flex-column-vertical" data-id="f7bc71d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a63913e elementor-widget elementor-widget-text-editor" data-id="a63913e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这篇博文是关于我们对Apache Lucene/Solr项目的最新贡献:<br/>介绍了为同义词分配不同权重的能力。<br/>这篇文章旨在帮助那些处理复杂同义词词典的用户，在这些词典中，为每个同义词关联一个数字权重是很重要的，例如，提升在该领域中更重要或更接近原始概念的同义词。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4a9ac6a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4a9ac6a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fbf4d81 ot-flex-column-vertical" data-id="fbf4d81" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d257630 elementor-widget elementor-widget-iheading" data-id="d257630" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">贡献</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-724311e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="724311e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ed3e19b ot-flex-column-vertical" data-id="ed3e19b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-22a3118 elementor-widget elementor-widget-text-editor" data-id="22a3118" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">贡献详见以下吉拉官方发布:<br/>-12238<a href="https://web.archive.org/web/20220925165828/https://issues.apache.org/jira/browse/SOLR-12238">【1】</a><br/>LUCENE-9171<a href="https://web.archive.org/web/20220925165828/https://issues.apache.org/jira/browse/LUCENE-9171">【2】</a></p>
+<p class="translated">在Github Pull请求<a href="https://web.archive.org/web/20220925165828/https://github.com/apache/lucene-solr/pull/357">【3】</a>中跟踪了代码审查和合并过程</p>
+<p class="translated">这个新特性将在Apache Lucene/Solr 8.5中提供</p>
+<p class="translated">变化主要发生在Lucene端:<br/>—<strong>新的令牌过滤器，</strong>能够提取权重并将其存储为令牌提升属性<br/>—<strong>查询构建</strong>，检查提升属性并在出现时使用它们构建提升查询</p>
+<p class="translated">这使得Apache Solr和Elasticsearch(即将推出)都可以使用这个贡献。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">Solr方面，这一变化影响了Solr基本查询解析器，以兼容同义词查询方式。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-cf7cc24 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="cf7cc24" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8e65831 ot-flex-column-vertical" data-id="8e65831" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9827aae elementor-widget elementor-widget-iheading" data-id="9827aae" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">阿帕奇索尔</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9adc6a4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9adc6a4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-745d359 ot-flex-column-vertical" data-id="745d359" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a30fdf3 elementor-widget elementor-widget-iheading" data-id="a30fdf3" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">配置</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4ce2f56 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4ce2f56" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6ceb17d ot-flex-column-vertical" data-id="6ceb17d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5443d01 elementor-widget elementor-widget-text-editor" data-id="5443d01" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">启用查询时间加权同义词需要两种配置:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">按照delimitedBoost 令牌过滤器的语法，在synonyms.txt文件<strong>中定义带有关联权重的同义词(如果您愿意，可以使用托管REST API来完成这项工作)</strong></li>
+</ul>
+</li>
+</ul>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:list --> <!-- /wp:list --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated"><em>同义词. txt </em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bdb9ec7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bdb9ec7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8e82677 ot-flex-column-vertical" data-id="8e82677" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6a0bcfb elementor-widget elementor-widget-text-editor" data-id="6a0bcfb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><code style="box-sizing: inherit;">tiger, tigre|0.9
+lynx =&gt; lince|0.8, lynx_canadensis|0.9
+
+leopard, big cat|0.8, bagheera|0.9, panthera pardus|0.85
+lion =&gt; panthera leo|0.9, simba leo|0.8, kimba|0.75
+
+panthera pardus, leopard|0.6
+panthera tigris =&gt; tiger|0.99
+
+snow leopard, panthera uncia|0.9, big cat|0.8, white_leopard|0.6
+panthera onca =&gt; jaguar|0.95, big cat|0.85, black panther|0.65
+panthera blytheae, oldest|0.5 ancient|0.9 panthera</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3673444 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3673444" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8e6cfe4 ot-flex-column-vertical" data-id="8e6cfe4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a6c47c0 elementor-widget elementor-widget-text-editor" data-id="a6c47c0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">在schema.xml中定义一个fieldType，在查询时展开同义词后应用delimitedBoost过滤器</li>
+</ul>
+</li>
+</ul>
+<p class="translated"><!-- wp:list --> <!-- /wp:list --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated"><em> schema.xml </em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-cff2b02 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="cff2b02" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b388a40 ot-flex-column-vertical" data-id="b388a40" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-13c15cd elementor-widget elementor-widget-text-editor" data-id="13c15cd" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><span style="white-space: pre-wrap;">&lt;fieldType name="boostedSynonyms" class="solr.TextField" positionIncrementGap="100"  synonymQueryStyle="as_distinct_terms" autoGeneratePhraseQueries="true"&gt;
+    &lt;analyzer type="index"&gt;
+      ...
+    &lt;/analyzer&gt;
+    &lt;analyzer type="query"&gt;
+      ...
+      &lt;filter name="synonymGraph" synonyms="synonyms.txt" ignoreCase="true" expand="true"/&gt;
+      &lt;filter name="delimitedBoost"/&gt;
+    &lt;/analyzer&gt;
+  &lt;/fieldType&gt;</span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-35dec88 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="35dec88" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-34701cb ot-flex-column-vertical" data-id="34701cb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ec322d7 elementor-widget elementor-widget-text-editor" data-id="ec322d7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><strong>注意事项</strong>。默认情况下“|”用作权重的分隔符，如果您喜欢任何其他字符，可以使用“分隔符”参数:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-052990b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="052990b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-75944f6 ot-flex-column-vertical" data-id="75944f6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-88851a7 elementor-widget elementor-widget-text-editor" data-id="88851a7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><code style="box-sizing: inherit;">&lt;filter name="delimitedBoost" delimiter="/"/&gt;</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-58d94b6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="58d94b6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d781064 ot-flex-column-vertical" data-id="d781064" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f56701a elementor-widget elementor-widget-text-editor" data-id="f56701a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">仅此而已！<br/>现在您已经准备好探索同义词查询扩展的各种工作方式以及如何应用提升</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c1eb9cf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c1eb9cf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0a697e8 ot-flex-column-vertical" data-id="0a697e8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7330f6c elementor-widget elementor-widget-iheading" data-id="7330f6c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">询问时间</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ec98956 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ec98956" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0e7bfae ot-flex-column-vertical" data-id="0e7bfae" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-db80bb8 elementor-widget elementor-widget-text-editor" data-id="db80bb8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在查询时，您为同义词配置的权重将用于构建一个包装同义词的<strong> boost查询</strong>。<br/>在评分时，这是一个<strong>乘法因子</strong>，应用于同义词匹配产生的分数。</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated">例如，<br/>给定一个&lt; <strong> query1 </strong>，<strong> document1 </strong> &gt;对，其中document1是query 1<br/><strong>query 1</strong>= title:(老虎或tigre^0.8)<br/><strong>score(document 1)</strong>(让我们只考虑tigre^0.9分数部分</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7fc5748 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7fc5748" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-87f8043 ot-flex-column-vertical" data-id="87f8043" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d7c7805 elementor-widget elementor-widget-text-editor" data-id="d7c7805" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><code style="box-sizing: inherit;">2.5526304 = weight(title:tigre in 14) [SchemaSimilarity], result of:
+    2.5526304 = score(freq=1.0), product of:
+      0.8 = boost
+      6.531849 = idf
+      0.4884969 = tf</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-98d2549 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="98d2549" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0b97c0c ot-flex-column-vertical" data-id="0b97c0c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c94244d elementor-widget elementor-widget-text-editor" data-id="c94244d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如何解析带有同义词的查询？</p>
+<p class="translated">Apache Solr目前支持三种不同的同义词查询样式:</p>
+<p class="translated"><code><strong>as_same_term</strong></code>(默认):混合术语文档频率，即<code>SynonymQuery(tshirt,tee)</code>，其中每个术语将被视为同等重要，而与它们在信息语料库中的稀有程度无关(混合文档频率)<br/> <code><strong>pick_best</strong></code>在用0平局因子对<code>Dismax(tee,tshirt)</code>评分时选择最重要(最稀有的文档频率)的同义词。<br/> <code><strong>as_distinct_terms</strong></code>将评分偏向包含更多同义词的文档<code>(pants OR slacks)</code>。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph -->T31】</p>
+<p class="translated">您可以在schema.xml中配置同义词查询样式:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-92de907 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="92de907" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1f1969d ot-flex-column-vertical" data-id="1f1969d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-dd2f80a elementor-widget elementor-widget-text-editor" data-id="dd2f80a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><span style="white-space: pre-wrap;">  &lt;fieldType name="text_as_distinct" class="solr.TextField" positionIncrementGap="100"  synonymQueryStyle="as_distinct_terms" autoGeneratePhraseQueries="true"&gt;</span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3bb757b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3bb757b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fa6d6ea ot-flex-column-vertical" data-id="fa6d6ea" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0366d99 elementor-widget elementor-widget-text-editor" data-id="0366d99" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">根据您选择的同义词查询样式，您将解析不同的查询，为了这篇博文，下面的示例使用了<code><strong>as_same_term</strong></code> <strong>(默认)</strong>同义词查询样式。<br data-rich-text-line-break="true"/>加权同义词兼容所有的同义词查询样式。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3b935eb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3b935eb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a0e33b0 ot-flex-column-vertical" data-id="a0e33b0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-182e166 elementor-widget elementor-widget-text-editor" data-id="182e166" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 class="translated"><strong> <span style="color: #333333;">单词查询——单词同义词</span> </strong></h6>
+<p class="translated"><em> <br/>同义词. txt </em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bc62071 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bc62071" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ec29a02 ot-flex-column-vertical" data-id="ec29a02" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f1d1626 elementor-widget elementor-widget-text-editor" data-id="f1d1626" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><code style="box-sizing: inherit;">tiger, tigre|0.9</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-48b020a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="48b020a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d62a36f ot-flex-column-vertical" data-id="d62a36f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7711477 elementor-widget elementor-widget-text-editor" data-id="7711477" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><em>查询</em> =标题:老虎<br data-rich-text-line-break="true"/> <em>解析查询</em> : <br data-rich-text-line-break="true"/>同义词(标题:老虎<strong data-rich-text-format-boundary="true"> title:tigre^0.9 </strong>)</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d6ab826 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d6ab826" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-47207f9 ot-flex-column-vertical" data-id="47207f9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8f60cbb elementor-widget elementor-widget-text-editor" data-id="8f60cbb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 class="translated"><strong>单词查询-多词同义词</strong></h6>
+<p class="translated"><em> <br/>同义词. txt </em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-096a327 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="096a327" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5ae2fd8 ot-flex-column-vertical" data-id="5ae2fd8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-16b33a9 elementor-widget elementor-widget-text-editor" data-id="16b33a9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><code style="box-sizing: inherit;">leopard, big cat|0.8, bagheera|0.9, panthera pardus|0.85</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-82f333f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="82f333f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b4d3559 ot-flex-column-vertical" data-id="b4d3559" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-fba1469 elementor-widget elementor-widget-text-editor" data-id="fba1469" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="box-sizing: inherit; color: #6d6d6d;" class="translated"><em style="box-sizing: inherit;">查询</em> =标题:豹子<br style="box-sizing: inherit;"/> <em style="box-sizing: inherit;">解析查询</em> : <br style="box-sizing: inherit;"/> <strong style="box-sizing: inherit;">((标题:“大cat")^0.8 </strong>或<br style="box-sizing: inherit;"/><strong style="box-sizing: inherit;">)(title:bagheera)^0.9</strong>或<br style="box-sizing: inherit;"/> <strong style="box-sizing: inherit;">(标题:“潘塞拉pardus")^0.85 </strong>或<br style="box-sizing: inherit;"/>标题:豹子)</p>
+<p style="box-sizing: inherit; margin-bottom: 20px; color: #6d6d6d;" class="translated"><strong style="box-sizing: inherit;">注意:</strong>支持多术语同义词，权重被解析为短语查询的提升。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2e12c0d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2e12c0d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-38f13b7 ot-flex-column-vertical" data-id="38f13b7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d024a5b elementor-widget elementor-widget-text-editor" data-id="d024a5b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 class="translated"><strong>多词查询——多词同义词</strong></h6>
+<p class="translated"><br/> <em>同义词. txt </em></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4f456b1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4f456b1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9750d47 ot-flex-column-vertical" data-id="9750d47" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-36b5ef2 elementor-widget elementor-widget-text-editor" data-id="36b5ef2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><code style="box-sizing: inherit;">snow leopard, panthera uncia|0.9, big cat|0.8, white_leopard|0.6</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fdd871f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fdd871f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a0a8cc2 ot-flex-column-vertical" data-id="a0a8cc2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c0341d5 elementor-widget elementor-widget-text-editor" data-id="c0341d5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><em>查询</em> =标题:【雪豹】<br/> <em>解析后的查询</em> : <br/> <strong>((标题:“panthera uncia")^0.9 </strong>或<br/>T9】(标题:“大cat")^0.8 或<br/>T12】)(title:white_leopard)^0.6或<br/>标题:“雪豹”)</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated"><strong>注意:</strong>支持多术语同义词，权重被解析为短语查询的提升。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a75f4b5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a75f4b5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1d1e411 ot-flex-column-vertical" data-id="1d1e411" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b31666e elementor-widget elementor-widget-text-editor" data-id="b31666e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 class="translated"><strong>原有的助推兼容性</strong></h6>
+<p class="translated">该贡献与预先存在的提升兼容(例如来自edismax查询解析器)。</p>
+<p class="translated"><!-- /wp:paragraph -->T24】</p>
+<p class="translated"><em>同义词. txt </em></p>
+<p class="translated"><!-- /wp:paragraph --></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2a215b6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2a215b6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-78f2346 ot-flex-column-vertical" data-id="78f2346" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-921f965 elementor-widget elementor-widget-text-editor" data-id="921f965" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: inherit; line-height: 1.71429; color: #6d6d6d;"><code style="box-sizing: inherit;">snow leopard, panthera uncia|0.9, big cat|0.8, white_leopard|0.6</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0365a6a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0365a6a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9b38cef ot-flex-column-vertical" data-id="9b38cef" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7fd8694 elementor-widget elementor-widget-text-editor" data-id="7fd8694" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">Edismax <em>查询</em> =雪豹<br/> qf = title^10 <br/> <em>解析查询</em>:<br/>(<strong>(标题:【panthera uncia")^0.9 </strong>或<br/>t38】(标题:【大cat")^0.8 或<br/>t41】(title:white_leopard)^0.6或<br/>标题:【雪豹】<strong> ^10.0 </strong></p>
+<p class="translated"><!-- wp:paragraph -->T47<!-- wp:paragraph -->T49】</p>
+<p class="translated"><strong>注意:</strong>支持多术语同义词，权重被解析为短语查询的提升。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-448120a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="448120a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-12d40ab ot-flex-column-vertical" data-id="12d40ab" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3d5fa27 elementor-widget elementor-widget-iheading" data-id="3d5fa27" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">结论</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d912a40 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d912a40" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-456a502 ot-flex-column-vertical" data-id="456a502" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1e2fdee elementor-widget elementor-widget-text-editor" data-id="1e2fdee" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">要改进Apache Lucene/Solr中同义词的管理方式，还有很多工作要做，特别是上义词(泛化)和下义词(规范)。这只是第一步🙂<br/> <br/>未完待续</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1daf0591 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1daf0591" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3891110a ot-flex-column-vertical" data-id="3891110a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-775d528e elementor-widget elementor-widget-iheading" data-id="775d528e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-261cac2c elementor-widget elementor-widget-text-editor" data-id="261cac2c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220925165828/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220925165828/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训吗？<br/>我们也提供关于这些主题的咨询，<a href="https://web.archive.org/web/20220925165828/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3131f81 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3131f81" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f28d317 ot-flex-column-vertical" data-id="f28d317" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ad4f2ad elementor-widget elementor-widget-iheading" data-id="ad4f2ad" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-8cbac3a elementor-widget elementor-widget-text-editor" data-id="8cbac3a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Apache Lucene/Solr中加权同义词的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-5c043cf elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="5c043cf" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220925165828/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664125108"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

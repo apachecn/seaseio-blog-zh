@@ -1,0 +1,547 @@
+<html>
+<head>
+<title>The Importance of Online Testing in Learning to Rank – Part 1</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">在线测试在学习排名中的重要性——第一部分</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2020/04/the-importance-of-online-testing-in-learning-to-rank-part-1.html#0001-01-01">https://web.archive.org/web/sease.io/2020/04/the-importance-of-online-testing-in-learning-to-rank-part-1.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-0105b0d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0105b0d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1c6ef3a ot-flex-column-vertical" data-id="1c6ef3a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-507ee9d elementor-widget elementor-widget-text-editor" data-id="507ee9d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">您刚刚训练了一个学习排序模型，现在想知道它的表现如何。</p>
+<p class="translated">你可以从在测试集上查看训练返回的评估参数开始，但你仍然不确定在真实网站中使用它会产生什么影响。</p>
+<p class="translated">这就是在线测试的用武之地。它仍然是检查您的模型在真实场景中的表现的最佳方式，并且它可以为您提供必要的信息来评估、改进和更好地理解您的模型的行为。</p>
+<p class="translated">在这篇博文中，我向你展示了学习排名的在线测试。 <br/> <strong>我将讲述这种方法的优势以及为什么要使用它，最后我将向您展示如何实现它，以及在实现过程中要避免哪些错误。</strong></p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">在第一部分中，我讨论了当前的技术水平，而在第二部分中，我将向您展示如何实现交错。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bf4636b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bf4636b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-62f2b5c ot-flex-column-vertical" data-id="62f2b5c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a51af50 elementor-widget elementor-widget-iheading" data-id="a51af50" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">行业中</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d183f1c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d183f1c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d65302d ot-flex-column-vertical" data-id="d65302d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d8f35bb elementor-widget elementor-widget-text-editor" data-id="d8f35bb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">不幸的是，今天仍然有许多行业不使用在线测试来学习排名评估。也许他们不知道它的存在，或者他们没有合适的工具去做；他们可能没有理解结果的能力。<br/>无论如何，这是一个遗憾，因为在线测试对于模型的正确调整和改进至关重要。</p>
+<p class="translated">我们当然可以依靠离线评估，在测试集上检查模型的性能，或者通过分析不同的离线指标，但我们不能真正确定对网站的影响。</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --></p>
+<p class="translated">使用<strong>离线评估</strong>很难发现几个问题。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c5cf5a7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c5cf5a7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4775a66 ot-flex-column-vertical" data-id="4775a66" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bb779eb elementor-widget elementor-widget-text-editor" data-id="bb779eb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 style="text-align: center;" class="translated">使用错误的测试集，可能会获得不反映真实模型改进的模型评估结果</h6>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-27c5bcd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="27c5bcd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3a77ac9 ot-flex-column-vertical" data-id="3a77ac9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d7ed899 elementor-widget elementor-widget-text-editor" data-id="d7ed899" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">首先，我们可能没有正确地训练和/或测试模型。如果我们在创建训练和/或测试集时出错，我们将得到不可靠的结果，这些结果可能会被误解。使用错误的测试集，可能会获得更好的模型结果，而这些结果并没有反映真实的模型改进。在这种情况下，我们有一个使用离线评估无法捕捉的问题。</p>
+<h6 class="translated">什么时候测试集是错误的？</h6>
+<p class="translated">当它不能很好地代表和概括排名问题时。<br/>一些例子:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><em> <strong>每个查询组一个样本</strong></em>:对一个查询的单个结果进行排序根本不是排序问题。</li>
+<li class="translated"><em> <strong>一个相关性标签</strong>用于一个查询组的所有样本</em>:所以无论模型做什么排序，离线评价指标都是一样的。</li>
+<li class="translated"><em>从<strong>数据集</strong> </em>开始:你考虑哪些交互用于训练，哪些用于测试？训练集和测试集的划分是一个非常重要的阶段，需要深入研究。理想情况下，我们希望创建两个集合，它们在查询和相关性标签方面遵循相同的概率分布。</li>
+</ul>
+</li>
+</ul>
+<p class="translated">【T8<!-- /wp:heading --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">另一个问题是找到离线评估指标和我们为在线模型性能考虑的参数之间的直接关联。要了解线下指标的改善将如何反映在页面浏览量、点击量、销售额和收入上，这并不那么明显，也不简单。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4baf48c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4baf48c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e70a9e7 ot-flex-column-vertical" data-id="e70a9e7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1265df7 elementor-widget elementor-widget-text-editor" data-id="1265df7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 style="text-align: center;" class="translated">依赖生成的相关性标签可能是一个问题。这些并不总是可靠的，也不总是反映真实的用户需求</h6>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-26708de ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="26708de" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ac19029 ot-flex-column-vertical" data-id="ac19029" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-19b8752 elementor-widget elementor-widget-text-editor" data-id="19b8752" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">离线评估最常用的技术是<strong>克兰菲尔德</strong>技术。在这种方法中，一组专家从一组选定的文档开始创建一组相关性判断。特别是，它们为所选文档集中的每个文档分配一个相关性标签。这种范式的应用会带来两个主要问题:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">关联集创建所需的<em> <strong>努力</strong> </em>，这是一个非常昂贵的阶段。</li>
+<li class="translated">依赖于生成的相关性标签。这些<strong> <em>并不总是可靠的</em> </strong>也不总是反映真实的用户需求。</li>
+</ul>
+</li>
+</ul>
+<p class="translated">【T29<!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">如果我们想克服这些问题，我们必须通过<strong>在线测试</strong>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-798f613 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="798f613" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ebfd230 ot-flex-column-vertical" data-id="ebfd230" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1e8935a elementor-widget elementor-widget-iheading" data-id="1e8935a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">在线测试</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8328171 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8328171" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-90271b4 ot-flex-column-vertical" data-id="90271b4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-de79437 elementor-widget elementor-widget-text-editor" data-id="de79437" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如前所述，使用在线测试有很多好处:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><em> <strong>可靠性</strong> </em>的结果。在这种方法中，我们可以直接观察用户行为，并由此了解他最感兴趣的文档是什么。</li>
+<li class="translated">给出一个<em> <strong>直接解释</strong> </em>的结果。通过在线评估，我们可以直接看到该模型在页面浏览量、点击量、销售额或收入方面的结果。</li>
+<li class="translated">我们也可以更好地理解<em> <strong>模型行为</strong> </em>。我们可以看到用户如何与模型交互，并找出如何改进它。</li>
+</ul>
+</li>
+</ul>
+<p class="translated">很明显，这些好处来之不易，但它们是值得的。</p>
+<p class="translated">当下，在学习排名及超越的世界里，业界广泛流传的在线测试有两种:<strong> A/B测试</strong>和<strong>交错</strong>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a1c49ee ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a1c49ee" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e5b2da9 ot-flex-column-vertical" data-id="e5b2da9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5c344bb elementor-widget elementor-widget-iheading" data-id="5c344bb" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">A/B测试</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1c5936d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1c5936d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d0178c7 ot-flex-column-vertical" data-id="d0178c7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e6f7970 elementor-widget elementor-widget-text-editor" data-id="e6f7970" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">让我们开始看看A/B测试是如何工作的。</p>
+<p class="translated">既然我们在讨论学习排序，假设你有两个训练有素的学习排序模型:<em>模型A </em>和<em>模型B </em>。这些型号并不相同，您想要比较它们，以便找到最好的型号。</p>
+<p class="translated">A/B测试允许您进行这种比较。特别是，它允许您将查询流量分成两组。第一组用户使用<em>模式A </em>与网站互动，而第二组用户使用<em>模式B </em>与网站互动。通过这种方式，我们可以观察两种场景中的用户行为，并查看我们的目标指标，如点击量、销售额、收入，以了解哪种模式表现更好。</p>
+<p class="translated">这是一个伟大的工具，它给了我们许多有用的信息，最重要的是，它依赖于真实的用户交互，应该反映真实的用户需求。</p>
+<p class="translated">即使A/B测试很棒，我们也必须非常小心地实施它。</p>
+<h6 class="translated">不要做什么</h6>
+<p class="translated">假设我们有一个网站，其中我们使用我们的学习来为查询搜索页面排序模型。假设我们有2页:</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:heading {"level":4} --><!-- /wp:heading --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list {"ordered":true} --><!-- /wp:list --></p>
+<ol>
+<li style="list-style-type: none;">
+ 
+<ol>
+<li class="translated"><em>一个是首页</em>。这里我们展示几个有趣的可以直接购买的新文档。这些文档是静态的，并且<strong>不是由学习排序模型</strong>排序的。</li>
+<li class="translated"><em>一个是搜索页面</em>。在这里，我们可以进行查询，并在结果中搜索我们最感兴趣的文档。这些文档实际上是由我们的学习排序模型进行排序的。</li>
+</ol>
+</li>
+</ol>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-695c732 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="695c732" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5ae6e38 ot-flex-column-vertical" data-id="5ae6e38" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f66a267 elementor-widget elementor-widget-text-editor" data-id="f66a267" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 style="text-align: center;" class="translated">当A/B测试时，我们需要确保我们只考虑来自<strong>搜索结果页面的交互，这些页面由我们正在比较的</strong>模型进行排名</h6>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-10a6e6f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="10a6e6f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-824f0e0 ot-flex-column-vertical" data-id="824f0e0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9b53886 elementor-widget elementor-widget-text-editor" data-id="9b53886" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">测试时，我们必须确保我们考虑的所有结果都来自<em>搜索页面</em>，而不是来自<em>主页</em>。错误的分析确实会导致对模特表现的错误结论。</p>
+<p class="translated">我要特别强调两种可能的情况:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">我们得出的结论是:A型<em>比B型<em>好，反之亦然。</em></em></li>
+<li class="translated">我们正确地断定<em>A型</em>优于<em>B型</em>，但是我们无法确定改进的百分比。</li>
+</ul>
+</li>
+</ul>
+<p class="translated">先来看<strong>第一个场景</strong>。</p>
+<p class="translated"><em>假设我们正在分析<strong>模型A </strong>。我们从主页获得10笔销售额，从搜索页面获得5笔销售额。</em> <br/> <em>然后假设分析<strong>模型B </strong>。我们从主页获得4笔销售额，从搜索页面获得10笔销售额。</em></p>
+<p class="translated">如果我们只看总数，我们会看到:<em>A型车</em>的15次销售和<em>B型车</em>的14次销售，结论是<em>A型车</em>是最好的。这对于主页(10个销售&gt; 4个销售)是正确的，但是对于搜索页面(5个销售&lt; 10个销售)却不是，在搜索页面中我们实际上使用了学习排名模型。</p>
+<p class="translated">那么，我们该如何看待这一点呢？</p>
+<p class="translated">这样，我们错误地断言<em>型号A </em>是最好的，而我们可以清楚地看到，在搜索页面<em>中，型号B </em>表现更好。<br/>因此，我们不会在模型实际运行的页面上对模型进行评估，但是我们会根据不涉及模型的主页得出结论。</p>
+<p class="translated">当改进只发生在主页而不发生在搜索页面时，同样的误解也会出现。下面你会看到一个例子。</p>
+<p class="translated"><em>假设我们正在分析<strong>模型A </strong>。我们从主页获得10笔销售额，从搜索页面获得10笔销售额。</em> <br/> <em>然后假设分析<strong>模型B </strong>。我们从主页获得5笔销售额，从搜索页面获得10笔销售额。</em></p>
+<p class="translated">在这里，如果我们只看总销售额，我们可以看到<em>型号A </em>获得20个销售额，而<em>型号B </em>获得15个销售额。在这种情况下，我们会得出结论:A型车比B型车更好。</p>
+<p class="translated">那么，我们该怎么做呢？</p>
+<p class="translated">如果我们只看搜索页面的结果，这是不对的，因为两者都获得了相同的销售额(10)。<br/>改进是由于主页没有使用模型，但我们可能会错误地将其归因于模型性能。</p>
+<p class="translated">现在让我们看看第二个场景<strong/>。</p>
+<p class="translated"><em>假设我们正在分析<strong>模型A </strong>。我们从主页获得12笔销售额，从搜索页面获得11笔销售额。</em> <br/> <em>然后假设分析<strong>模型B </strong>。我们从主页获得5笔销售额，从搜索页面获得10笔销售额。</em></p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">在这里，如果我们查看总销售额，我们可以看到<em>型号A </em>获得23笔销售额，而<em>型号B </em>获得15笔销售额。在这种情况下，我们会得出结论，A型比B型更好。</p>
+<p class="translated">那么，我们该怎么做呢？</p>
+<p class="translated">这是真的，因为即使只看搜索页面，<em>A型车</em>的销量也比<em>B型车</em>的销量多(11销量&gt; 10销量)。但是..改善了多少？从总数来看，我们看到<em>A型</em>比<em>B型</em>多获得了8的销量，这是一个巨大的进步！但实际上，仅查看搜索页面，我们就可以看到<em>A型车</em>仅比<em>B型车</em>多卖出1辆，差距并不大。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3f82179 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3f82179" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e45c660 ot-flex-column-vertical" data-id="e45c660" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-23cba11 elementor-widget elementor-widget-text-editor" data-id="23cba11" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 style="text-align: center;" class="translated">在测试过程中过滤交互是很重要的。<br/>我们必须只考虑与被评估模型真正相关的交互</h6>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f097f8c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f097f8c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2bc5635 ot-flex-column-vertical" data-id="2bc5635" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3e589c4 elementor-widget elementor-widget-text-editor" data-id="3e589c4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这些例子表明，在测试过程中过滤我们的交互是很重要的。如果我们想要评估模型，我们必须只考虑与模型真正相关的交互。也考虑到其他人，像第一页的那些人，带来了额外的噪音，可以隐藏真正的模型性能。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3e7971f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3e7971f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1b044c5 ot-flex-column-vertical" data-id="1b044c5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-dfc8822 elementor-widget elementor-widget-iheading" data-id="dfc8822" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">交叉</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1f15d1a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1f15d1a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1d00589 ot-flex-column-vertical" data-id="1d00589" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b3682d8 elementor-widget elementor-widget-text-editor" data-id="b3682d8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">A/B测试在工业中被广泛使用，它非常有用，并且实现起来并不复杂。<br/>由于这些原因，这种方法已经成为大量研究的焦点，目的是改进当前的实施。<br/>这些研究导致了一种新的类似方法，称为:<strong>交错</strong>。</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated">在这种方法中，还比较了两个模型。与A/B测试的主要区别在于，在这里，我们直接比较两个模型，同时向同一用户显示它们的结果。<br/>让我们更详细地解释它是如何工作的:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bfef890 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bfef890" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b143a8b ot-flex-column-vertical" data-id="b143a8b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ce5f63f elementor-widget elementor-widget-text-editor" data-id="ce5f63f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 style="text-align: center;" class="translated">交错可以防止用户在整个测试实验过程中接触到坏的模型</h6>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a36fe20 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a36fe20" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3bf21a1 ot-flex-column-vertical" data-id="3bf21a1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9414def elementor-widget elementor-widget-text-editor" data-id="9414def" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">就A/B测试而言，交错有几个优点:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">它减少了由于用户分组(A组和B组)而导致的用户差异问题。</li>
+<li class="translated">在车型对比上更为敏感。</li>
+<li class="translated">它需要更少的交通。</li>
+<li class="translated">它需要更少的时间来获得可靠的结果。</li>
+<li class="translated">这并不一定会将一个糟糕的模型暴露给一部分用户</li>
+</ul>
+</li>
+</ul>
+<p class="translated">让我们看看交错是如何工作的，以及它是如何实现这些改进的。</p>
+<h6 class="translated">它是如何工作的</h6>
+<p class="translated">假设我们有两个学习排名模型叫做:<em> model_A </em>和<em> model_B </em>。<br/>给定一个查询<em> q </em>每个模型响应一个排序的文档列表:<em>l<sub>A</sub>T32】和<em>l<sub>B</sub>T36】。<br/>此时，不是将列表<em>l<sub>A</sub>T41】返回给一组用户A，将列表<em>l<sub>B</sub>T45】返回给一组用户B，而是创建一个唯一的结果列表<em>l<sub>I</sub>T49】并返回给用户。<br/>查询流量不再分离，每个用户都可以看到使用相同交叉方法从两个模型中创建的结果列表。<br/>因此，这个唯一列表将包含来自<em>型号_A </em>和<em>型号_B </em>的搜索结果。</em></em></em></em></em></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:list --></p>
+<p class="translated"><!-- /wp:list --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:heading {"level":4} --></p>
+<p class="translated"><!-- /wp:heading --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated"><!-- wp:paragraph --></p>
+<p class="translated"><!-- /wp:paragraph --></p>
+<p class="translated">有几种实现这种列表的方法，都尽量做到公平。</p>
+<p class="translated"><em>我们对公平的理解是什么？<br/> </em>这个概念与搜索结果的选择高度相关。<br/>理想情况下，我们希望列表包含来自两个模型的相同数量的文档，因此一个模型相对于另一个模型的偏好不依赖于显示项目的数量。<br/>其次，我们希望显示项目的位置不会影响用户对两种型号之一的偏好。如果我们将来自<em> model_A </em>的所有文档放在前10个位置上，并且将来自<em> model_B </em>的所有文档放在底层位置上，那么来自B的文档可能仅仅因为它们的低等级而没有被选择。</p>
+<p class="translated"><br/>关于测试学习如何在行业中进行以及它在当前技术水平下看起来如何的第一次调查到此结束，但是如果你想了解如何实现这一点的更多细节，让我们在<a href="https://web.archive.org/web/20220930000022/https://sease.io/2020/05/online-testing-for-learning-to-rank-interleaving.html" data-rich-text-format-boundary="true">第2部分</a>见面吧！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-70e99153 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="70e99153" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-26c48673 ot-flex-column-vertical" data-id="26c48673" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-455deaf6 elementor-widget elementor-widget-iheading" data-id="455deaf6" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-480fd596 elementor-widget elementor-widget-text-editor" data-id="480fd596" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20220930000022/https://sease.io/learning-to-rank-training">学习排名</a>和<a href="https://web.archive.org/web/20220930000022/https://sease.io/training/search-quality-evaluation-trainings/search-quality-evaluation-training">搜索质量评估</a>培训？我们也提供这些主题的咨询，<a href="https://web.archive.org/web/20220930000022/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-726c3fba ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="726c3fba" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-27d7f8fe ot-flex-column-vertical" data-id="27d7f8fe" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-393cb2e7 elementor-widget elementor-widget-iheading" data-id="393cb2e7" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-b113f0 elementor-widget elementor-widget-text-editor" data-id="b113f0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于学习排名在线测试的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-59d7725b elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="59d7725b" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220930000022/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664496022"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

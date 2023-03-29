@@ -1,0 +1,1042 @@
+<html>
+<head>
+<title>Solr Is Learning To Rank Better – Part 3 – Ltr tools</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">Solr正在学习如何更好地排名——第3部分——Ltr工具</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2016/08/apache-solr-learning-to-rank-part-3-ltr-tools.html#0001-01-01">https://web.archive.org/web/sease.io/2016/08/apache-solr-learning-to-rank-part-3-ltr-tools.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-7b6c8c0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7b6c8c0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e25d81f ot-flex-column-vertical" data-id="e25d81f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c30312b elementor-widget elementor-widget-iheading" data-id="c30312b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">Apache Solr学习排名- <br/>事情变得严重了</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-63ac0e2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="63ac0e2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c6b0fe2 ot-flex-column-vertical" data-id="c6b0fe2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f79daca elementor-widget elementor-widget-text-editor" data-id="f79daca" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这篇博客文章是关于Apache Solr学习排名工具的:一套工具来简化Apache Solr学习排名集成的使用。</p><div>The model has been trained in <a href="https://web.archive.org/web/20220929230240/https://sease.io/2016/08/apache-solr-learning-to-rank-part-2-model-training.html">Part 2</a>, we are ready to deploy it to Solr, but first it would be useful to have a better understanding of what we just created.<br/>A LambdaMART model in a real world scenario is a massive ensemble of regression trees, not the most readable structure for a human.</div><div>More we understand the model, easier will be to find anomalies and to fix/improve it.</div><div>But the most important benefit of having a clearer picture of the training set and the model is the fact that it can dramatically improves the communication with the business layer :</div><div><ul><li style="list-style-type: none;"><ul><li class="translated">我们领域中最重要的特性是什么？</li><li class="translated">根据模型什么样的文档应该得分高？</li><li class="translated">为什么这个文档(特征向量)得分那么高？</li></ul></li></ul><p style="padding-left: 40px;" class="translated">这些只是例子，但是很多类似的问题会出现，我们需要工具来回答。</p></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e503d91 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e503d91" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e26c1ee ot-flex-column-vertical" data-id="e26c1ee" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ae64a15 elementor-widget elementor-widget-iheading" data-id="ae64a15" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">Apache Solr学习排序工具</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-01e2047 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="01e2047" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c148268 ot-flex-column-vertical" data-id="c148268" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7f60f17 elementor-widget elementor-widget-text-editor" data-id="7f60f17" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>This is how the <span style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;">Learning To Rank tools</span><span style="color: var( --e-global-color-text ); font-weight: var( --e-global-typography-text-font-weight );"> project</span> <a style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;" href="https://web.archive.org/web/20220929230240/https://github.com/alessandrobenedetti/ltr-tools">[1]</a><span style="color: var( --e-global-color-text ); font-weight: var( --e-global-typography-text-font-weight );"> was born ( LTR stands for Learning To Rank ).</span></div><div>The target of the project is to use the power of Apache Solr to visualise and understand a Learning To Rank model.</div><div>It is a set of simple tools specifically thought for LambdaMart models, represented in the Json format supported by the Bloomberg Apache Solr Learning To Rank integration.<br/>Of course it is open source so feel free to extend it by introducing additional models and functionalities.</div><div>All the tools provided are meant to work with a Solr backend in order to index data that we can later search easily.</div><div>The tools currently available provide the support to :</div><ul><li style="list-style-type: none;"><ul><li class="translated">在Solr集合中索引模型</li><li class="translated">索引Solr集合中的训练集<br/>打印LambdaMART模型中得分最高的叶子</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-39fb815 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="39fb815" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-359c9dc ot-flex-column-vertical" data-id="359c9dc" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-04a12c1 elementor-widget elementor-widget-iheading" data-id="04a12c1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">准备</h4>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d22385c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d22385c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1da82c3 ot-flex-column-vertical" data-id="1da82c3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b01898f elementor-widget elementor-widget-text-editor" data-id="b01898f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">要使用学习评级(LTR)工具，您必须遵循以下简单步骤:</p><ul><li style="list-style-type: none;"><ul><li class="translated"><b>设置Solr后端</b>——这将是一个新的Solr实例，有两个集合:<b>模型</b>，<b>训练集</b>，简单的配置可以在:<i> ltr-tools/configuration </i>中找到</li><li class="translated"><b>gradle build</b>–这会将可执行文件jar打包到:<i>ltr-tools/ltr-tools/build/libs</i></li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-cd5b4d4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="cd5b4d4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-da44ef9 ot-flex-column-vertical" data-id="da44ef9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0067a62 elementor-widget elementor-widget-iheading" data-id="0067a62" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h4 class="main-heading translated">使用</h4>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c2c1b11 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c2c1b11" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-147eebc ot-flex-column-vertical" data-id="147eebc" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e37bf46 elementor-widget elementor-widget-text-editor" data-id="e37bf46" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">让我们简单看一下可执行命令行界面的参数:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a5c4b17 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a5c4b17" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-03d4b41 ot-flex-column-vertical" data-id="03d4b41" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-732d31a elementor-widget elementor-widget-text-editor" data-id="732d31a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table style="width: 840px; color: #6d6d6d;"><tbody><tr><th class="translated">参数</th><th class="translated">描述</th></tr><tr><td class="translated"><span style="font-size: 15px;"><b>-帮助</b> </span></td><td class="translated">打印帮助消息</td></tr><tr><td class="translated"><b>-刀具</b> <b/></td><td class="translated">要执行的工具(可能值):<br/>–模型索引器<br/>–训练设置器<br/>–topScoringLeavesViewer</td></tr><tr><td class="translated"><b> -solrURL </b> <b/></td><td class="translated">用于搜索后端的Solr基本URL</td></tr><tr><td class="translated"><b>-型号</b> <b/></td><td class="translated">model.json文件的路径</td></tr><tr><td class="translated"><b> -topK </b></td><td class="translated">要返回的最高得分叶数(按得分后代排序)</td></tr><tr><td class="translated"><span style="font-size: 15px;"><b>-训练设置</b> </span> <b/></td><td class="translated">定型集文件的路径</td></tr><tr><td class="translated"><span style="font-size: 15px;"><b>-特性</b> </span> <b/></td><td class="translated">feature-mapping.json的路径。该文件包含要素Id和要素名称之间的映射。</td></tr><tr><td class="translated"><b>-范畴特征</b> <b/></td><td class="translated">包含分类要素名称列表的文件的路径。</td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8f5924e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8f5924e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-775e020 ot-flex-column-vertical" data-id="775e020" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-11b82fd elementor-widget elementor-widget-text-editor" data-id="11b82fd" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b>注意:</b> <i>下面所有的例子都假设输入的模型是一个LambdaMART模型，彭博Solr插件期望的json格式。</i></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-aa87cca ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="aa87cca" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2215ac3 ot-flex-column-vertical" data-id="2215ac3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d3168cb elementor-widget elementor-widget-iheading" data-id="d3168cb" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">模型索引器</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-59ecf02 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="59ecf02" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5646ff3 ot-flex-column-vertical" data-id="5646ff3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f29b69f elementor-widget elementor-widget-text-editor" data-id="f29b69f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b>要求</b>:后端Solr采集&lt; <b>型号</b> &gt;必须启动&amp;运行</p><p class="translated">模型索引器是一个在Solr中索引lambdaMART模型的工具，以更好地可视化树集合的结构。<br/>特别是，该工具会将属于lambdaMART系综的树的每个分支索引为Solr文档。<br/>让我们来看看solr模式:</p><p class="translated"><i>配置/Solr/模型/配置</i></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-12424c0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="12424c0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cdf4b6d ot-flex-column-vertical" data-id="cdf4b6d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5ffd8d0 elementor-widget elementor-widget-text-editor" data-id="5ffd8d0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;"><span style="color: #808080;"><code style="overflow-wrap: normal;"> &lt;field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/&gt;  
+ &lt;field name="modelName" type="string" indexed="true" stored="true"/&gt;  
+ &lt;field name="feature" type="string" indexed="true" stored="true" docValues="true"/&gt;  
+ &lt;field name="threshold" type="double" indexed="true" stored="true" docValues="true"/&gt;  
+ ...  </code></span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9fb8319 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9fb8319" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7bfec18 ot-flex-column-vertical" data-id="7bfec18" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7c8c8f3 elementor-widget elementor-widget-text-editor" data-id="7c8c8f3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">所以输入一个lambdaMART模型:</p><p class="translated"><i/> <i>例如lambdaMARTModel1.json </i></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b77c8e0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b77c8e0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e26e561 ot-flex-column-vertical" data-id="e26e561" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e1f2736 elementor-widget elementor-widget-text-editor" data-id="e1f2736" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;"><span style="color: #808080;"><code style="overflow-wrap: normal;"> {  
+   "class":"org.apache.solr.ltr.ranking.LambdaMARTModel",  
+   "name":"lambdaMARTModel1",  
+   "features":[  
+    {  
+      "name":"feature1"  
+    },  
+    {  
+      "name":"feature2"  
+    }  
+   ],  
+   "params":{  
+    "trees":[  
+      {  
+       "weight":1,  
+       "root":{  
+         "feature":"feature1",  
+         "threshold":0.5,  
+         "left":{  
+          "value":80  
+         },  
+         "right":{  
+          "feature":"feature2",  
+          "threshold":10.0,  
+          "left":{  
+            "value":50  
+          },  
+          "right":{  
+            "value":75  
+          }  
+         }  
+       }  
+      }  
+    ]  
+   }  
+ }  </code></span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8f361e9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8f361e9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-81a7e7c ot-flex-column-vertical" data-id="81a7e7c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1fee662 elementor-widget elementor-widget-text-editor" data-id="1fee662" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b>注意:</b>树枝分叉是指树分成两个分支:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f041916 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f041916" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6678d79 ot-flex-column-vertical" data-id="6678d79" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f0152cc elementor-widget elementor-widget-text-editor" data-id="f0152cc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;"><span style="color: #808080;"><code style="overflow-wrap: normal;"> "feature":<b>"feature2"</b>,   
+      "threshold":<b>10.0</b>,   
+      "left":{   
+       "value":50   
+      },   
+      "right":{   
+       "value":75   
+      }   </code></span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0857238 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0857238" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ffc9ca7 ot-flex-column-vertical" data-id="ffc9ca7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-11c3adc elementor-widget elementor-widget-text-editor" data-id="11c3adc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">分割发生在特征值的阈值上。<br/>我们可以使用工具来启动索引过程:</p><p> </p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-cc0ca1b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="cc0ca1b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2fcfe3c ot-flex-column-vertical" data-id="2fcfe3c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b6228aa elementor-widget elementor-widget-text-editor" data-id="b6228aa" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 20px; padding: 0px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><span style="color: #808080;"><code style="; font-size: 12px; background-color: #f0f0f0; overflow-wrap: normal;">java -jar ltr-tools-1.0.jar -tool modelIndexer -model /models/lambdaMARTModel1.json  -solrURL <br/></code></span><span style="color: #808080;"><code style="; font-size: 12px; background-color: #f0f0f0; overflow-wrap: normal;">http://localhost:8983/solr/models</code></span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-eb1e1cf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="eb1e1cf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-42fcbd0 ot-flex-column-vertical" data-id="42fcbd0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b65a983 elementor-widget elementor-widget-text-editor" data-id="b65a983" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">索引过程完成后，我们可以访问Solr并开始搜索！<br/> <i>例如<br/>这个查询将返回每个特性的响应:</i></p><div><ul><li style="list-style-type: none;"><ul><li class="translated"><i>特征出现在分支分割处的次数</i></li><li class="translated"><i>该特性的前10个发生阈值</i></li><li class="translated"><i>出现在该特性模型中的唯一阈值的数量</i></li></ul></li></ul></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d0d46aa ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d0d46aa" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-65a4d30 ot-flex-column-vertical" data-id="65a4d30" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f82c009 elementor-widget elementor-widget-text-editor" data-id="f82c009" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 1.71429; color: #6d6d6d;"><code style="color: black; overflow-wrap: normal;"><span style="color: #808080;"> http://localhost:8983/solr/models/select?indent=on&amp;q=*:*&amp;wt=json&amp;facet=true&amp;json.facet={  
+      Features: {  
+           type: terms,  
+           field: feature,  
+           limit: -1,  
+           facet: {  
+                Popular_Thresholds: {  
+                     type: terms,  
+                     field: threshold,  
+                     limit: 10  
+                },  
+                uniques: "unique(threshold)"  
+           }  
+      }  
+ }&amp;rows=0&amp;fq=modelName:lambdaMARTModel1</span>  </code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6c49742 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6c49742" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e49494c ot-flex-column-vertical" data-id="e49494c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2c73074 elementor-widget elementor-widget-text-editor" data-id="2c73074" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">让我们看看如何解释Solr响应:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1fbe86b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1fbe86b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-caea10c ot-flex-column-vertical" data-id="caea10c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b8b9eef elementor-widget elementor-widget-text-editor" data-id="b8b9eef" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: arial; font-size: 12px; background-color: #f0f0f0; line-height: 20px; padding: 0px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><span style="color: #808080;"><code style="overflow-wrap: normal;"> facets": {  
+   "count": 3479, </code></span><code style="overflow-wrap: normal;"><span style="color: #38761d;">//number of branch splits in the entire model </span></code><code style="color: black; overflow-wrap: normal;"><span style="color: #808080;"> 
+   "Features": {  
+     "buckets": [  
+       { </span> 
+        <span style="color: #808080;"> "val": "product_price",</span>  
+         <span style="color: #808080;">"count": 317, </span></code><code style="overflow-wrap: normal;"><span style="color: #38761d;">//the feature "product_price" is occurring in the model in 317 splits  </span></code><code style="color: black; overflow-wrap: normal;"><span style="color: #808080;">
+         "uniques": 28,</span> </code><code style="overflow-wrap: normal;"><span style="color: #38761d;">//the feature "product_price" is occurring in the splits with 28 unique threshold values</span></code><span style="color: #808080;"><code style="overflow-wrap: normal;">  
+         "Popular_Thresholds": {  
+           "buckets": [  
+             {  
+               "val": "250.0", </code></span><code style="overflow-wrap: normal;"><span style="color: #38761d;">//threshold value </span></code><span style="color: #808080;"><code style="overflow-wrap: normal;"> 
+               "count": 45 </code></span><code style="overflow-wrap: normal;"><span style="color: #38761d;">//the feature "product_price" is occurring in the splits 45 times with threshold "250.0"</span></code><span style="color: #808080;"><code style="overflow-wrap: normal;">  
+             },  
+             {  
+               "val": "350.0",  
+               "count": 45  
+             },  
+             ...  </code></span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d9f1ea2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d9f1ea2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-94651e7 ot-flex-column-vertical" data-id="94651e7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-29f69cc elementor-widget elementor-widget-iheading" data-id="29f69cc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">训练集索引器</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-72cdf4a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="72cdf4a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-de737b5 ot-flex-column-vertical" data-id="de737b5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7e4185a elementor-widget elementor-widget-text-editor" data-id="7e4185a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b>要求</b>:后端Solr采集&lt; <b>训练集</b> &gt;必须启动&amp;运行</p><p class="translated">训练集索引器是一个在Solr中对学习排序训练集(RankLib格式)进行索引的工具，以更好地可视化数据。<br/>特别是，该工具会将trainign集合的每个训练样本索引为Solr文档。<br/>让我们看看Solr模式:</p><p class="translated"><strong> <span style="color: #808080;"> <i>配置/Solr/models/conf</i></span></strong></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-370ce5f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="370ce5f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-32e0cd4 ot-flex-column-vertical" data-id="32e0cd4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f3f19fe elementor-widget elementor-widget-text-editor" data-id="f3f19fe" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: arial; font-size: 12px; background-color: #f0f0f0; line-height: 20px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><code style="overflow-wrap: normal;">&lt;field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/&gt;
+&lt;field name="relevancy" type="tdouble" indexed="true" stored="true" docValues="true"/&gt; 
+&lt;dynamicField name="cat_*" type="string" indexed="true" stored="true" docValues="true"/&gt;
+&lt;dynamicField name="*" type="tdouble" indexed="true" stored="true" docValues="true"/&gt; </code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1f8c7fa ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1f8c7fa" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-51d0086 ot-flex-column-vertical" data-id="51d0086" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2315a4d elementor-widget elementor-widget-text-editor" data-id="2315a4d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><div style="color: black;"><p class="translated"><span style="color: #808080;">如你所见，这里的要点是动态字段的定义。</span> <br/> <span style="color: #808080;">事实上我们事先并不知道特性的名称，但是我们可以区分分类特性(可以作为字符串索引)和顺序特性(可以作为double索引)。</span></p><p class="translated"><span style="color: #808080;">我们现在需要3个输入:</span></p></div><div style="color: black;"> </div></div><div><p class="translated"><b>1)</b>rank lib格式的训练集:<i/></p><p class="translated"><i>例如:training1.txt </i></p></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c46aabd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c46aabd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d2439d6 ot-flex-column-vertical" data-id="d2439d6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-eb07cbf elementor-widget elementor-widget-text-editor" data-id="eb07cbf" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: arial; font-size: 12px; background-color: #f0f0f0; line-height: 20px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><code style="overflow-wrap: normal;">1 qid:419267 1:300 2:4.0 3:1 6:1
+4 qid:419267 1:250 2:4.5 4:1 7:1
+5 qid:419267 1:450 2:5.0 5:1 6:1
+2 qid:419267 1:200 2:3.5 3:1 8:1 </code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a0a1745 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a0a1745" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-af3cfed ot-flex-column-vertical" data-id="af3cfed" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9af8192 elementor-widget elementor-widget-text-editor" data-id="9af8192" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b style="color: #6d6d6d;"> 2) </b> <span style="color: #6d6d6d;">将特征Id翻译成人类可读特征名称的特征映射</span></p><p class="translated"><span style="color: #6d6d6d;">例如features-mapping1.json </span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a4649a4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a4649a4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b7cb0e1 ot-flex-column-vertical" data-id="b7cb0e1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-04de9c2 elementor-widget elementor-widget-text-editor" data-id="04de9c2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="box-sizing: border-box; overflow: auto; font-family: arial; font-size: 12px; background: #f0f0f0; line-height: 20px; margin-bottom: 1.6em; max-width: 100%; padding: 0px; color: #6d6d6d; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><code style="box-sizing: border-box; font-family: Monaco, Consolas, 'Andale Mono', 'DejaVu Sans Mono', monospace; font-size: 15px; overflow-wrap: normal;"><span style="color: #808080;">{"1":"product_price","2":"product_rating","3":"product_colour_red","4":"product_colour_green","5":"product_colour_blue","6":"product_size_S","7":"product_size_M","8":"product_size_L"}</span>  
+</code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5b0e9ce ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5b0e9ce" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-611b262 ot-flex-column-vertical" data-id="611b262" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6f3060a elementor-widget elementor-widget-text-editor" data-id="6f3060a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b>注意事项</b>。映射必须是单行的json对象</p><p class="translated">该输入文件是可选的，可以直接将特征id作为名称进行索引。</p><p class="translated"><b> 3) </b>分类特征列表</p><p class="translated"><i>例如类别特征1.txt </i></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dbc114c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dbc114c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-05f9de0 ot-flex-column-vertical" data-id="05f9de0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b97342c elementor-widget elementor-widget-text-editor" data-id="b97342c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: arial; font-size: 12px; background-color: #f0f0f0; line-height: 20px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><code style="overflow-wrap: normal;"><span style="color: #808080;">product_colour
+product_size</span> </code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9362deb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9362deb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ae5a9df ot-flex-column-vertical" data-id="ae5a9df" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e347c7b elementor-widget elementor-widget-text-editor" data-id="e347c7b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">该列表(每行一个要素)将向工具阐明哪些要素是分类要素，从而将类别索引为要素的字符串值。<br/>该输入文件是可选的，可以将分类特征索引为二进制热编码特征。</p><p class="translated">要开始索引过程，请执行以下操作:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5199e61 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5199e61" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8bca8bd ot-flex-column-vertical" data-id="8bca8bd" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3dbb8fc elementor-widget elementor-widget-text-editor" data-id="3dbb8fc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 20px; padding: 0px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><span style="color: #808080;"><code style=" font-size: 12px; background-color: #f0f0f0; overflow-wrap: normal;">java -jar ltr-tools-1.0.jar -tool trainingSetIndexer -trainingSet /trainingSets/training1.txt -features /featureMappings/feature-mapping1.json -categoricalFeatures /feature/categoricalFeatures1.txt -solrURL 
+http://localhost:8983/solr/trainingSet</code></span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5a3f033 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5a3f033" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-76888da ot-flex-column-vertical" data-id="76888da" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5e900ce elementor-widget elementor-widget-text-editor" data-id="5e900ce" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">索引过程完成后，我们可以访问Solr并开始搜索！<br/> <i>例如<br/>作为响应，该查询将返回所有经过过滤然后在相关性字段上进行分面的训练样本。</i> <br/> <i>这可以是训练集的特定子集中的相关性分数分布的指示</i></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-da25e47 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="da25e47" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8609479 ot-flex-column-vertical" data-id="8609479" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d024251 elementor-widget elementor-widget-text-editor" data-id="d024251" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: arial; font-size: 12px; background-color: #f0f0f0; line-height: 20px; padding: 0px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><code style="overflow-wrap: normal;"><span style="color: #808080;">http://localhost:8983/solr/trainingSet/select?</span>
+<span style="color: #808080;">indent=on&amp;q=*:*&amp;wt=json&amp;fq=cat_product_colour:red&amp;rows=0&amp;facet=true&amp;facet.field=relevancy</span></code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d40c258 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d40c258" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-43c270a ot-flex-column-vertical" data-id="43c270a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-27e0736 elementor-widget elementor-widget-text-editor" data-id="27e0736" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b>注意:这是一种快速探索训练集的肮脏方式。我强烈建议你把它作为一个快速资源。高级数据绘图更适合可视化大数据和识别模式。</b></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9a272e4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9a272e4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d65619a ot-flex-column-vertical" data-id="d65619a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-fbec5d6 elementor-widget elementor-widget-iheading" data-id="fbec5d6" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">最高分离开观众</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2847bad ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2847bad" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8870003 ot-flex-column-vertical" data-id="8870003" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4694e9c elementor-widget elementor-widget-text-editor" data-id="4694e9c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><p class="translated">最高得分叶查看器是一个工具，用于打印模型中最高得分叶的路径。<br/>由于有了这个工具，回答类似于<br/>“一个文档(特征向量)应该是什么样子才能得到高分？”该工具将简单地访问模型中的所有树，并跟踪每片树叶的得分。</p><p class="translated">所以输入一个lambdaMART模型:</p><p class="translated"><i>例如lambdaMARTModel1.json </i></p></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6af87f2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6af87f2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-644da56 ot-flex-column-vertical" data-id="644da56" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-44f8329 elementor-widget elementor-widget-text-editor" data-id="44f8329" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: arial; font-size: 12px; background-color: #f0f0f0; line-height: 20px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><code style="overflow-wrap: normal;"><span style="color: #808080;"> {  
+   "class":"org.apache.solr.ltr.ranking.LambdaMARTModel",  
+   "name":"lambdaMARTModel1",  
+   "features":[  
+    {  
+      "name":"feature1"  
+    },  
+    {  
+      "name":"feature2"  
+    }  
+   ],  
+   "params":{  
+    "trees":[  
+      {  
+       "weight":1,  
+       "root":{  
+         "feature":"feature1",  
+         "threshold":0.5,  
+         "left":{  
+          "value":80  
+         },  
+         "right":{  
+          "feature":"feature2",  
+          "threshold":10.0,  
+          "left":{  
+            "value":50  
+          },  
+          "right":{  
+            "value":75  
+          }  
+         }  
+       }  
+      }, ...  
+    ]  
+   }  
+ } </span> </code></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b2d02e9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b2d02e9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f9ba3fe ot-flex-column-vertical" data-id="f9ba3fe" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c6c2f91 elementor-widget elementor-widget-text-editor" data-id="c6c2f91" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">要启动该流程，请执行以下操作:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6710c4b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6710c4b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e193afa ot-flex-column-vertical" data-id="e193afa" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-547d89a elementor-widget elementor-widget-text-editor" data-id="547d89a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="line-height: 20px; padding: 0px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><span style="color: #808080;"><code style=" font-size: 12px; background-color: #f0f0f0; overflow-wrap: normal;"> java -jar ltr-tools-1.0.jar -tool topScoringLeavesViewer -model /models/lambdaMARTModel1.json -topK 10  </code></span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f47a2bf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f47a2bf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8a59624 ot-flex-column-vertical" data-id="8a59624" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-17cd82d elementor-widget elementor-widget-text-editor" data-id="17cd82d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这将打印得分最高的10片叶子(在树中带有相关路径):</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1b8c451 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1b8c451" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cc6beb8 ot-flex-column-vertical" data-id="cc6beb8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-fdd8365 elementor-widget elementor-widget-text-editor" data-id="fdd8365" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre style="font-family: arial; font-size: 12px; background-color: #f0f0f0; line-height: 20px; color: #6d6d6d; border: 1px dashed #cccccc; height: auto; width: 831.594px;"><span style="color: #808080;"><code style="overflow-wrap: normal;">1000.0 -&gt; feature2 &gt; 0.8, feature1 &lt;= 100.0
+200.0 -&gt; feature2 &lt;= 0.8, 
+80.0 -&gt; feature1 &lt;= 0.5, 
+75.0 -&gt; feature1 &gt; 0.5, feature2 &gt; 10.0, 
+60.0 -&gt; feature2 &gt; 0.8, feature1 &gt; 100.0, 
+50.0 -&gt; feature1 &gt; 0.5, feature2 &lt;= 10.0,  </code></span></pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d29f39d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d29f39d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-223dc86 ot-flex-column-vertical" data-id="223dc86" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8d7a60f elementor-widget elementor-widget-iheading" data-id="8d7a60f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">结论</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6e948d3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6e948d3" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1416c60 ot-flex-column-vertical" data-id="1416c60" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-790ba40 elementor-widget elementor-widget-text-editor" data-id="790ba40" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>The Apache Solr Learning To Rank tools are quick and dirty solutions to help people understanding better and working better with Learning To Rank models.</div><div>They are far from being optimal but I hope they will be helpful for people working on similar problems.</div><div>Any contribution, improvement, bugfix is welcome !</div><div> </div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2a98ee92 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2a98ee92" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-66c5053 ot-flex-column-vertical" data-id="66c5053" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cce5ec0 elementor-widget elementor-widget-iheading" data-id="cce5ec0" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-796f228b elementor-widget elementor-widget-text-editor" data-id="796f228b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20220929230240/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220929230240/https://sease.io/training/learning-to-rank-training">学习排名</a>培训？<br/>我们也提供这些主题的咨询，<a href="https://web.archive.org/web/20220929230240/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6701279c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6701279c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-68494899 ot-flex-column-vertical" data-id="68494899" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-3bf950e6 elementor-widget elementor-widget-iheading" data-id="3bf950e6" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-46eab2cf elementor-widget elementor-widget-text-editor" data-id="46eab2cf" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Solr正在学习更好地排名的帖子吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-48bc7c47 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="48bc7c47" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929230240/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664492560"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

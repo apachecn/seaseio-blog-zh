@@ -1,0 +1,726 @@
+<html>
+<head>
+<title>Exploring Solr Internals : The Lucene Inverted Index</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">探索Solr内部:Lucene倒排索引</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2015/07/exploring-solr-internals-lucene.html#0001-01-01">https://web.archive.org/web/sease.io/2015/07/exploring-solr-internals-lucene.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-471cbc4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="471cbc4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7d490a7 ot-flex-column-vertical" data-id="7d490a7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f9bbfbc elementor-widget elementor-widget-iheading" data-id="f9bbfbc" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">介绍</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1e260b0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1e260b0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9f080b4 ot-flex-column-vertical" data-id="9f080b4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f06f22e elementor-widget elementor-widget-text-editor" data-id="f06f22e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这篇博文是关于Lucene倒排索引和Apache Solr内部如何工作的。</p><p class="translated">在使用Solr系统时，理解并正确配置下划线Lucene索引是深度控制搜索的基础。通过更好地了解索引的外观以及每个组件的使用方式，您可以构建一个更高性能、轻量级和高效的解决方案。<br/>这篇博文的范围是探索倒排索引中的不同组件。<br/>这将更多地是关于数据结构以及它们如何有助于提供搜索相关的功能。<br/>关于存储数据结构的底层方法，请参考Lucene官方文档<a style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;" href="https://web.archive.org/web/20220929232332/https://lucene.apache.org/core/5_2_1/core/org/apache/lucene/codecs/lucene50/package-summary.html#package_description" target="_blank" rel="noopener">【1】</a>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ea2c925 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ea2c925" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-251c20e ot-flex-column-vertical" data-id="251c20e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d7496a3 elementor-widget elementor-widget-iheading" data-id="d7496a3" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">Lucene倒排索引</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3062cb9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3062cb9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ed629bb ot-flex-column-vertical" data-id="ed629bb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d4ffb41 elementor-widget elementor-widget-text-editor" data-id="d4ffb41" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>The Inverted Index is the basic data structure used by Lucene to provide Search in a corpus of documents.</div><div>It’s pretty much quite similar to the index in the end of a book.</div><div>From wikipedia :</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3bbeea2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3bbeea2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-987c44b ot-flex-column-vertical" data-id="987c44b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1642a76 elementor-widget elementor-widget-text-editor" data-id="1642a76" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated">在计算机科学中，倒排索引(也称为发布文件或倒排文件)是一种索引数据结构，存储从内容(如单词或数字)到其在数据库文件、一个文档或一组文档中的位置的映射</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f19899f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f19899f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-63b6cb6 ot-flex-column-vertical" data-id="63b6cb6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-949cc40 elementor-widget elementor-widget-iheading" data-id="949cc40" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">在内存中/磁盘上</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ca97394 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ca97394" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-617acbf ot-flex-column-vertical" data-id="617acbf" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cac68cc elementor-widget elementor-widget-text-editor" data-id="cac68cc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>The Inverted index is the core data structure that is used to provide Search.</div>
+<div>We are going to see in details all the components involved.</div>
+<div>It’s important to know where the Inverted index will be stored.</div>
+<div>Assuming we are using a <b>FileSystem Lucene Directory</b>, the index will be stored on the disk for durability ( we will not cover here the Commit concept and policies).</div>
+<div>Modern implementation of the FileSystem Directory will leverage the OS Memory Mapping feature to actually load into the memory ( RAM ) chunk of the index ( or possibly all the index) when necessary.</div>
+<div>The index in the file system will look like a collection of <b>immutable segments.</b></div>
+<div><b>Each segment is a fully working Inverted Index, built from a set of documents.</b></div>
+<div><b>The segment is a partition of the full index, it represents a part of it and it is fully searchable.</b></div>
+<div>Each segment is composed by a number of binary files, each of them storing a particular data structure relevant to the index, compressed <a style="font-weight: var( --e-global-typography-text-font-weight ); background-color: #ffffff;" href="https://web.archive.org/web/20220929232332/https://lucene.apache.org/core/5_2_1/core/org/apache/lucene/codecs/lucene50/package-summary.html#package_description" target="_blank" rel="noopener">[1]</a><span style="color: var( --e-global-color-text ); font-weight: var( --e-global-typography-text-font-weight );">.</span></div>
+<div>To simplify, in the life of our index, while we are indexing data, we build segments, which are merged from time to time ( depending of the configured Merge Policy).</div>
+<div>But the scope of this post is not the Indexing process but the structure of the Index produced.</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b77a981 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b77a981" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-257e21c ot-flex-column-vertical" data-id="257e21c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-98a8d21 elementor-widget elementor-widget-iheading" data-id="98a8d21" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">把手举起来。</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-480ab90 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="480ab90" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ed97578 ot-flex-column-vertical" data-id="ed97578" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-208c7d0 elementor-widget elementor-widget-text-editor" data-id="208c7d0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">假设输入3个文档，每个文档有2个简单的字段，看看完整的倒排索引是什么样子的:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-84f99eb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="84f99eb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-66f306e ot-flex-column-vertical" data-id="66f306e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-992142f elementor-widget elementor-widget-text-editor" data-id="992142f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><span style="color: #3d85c6;"> Doc0 </span> <br/> <span style="color: #3d85c6;"> { "id":"c "，</span> <br/> <span style="color: #3d85c6;"> "title ":"电子游戏历史"</span> <br/> <span style="color: #3d85c6;"> }，</span></p><p class="translated"><span style="color: #a64d79;">Doc1</span><br/><span style="color: #a64d79;">{ " id ":" a "、</span> <br/> <span style="color: #a64d79;"> "title ":"游戏视频回顾游戏"</span> <br/> <span style="color: #a64d79;"> }、</span></p><p> </p><p class="translated"><span style="color: #6aa84f;">Doc2</span><br/><span style="color: #6aa84f;">{ " id ":" b "，</span> <br/> <span style="color: #6aa84f;"> "title ":"游戏商店"</span> <br/> <span style="color: #6aa84f;"> }，</span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-8d4b536 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8d4b536" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6bb3077 ot-flex-column-vertical" data-id="6bb3077" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-024af3c elementor-widget elementor-widget-text-editor" data-id="024af3c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">根据schema.xml中的配置，我们在索引时生成相关的数据结构。</p><p class="translated">让我们看看完整形式的倒排索引，然后让我们解释每个组件如何使用，以及何时省略它的一部分。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-dd4b077 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="dd4b077" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-51f2e03 ot-flex-column-vertical" data-id="51f2e03" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-658a19d elementor-widget elementor-widget-text-editor" data-id="658a19d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table class="tg"><tbody><tr><th class="tg-s8ba translated">田</th><th class="tg-s8ba translated"><span style="font-weight: normal;"> id </span></th></tr><tr><th class="tg-s8ba translated">序数</th><th class="tg-s8ba translated">学期</th><th class="tg-s8ba translated">文档频率</th><th class="tg-s8ba translated"><span style="background-color: #eeeeee;">发布列表</span></th></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 0 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">答</span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> <b> 1 </b> : 1 : [1] : [0-1] </span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> b </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><b>2</b>:1:[1]:[0-1]</span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 2 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> c </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><b>0</b>:1:[1]:[0-1]</span></td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-85a8372 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="85a8372" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-34197f0 ot-flex-column-vertical" data-id="34197f0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f401d08 elementor-widget elementor-widget-text-editor" data-id="f401d08" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table class="tg"><tbody><tr><th class="tg-s8ba translated">田</th><th class="tg-s8ba translated"><span style="font-weight: normal;">标题</span></th></tr><tr><th class="tg-s8ba translated">序数</th><th class="tg-s8ba translated">学期</th><th class="tg-s8ba translated">文档频率</th><th class="tg-s8ba translated">过帐清单</th></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 0 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">游戏</span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 3 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><b>0</b>:1:[2]:【6-10】</span><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">，</span><br/><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><span style="color: #a64d79;"><b>1</b>:2:[1，4]:【0-4，18-22】</span></span><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">，</span><br/><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><span style="color: #6aa84f;"><b>2</b>:1:[0-4]</span></span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">历史</span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> <b> 0 </b> : 1 : [3] : [11-18] </span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 2 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">回顾</span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><b>1</b>:1:[3]:[11-17]</span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 3 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">商店</span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><b>2</b>:1:[2]:[5-10]</span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 4 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">视频</span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 2 </span></td><td class="tg-vc88 translated"><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><b>0</b>:1:[1]:【0-5】</span><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">，</span><br/><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><span style="color: #a64d79;"><b>1</b>:1:[2]:【5-10】，</span> </span></td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fa2077e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fa2077e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-875205d ot-flex-column-vertical" data-id="875205d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ab3913a elementor-widget elementor-widget-text-editor" data-id="ab3913a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这听起来有点吓人，让我们分析一下数据结构的不同组成部分。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-158df62 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="158df62" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4846eda ot-flex-column-vertical" data-id="4846eda" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e533fb7 elementor-widget elementor-widget-iheading" data-id="e533fb7" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">术语词典</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-919ada9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="919ada9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3b0a33a ot-flex-column-vertical" data-id="3b0a33a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a6dc061 elementor-widget elementor-widget-text-editor" data-id="a6dc061" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>The term dictionary is a <b>sorted skip list</b> containing all the unique terms for the specific field.</div><div>Two operations are permitted, starting from a pointer in the dictionary :</div><div><b>next()</b> -&gt; to iterate one by one on the terms</div><div><b>advance(ByteRef b)</b> -&gt; to jump to an entry &gt;= than the input  ( this operation is O(n) = log n where n= number of unique terms).</div><div> </div><div>An auxiliary Automaton is stored in memory, accepting a set of smart calculated prefixes of the terms in the dictionary.</div><div>It is a weighted Automaton, and a weight will be associated to each prefix ( i.e. the offset to look into the Term Dictionary) .</div><div>This automaton is used at query time to identify a starting point to look into the dictionary.</div><div> </div><div>When we run a query ( a <b>TermQuery</b> for example) :</div><div> </div><div>1) we give in input the query to the <b>In Memory Automaton</b>, an <b>Offset is returned</b></div><div>2) we access the location associated to the <b>Offset in the Term Dictionary</b></div><div>3) we <b>advance</b> to the <b>ByteRef</b> representation of the <b>TermQuery</b></div><div>4) if the term is a <b>match</b> for the <b>TermQuery</b> we return the <b>Posting List</b> associated</div><div> </div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-126d5fe ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="126d5fe" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-019fa0a ot-flex-column-vertical" data-id="019fa0a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cde4d3b elementor-widget elementor-widget-iheading" data-id="cde4d3b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">文档频率</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b19bc96 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b19bc96" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a7e676d ot-flex-column-vertical" data-id="a7e676d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f410cfc elementor-widget elementor-widget-text-editor" data-id="f410cfc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>This is simply the number of Documents in the corpus containing the term  t in the field f .</div><div>For the term <b>game </b>we have<b> 3 documents </b>in our corpus that contain the term<b> </b>in the field<b> title</b></div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-beb7786 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="beb7786" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3b2197f ot-flex-column-vertical" data-id="3b2197f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-809e740 elementor-widget elementor-widget-iheading" data-id="809e740" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">过帐清单</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2a71629 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2a71629" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d76384f ot-flex-column-vertical" data-id="d76384f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d5d49a5 elementor-widget elementor-widget-text-editor" data-id="d5d49a5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>The posting list is the <b>sorted skip list</b> of DocIds that contains the related term.</div><div>It’s used to return the documents for the searched term.</div><div>Let’s have a deep look to a complete Posting List for the term <b>game </b>in the field<b> title </b>:</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-68f2ea1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="68f2ea1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-73da635 ot-flex-column-vertical" data-id="73da635" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0dde5e2 elementor-widget elementor-widget-text-editor" data-id="0dde5e2" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><b>0</b>:1:[2]:【6-10】</span><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">，</span> <br/> <span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> <span style="color: #a64d79;"> <b> 1 </b> : 2 : [1，4]:【0-4，18-22】</span></span><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">，</span><br/><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><span style="color: #6aa84f;"><b>2</b>:1:[1]:【0-4】</span></span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-30aed46 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="30aed46" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a33df47 ot-flex-column-vertical" data-id="a33df47" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1dfbe91 elementor-widget elementor-widget-text-editor" data-id="1dfbe91" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">该过账列表的每个元素为:<br/> <i>文档序号:词频:[词频数组]:[词频偏移量数组]。</i></p><p class="translated"><u> <b>文档序号</b> </u> - &gt;包含相关术语的语料库中的文档序号(Lucene ID)。<br/><br/> <i>例如</i> <br/>根据每个发布列表元素的起始序号:<br/> Doc0 <b> <span style="color: #3d85c6;"> 0 </span> </b>，<br/> Doc1 <b> <span style="color: #a64d79;"> 1 </span> </b>，<br/>Doc2<b><span style="color: #6aa84f;">2</span></b><br/>在<b>标题字段中包含术语<b>游戏</b>。</b></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-57fc94b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="57fc94b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2a6091e ot-flex-column-vertical" data-id="2a6091e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8ca175e elementor-widget elementor-widget-text-editor" data-id="8ca175e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b> <u>术语频率</u> </b> - &gt;术语在发布列表元素中出现的次数。<br/>例如<br/><b style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">0</b><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">:1</span><br/><b><span style="color: #3d85c6;">doc 0</span></b>包含<b> <span style="color: #3d85c6;"> 1 </span> </b>术语的出现<b>游戏</b>字段<b>标题</b>。<br/><b style="color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">1</b><span style="background-color: white; color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">:2</span><br/><b><span style="color: #a64d79;">Doc1</span></b>包含<b> <span style="color: #a64d79;"> 2 </span> </b>术语的出现<b>游戏</b>字段<b>标题</b>。<br/><b style="color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">2</b><span style="background-color: white; color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">:1</span><br/><b><span style="color: #6aa84f;">doc 2</span></b>包含<b> <span style="color: #6aa84f;"> 1 </span> </b>术语的出现<b>游戏</b>字段<b>标题</b>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-83f9683 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="83f9683" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7fe9dc3 ot-flex-column-vertical" data-id="7fe9dc3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-09d7ffe elementor-widget elementor-widget-text-editor" data-id="09d7ffe" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b> <u>术语位置数组</u> </b> - &gt;对于术语在发布列表元素中的每次出现，它包含字段内容中的相关位置。<br/>例如<br/><span style="color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.3333px;">0:[2]</span><br/><b>doc 0</b>术语<b>游戏</b>在字段<b>标题</b>中的第一次出现在字段内容中的<b>第二个位置</b>。<br/> ( <span style="color: #3d85c6;">“标题”:“视频(1) <b>游戏(2) </b>历史(3)</span>)<br/><b style="color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">1</b><span style="color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.3333px;">:【1，4】</span><br/><b>Doc1</b>术语<b>游戏</b>在字段中第一次出现<b>标题</b>在字段内容中占据<b>第一位</b>。<br/> <b> Doc1 </b>术语第二次出现<b>游戏</b>在字段<b>标题</b>在字段内容中占据<b>第四位</b>。<br/> ( <span style="color: #a64d79;">【标题】:<b>游戏(1) </b>视频(2)回顾(3) <b>游戏(4)</b></span><span style="color: #3d85c6;"/>)<br/><b style="color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">2</b><span style="color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.3333px;">:【1】</span><br/><b>Doc0</b>术语第一次出现<b>游戏</b>领域<b>标题</b>占据<br/> ( <span style="color: #6aa84f;">【标题】::<b>游戏(1) </b>商店(2)</span><span style="color: #3d85c6;"/>)</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-010c017 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="010c017" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e9ee3ac ot-flex-column-vertical" data-id="e9ee3ac" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-dabda26 elementor-widget elementor-widget-text-editor" data-id="dabda26" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b> <u>术语偏移量数组</u> </b> - &gt;对于公告列表元素中术语的每一次出现，都包含字段内容中相关的字符偏移量。<br/>例如<br/><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">0:</span><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">【6-10】</span><br/><b>doc 0</b>字段中第一次出现的术语<b>游戏</b><b>标题</b>从字段内容中的<b>第6个</b>字符<b> </b>开始，直到<b>第10个</b>字符(不包括)。<br/> ( <span style="color: #3d85c6;">"标题":"视频(1) <b>游戏(2) </b> …" </span> ) <br/> ( <span style="color: #3d85c6;">"标题":" 01234 5<b>6789</b>10<b/>…"</span>)<br/><b style="color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">1</b><span style="background-color: white; color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">:</span><span style="background-color: white; color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">【0-4，18-22】</span><br/>..<br/> <b> Doc1 </b>字段中第二次出现的术语<b>游戏</b>标题从字段内容中的<b>第18个</b>字符<b> </b>开始，直到<b>第22个</b>字符(不包括)。<br/> ( <span style="color: #a64d79;">【标题】:<b>游戏(1) </b>视频(2)回顾(3) <b>游戏(4)</b></span><span style="color: #3d85c6;"/>)<br/>(<span style="color: #a64d79;">【标题】:<b> 0123 </b> 4视频(2)回顾(3)<b>18192021</b>22“【T83<br/> ( <span style="background-color: white; color: #6aa84f;">【标题】:<b>游戏(1) </b>商店(2)</span><span style="color: #3d85c6;"/>)<br/>(<span style="background-color: white; color: #6aa84f;">【标题】:<b> 0123 </b> 4商店(2)</span><span style="color: #3d85c6;"/>)</span></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-de38545 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="de38545" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8559f0e ot-flex-column-vertical" data-id="8559f0e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-732e2c5 elementor-widget elementor-widget-iheading" data-id="732e2c5" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">实时文档</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a9fed01 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a9fed01" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bf519ee ot-flex-column-vertical" data-id="bf519ee" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b67bcdf elementor-widget elementor-widget-text-editor" data-id="b67bcdf" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>Live Documents is a lightweight data structure that keep the alive documents at the current status of the index.</div><div>It simply associates a bit  1 ( alive) , 0 ( deleted) to a document.</div><div>This is used to keep the queries aligned to the status of the Index, avoiding to return deleted documents.</div><div><b>Note</b> : <b>Deleted documents</b> in index data structures <b>are removed</b> ( and disk space released) only when a <b>segment merge happens</b>.</div><div>This means that you can delete a set of documents, and the space in the index will be claimed back only after the first merge involving the related segments will happen.</div><div>Assuming we delete the Doc2, this is how the Live Documents data structure looks like :</div><div> </div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fbca0dc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fbca0dc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-519c243 ot-flex-column-vertical" data-id="519c243" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-09c9754 elementor-widget elementor-widget-text-editor" data-id="09c9754" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table class="tg"><tbody><tr><th class="tg-s8ba translated">序数</th><th class="tg-s8ba translated">活着的</th></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 0 </span></td><td class="tg-vc88 translated"><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 2 </span></td><td class="tg-vc88 translated"><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 0 </span></td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1ae3dc2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1ae3dc2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5c1fc3f ot-flex-column-vertical" data-id="5c1fc3f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ab38f3d elementor-widget elementor-widget-text-editor" data-id="ab38f3d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div><b><u>Ordinal</u></b> -&gt; The Internal Lucene document ID<br/><b><u>Alive</u></b> -&gt; A bit that specifies if the document is alive or deleted.</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-78cd0af ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="78cd0af" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-eb81d79 ot-flex-column-vertical" data-id="eb81d79" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1f5a351 elementor-widget elementor-widget-iheading" data-id="1f5a351" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">规范</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ecbffc0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ecbffc0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e60a75a ot-flex-column-vertical" data-id="e60a75a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e48087d elementor-widget elementor-widget-text-editor" data-id="e48087d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">Norms是一种数据结构，它为每个文档的每个字段提供了长度标准化和提升因子。<br/>数值与每个字段和每个文档相关联。<br/>该值与内容值的<b>长度相关联，也可能与索引时间提升因子相关联。<br/>在为查询检索的文档评分时使用规范。<br/>具体来说，这是一种提高包含短字段术语的文档的相关性的方法。<br/>步进时也可以关联一个提升因子。<br/> <b>匹配启用了规范的查询时，短字段内容将胜过长字段内容</b>。</b></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1607707 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1607707" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f556205 ot-flex-column-vertical" data-id="f556205" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8aaa96d elementor-widget elementor-widget-text-editor" data-id="8aaa96d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table class="tg"><tbody><tr><th class="tg-s8ba translated">田</th><th class="tg-s8ba translated"><span style="font-weight: normal;">标题</span></th></tr><tr><th class="tg-s8ba translated">文档序号</th><th class="tg-s8ba translated">标准</th></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 0 </span></td><td class="tg-vc88 translated"><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 0.78 </span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #a64d79; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 1 </span></td><td class="tg-vc88 translated"><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 0.56 </span></td></tr><tr><td class="tg-vc88 translated"><span style="background-color: white; color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 2 </span></td><td class="tg-vc88 translated"><span style="background-color: white; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 0.98 </span></td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-231f5fb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="231f5fb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a5d2e23 ot-flex-column-vertical" data-id="a5d2e23" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-95f5502 elementor-widget elementor-widget-iheading" data-id="95f5502" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">模式配置</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0ca93bc ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0ca93bc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e5d02d1 ot-flex-column-vertical" data-id="e5d02d1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cd75724 elementor-widget elementor-widget-text-editor" data-id="cd75724" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div>When configuring a field in Solr ( or directly in Lucene) it is possible to specify a set of field attributes to control which data structures are going to be produced .</div><div>Let’s take a look to the different Lucene Index Options</div>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-843bbb1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="843bbb1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2caaf4d ot-flex-column-vertical" data-id="2caaf4d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-30ba473 elementor-widget elementor-widget-text-editor" data-id="30ba473" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table class="tg"><tbody><tr><th class="tg-s8ba translated">Lucene索引选项</th><th class="tg-s8ba translated">Solr模式</th><th class="tg-s8ba translated">描述</th><th class="tg-s8ba translated">当…时使用</th></tr><tr><td class="tg-vc88 translated">没有人</td><td class="tg-vc88 translated">indexed="false "</td><td class="tg-vc88 translated"><span style="font-weight: normal;">不会建立倒排索引。</span></td><td class="tg-vc88 translated">你不需要在你的文档库中搜索。</td></tr><tr><td class="tg-vc88 translated">文件（documents的简写）</td><td class="tg-vc88 translated">omitTermFreqAnd<br/>Positions = " true "</td><td class="tg-vc88 translated">每个术语的发布列表只包含文档id(序号),没有其他内容。 <br/> <span style="font-weight: normal;"> <br/> </span> <span style="font-weight: normal;">例如</span> <br/> <span style="font-weight: normal;">游戏- &gt; <span style="color: #3d85c6;"> <b> 0 </b> </span>，<span style="color: #a64d79;"> <b> 1 </b> </span>，<span style="color: #6aa84f;"> <b> 2 </b> </span> </span></td><td class="tg-vc88 translated"><span style="font-weight: normal;">–你不需要使用短语或位置查询在语料库中搜索。</span><br/><span style="font-weight: normal;">-您不需要分数受到文档字段中术语出现次数的影响。</span></td></tr><tr><td class="tg-vc88 translated">文档和频率</td><td class="tg-vc88 translated">omitPositions="true "</td><td class="tg-vc88 translated"><span style="font-weight: normal;">每个术语的发布列表将只包含文档中的文档id(序号)和术语频率。</span> <br/> <span style="font-weight: normal;"> <br/> </span> <span style="font-weight: normal;">例如</span> <br/> <span style="font-weight: normal;">游戏-&gt;</span><span style="background-color: white; color: #3d85c6; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"><b>0</b>:1</span><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">，</span><span style="font-weight: normal;"><span style="color: #a64d79;"><b>1</b>:2</span></span><span style="background-color: white; color: #333333; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">，</span> <b style="color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> 2 </b> <span style="background-color: white; color: #6aa84f; font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;"> : 1 </span></td><td class="tg-vc88 translated"><span style="font-weight: normal;">——你</span> <span style="font-weight: normal;">不需要</span> <span style="font-weight: normal;">在你的语料库</span> <span style="font-weight: normal;">中用短语或者位置</span> <span style="font-weight: normal;">查询搜索。</span><br/><span style="font-weight: normal;">–您确实需要评分来考虑术语频率</span></td></tr><tr><td class="tg-vc88 translated">DOCS _ AND _ freq _ AND _<br/>职位</td><td class="tg-vc88 translated">indexed="true "时的默认值</td><td class="tg-vc88 translated"><span style="font-weight: normal;">每个术语的发布列表还将包含术语位置。</span> <br/> <span style="font-weight: normal;"> <br/> </span> <span style="font-weight: normal;">例如</span><br/><span style="color: #3d85c6; font-weight: normal;"><b>0</b>:1:[2]</span><span style="font-weight: normal;">，</span> <span style="color: #a64d79;"> <b> 1 </b> : 2 : [1，4]，</span><span style="color: #6aa84f;"><b style="font-family: Helvetica, Arial, sans-serif; font-size: 15px; line-height: 21.333333969116px;">2</b>:1:[T93】</span></td><td class="tg-vc88 translated"><span style="font-weight: normal;">–你</span> <span style="font-weight: normal;">确实需要</span> <span style="font-weight: normal;">在你的语料库</span> <span style="font-weight: normal;">中用短语或位置</span> <span style="font-weight: normal;">查询进行搜索。</span><br/><span style="font-weight: normal;">–您确实需要评分来考虑术语频率</span></td></tr><tr><td class="tg-vc88 translated">文档_和_频率_和_ <br/>位置_和_偏移</td><td class="tg-vc88 translated">storeOffsetsWithPositions = " true "</td><td class="tg-vc88"><span style="font-weight: normal;">The posting list for each term will contain the term offsets in addition.</span><p> </p><p class="translated">例如:game-&gt;<span style="background-color: #f3f3f3; color: #3d85c6; font-weight: normal;"><b>0</b>:1:[2]:【6-10】</span><span style="font-weight: normal;">，</span><br/><span style="font-weight: normal;"><span style="color: #a64d79;"><b>1</b>:2:[1，4]:【0-4，18-22】</span>，<br/><span style="color: #6aa84f;"><b>2</b>:1:[1]:【0-4】</span></span></p></td><td class="tg-vc88 translated"><span style="font-weight: normal;">–您想要使用发布荧光笔。</span> <br/> <span style="font-weight: normal;">一种快速版本的高亮显示，使用发布列表而不是术语向量。</span></td></tr><tr><td class="tg-vc88 translated">omitNorms</td><td class="tg-vc88 translated">omitNorms="true "</td><td class="tg-vc88 translated"><span style="font-weight: normal;">不会建立规范数据结构</span></td><td class="tg-vc88 translated"><span style="font-weight: normal;">–不需要提升短字段内容</span><br/><span style="font-weight: normal;">–不需要提升每个字段的索引时间</span></td></tr></tbody></table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2ffb2a31 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2ffb2a31" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-75600bd9 ot-flex-column-vertical" data-id="75600bd9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4bc7c3fa elementor-widget elementor-widget-iheading" data-id="4bc7c3fa" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-125d4fc4 elementor-widget elementor-widget-text-editor" data-id="125d4fc4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220929232332/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220929232332/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训吗？<br/>我们也提供关于这些主题的咨询，<a href="https://web.archive.org/web/20220929232332/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-cbdce99 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="cbdce99" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1b6f228 ot-flex-column-vertical" data-id="1b6f228" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7f31155 elementor-widget elementor-widget-iheading" data-id="7f31155" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-2595568 elementor-widget elementor-widget-text-editor" data-id="2595568" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于Lucene倒排索引的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-361980d elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="361980d" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929232332/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664493812"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

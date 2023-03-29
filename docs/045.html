@@ -1,0 +1,1115 @@
+<html>
+<head>
+<title>Explaining Learning to Rank Models with Tree Shap</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">解释如何用树形图对模型进行排序</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html#0001-01-01">https://web.archive.org/web/sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-254abd7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="254abd7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-291cdb0 ot-flex-column-vertical" data-id="291cdb0" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-63fb2fa elementor-widget elementor-widget-iheading" data-id="63fb2fa" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">介绍</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f728721 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f728721" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fa50748 ot-flex-column-vertical" data-id="fa50748" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9204e38 elementor-widget elementor-widget-text-editor" data-id="9204e38" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">机器学习模型的一个常见问题是它们的<strong>可解释性</strong>和<strong>可解释性</strong>。<br/>我们创建一个数据集，我们训练一个模型来完成一项任务，然后我们想了解<strong>模型如何</strong>获得这些结果。这通常很难理解，尤其是对于非常复杂的模型。</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --></p>
+<p class="translated">在这篇博文中，我想介绍一个非常有用的库，叫做SHAP。特别是，我将写下它的惊人的工具，我将向你解释如何在一个学习排名的场景中解释结果。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a858ae7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a858ae7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-25b2eff ot-flex-column-vertical" data-id="25b2eff" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c705849 elementor-widget elementor-widget-text-editor" data-id="c705849" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 style="text-align: center;" class="translated">树SHAP给出了模型行为的解释，特别是每个特征如何影响模型的输出。</h6>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-eb88fe5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="eb88fe5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-10a18f5 ot-flex-column-vertical" data-id="10a18f5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e16d083 elementor-widget elementor-widget-text-editor" data-id="e16d083" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><strong>树SHAP </strong>是一种为基于树的机器学习模型计算SHAP值的算法。<br/><strong>【SHAP(SHapley Additive explaints)</strong>是一种博弈论方法，用来解释任何机器学习模型的输出。它使用博弈论的经典Shapley值及其相关扩展[1]，<a href="https://web.archive.org/web/20220930001359/https://github.com/slundberg/shap">，[2]，</a>将最优信用分配与本地解释联系起来。</p>
+<p class="translated">SHAP树允许我们解释模型的行为，特别是每个特征如何影响模型的输出。这里，每个输出/预测被视为每个单独特征的贡献的总和。</p>
+<p class="translated">它提供了几个工具，以便深入检查模型预测，特别是通过详细的绘图。<br/>这些情节给了我们一个<a href="https://web.archive.org/web/20220930001359/https://towardsdatascience.com/explain-your-model-with-the-shap-values-bc36aac4de3d">【4】</a>:</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --></p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><strong>全局可解释性</strong>:通过概要情节。这些反映了模型中特性的<strong>一般行为，并让我们了解哪些特性对最终输出影响最大以及影响有多大。</strong></li>
+<li class="translated"><strong>局部可解释性</strong>:通过力/依赖性图。这些显示了<strong>单一模型预测</strong>中特性的具体行为，使我们能够了解它们对最终输出的所有单一影响。</li>
+<li class="translated"><strong>它可以用于几个机器学习模型</strong> : SHAP提供了几个解释器，涵盖了大部分的机器学习方法。这些是类的集合，其中每个类代表一个特定机器学习算法的解释器。解释器是允许我们理解模型行为的对象。</li>
+</ul>
+</li>
+</ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ba593a1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ba593a1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-bbea6b5 ot-flex-column-vertical" data-id="bbea6b5" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-06d5d0c elementor-widget elementor-widget-iheading" data-id="06d5d0c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">情节</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-03d7c65 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="03d7c65" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-29baa30 ot-flex-column-vertical" data-id="29baa30" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a97da43 elementor-widget elementor-widget-text-editor" data-id="a97da43" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">树SHAP为我们提供了几种不同类型的情节，每一个突出了模型的一个特定方面。可用的图有:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><em>概要图</em></li>
+<li class="translated"><em>力图</em></li>
+<li class="translated"><em>依赖情节</em></li>
+<li class="translated"><em>决定剧情</em></li>
+</ul>
+</li>
+</ul>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph -->T11】</p>
+<p class="translated">这些图是在计算SHAP值之后生成的。这些值测量<strong>如何</strong>和<strong>如何</strong> <strong>每个特征如何</strong>影响模型。<br/>特别是，它们是通过一种查看每个特征的边际贡献的方法来计算的。这种方法所做的是，评估一个特征的影响，看看在特征移除之后模型的输出是如何变化的。为了评估这种变化，它对其他特征[1]、<a href="https://web.archive.org/web/20220930001359/https://towardsdatascience.com/explain-your-model-with-the-shap-values-bc36aac4de3d">、[4]、T20的所有可能排序的预测结果进行平均。</a></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c0b77ee ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c0b77ee" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2a213be ot-flex-column-vertical" data-id="2a213be" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a7b6913 elementor-widget elementor-widget-iheading" data-id="a7b6913" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">解释</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1f43ee0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1f43ee0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8673d58 ot-flex-column-vertical" data-id="8673d58" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bb69a84 elementor-widget elementor-widget-text-editor" data-id="bb69a84" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">假设处于<strong>学习排名场景</strong>。</p>
+<p class="translated">我们必须在电子商务网站中管理图书目录。每本书都有许多不同的特征，比如出版年份、目标年龄、流派、作者等等。用户可以访问网站，通过对书籍特征的一些过滤器选择进行查询，然后检查获得的搜索结果页面。<br/>为了训练我们的模型，我们收集了用户与网站产品的所有<strong>交互</strong>(例如，浏览、点击、加入购物车、销售..)并创建一个由<strong> &lt;查询、文档&gt;对</strong>组成的数据集(例如，所选的过滤器和所查看/点击/销售的产品特征/…)。</p>
+<p class="translated">【T29<!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">我们得到类似这样的结果，其中<em> s_feature </em>表示从网站过滤器中选择的特性，而<em> book_feature </em>表示用户与之交互的产品的特性:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-161092b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="161092b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6b167bf ot-flex-column-vertical" data-id="6b167bf" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-81c199f elementor-widget elementor-widget-text-editor" data-id="81c199f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table style="width: 840px; color: #6d6d6d;">
+<thead>
+<tr>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">相互作用</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">s _流派</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">s _价格_范围</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">书籍_流派</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">图书_作者</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">图书_价格</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #f0f0f0;">
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_1</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">惊悚片</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">[15-20]</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">惊悚片</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">褐色的</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">18</td>
+</tr>
+<tr>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_2</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">秘密</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">[5-10]</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">秘密</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">克里斯蒂</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">8</td>
+</tr>
+<tr style="background-color: #f0f0f0;">
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_3</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">幻想</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">[10-15]</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">幻想</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">阿西莫夫</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">15</td>
+</tr>
+</tbody>
+</table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a73c3d3 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a73c3d3" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5e078d4 ot-flex-column-vertical" data-id="5e078d4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cd23226 elementor-widget elementor-widget-text-editor" data-id="cd23226" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">为了使用它们，需要操纵这些特征。<br/>特别是分类特征需要编码。我们使用one-hot编码来实现这一点，它为每个分类特征的每个值创建一列。通过这种方式，我们将为<em>流派</em>列获得类似这样的内容:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c99da03 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c99da03" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8e5244a ot-flex-column-vertical" data-id="8e5244a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6503cc4 elementor-widget elementor-widget-text-editor" data-id="6503cc4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table style="width: 840px; color: #6d6d6d;">
+<thead>
+<tr>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">相互作用</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">是_流派_惊悚</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">是_流派_神秘</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">是_流派_幻想</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #f0f0f0;">
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_1</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">真实的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+</tr>
+<tr>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_2</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">真实的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+</tr>
+<tr style="background-color: #f0f0f0;">
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_3</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">真实的</td>
+</tr>
+</tbody>
+</table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f0b943b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f0b943b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c742b51 ot-flex-column-vertical" data-id="c742b51" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c40d95e elementor-widget elementor-widget-text-editor" data-id="c40d95e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">现在我们准备解释树SHAP情节。</p>
+<h6 class="translated">汇总图</h6>
+<p class="translated">我要分析的第一个剧情是<strong>概要</strong>剧情<strong>剧情</strong>。<br/>这可以给我们关于模型可解释性的全局信息。</p>
+<p class="translated">从下图中我们可以看到，该情节代表了:</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:heading {"level":4} --><!-- /wp:heading --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --></p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><strong> y轴</strong>上模型最重要的特征按降序排列(最重要的在顶部)。</li>
+<li class="translated"><strong> x轴</strong>上的SHAP值。</li>
+<li class="translated">带有<strong>颜色的特征值</strong>。高值用红色表示，低值用蓝色表示。</li>
+<li class="translated">此外，这里每个<strong>点</strong>代表一个预测结果。</li>
+</ul>
+</li>
+</ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5d60559 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5d60559" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-269b5b4 ot-flex-column-vertical" data-id="269b5b4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9210b3d elementor-widget elementor-widget-text-editor" data-id="9210b3d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<figure class="wp-block-image size-large"><img data-attachment-id="3752" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/summary_shap_importance-2" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance.png?fit=989%2C805&amp;ssl=1" data-orig-size="989,805" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="summary_shap_importance" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance.png?fit=300%2C244&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance.png?fit=989%2C805&amp;ssl=1" loading="lazy" width="989" height="805" class="wp-image-3752" src="../Images/3fbbd21a8d911b0aaffe09ab5da365d4.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance.png?w=989&amp;ssl=1 989w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance.png?resize=300%2C244&amp;ssl=1 300w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance.png?resize=768%2C625&amp;ssl=1 768w" sizes="(max-width: 989px) 100vw, 989px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance.png?ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-794282c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="794282c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3039ffa ot-flex-column-vertical" data-id="3039ffa" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4884300 elementor-widget elementor-widget-text-editor" data-id="4884300" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">从这个例子我们可以看出:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">评论总数越多，对相关性的积极影响就越大</li>
+<li class="translated">审查平均分越高，对相关性的积极影响就越大</li>
+<li class="translated">如果是一本电子书，它在大多数情况下更相关</li>
+<li class="translated">如果这本书的类型是幻想，它对相关性有负面影响</li>
+</ul>
+</li>
+</ul>
+<p class="translated">还有一些特性，它们的值没有明确的行为，例如图书销售、图书价格和出版年份。<br/>从该图中，我们还可以看到每个特征对x轴SHAP值模型的影响程度。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">另一种类型的摘要图是<strong>栏</strong>图:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a40e718 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a40e718" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f0f8ace ot-flex-column-vertical" data-id="f0f8ace" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8039616 elementor-widget elementor-widget-text-editor" data-id="8039616" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<figure class="wp-block-image size-large"><img data-attachment-id="3753" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/summary_shap_importance_bars-2" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance_bars.png?fit=998%2C799&amp;ssl=1" data-orig-size="998,799" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="summary_shap_importance_bars" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance_bars.png?fit=300%2C240&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance_bars.png?fit=998%2C799&amp;ssl=1" loading="lazy" width="998" height="799" class="wp-image-3753" src="../Images/7f199d60ee970fe57b3af4d9002906d1.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance_bars.png?w=998&amp;ssl=1 998w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance_bars.png?resize=300%2C240&amp;ssl=1 300w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance_bars.png?resize=768%2C615&amp;ssl=1 768w" sizes="(max-width: 998px) 100vw, 998px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/summary_shap_importance_bars.png?ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fb732fd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fb732fd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5b0f693 ot-flex-column-vertical" data-id="5b0f693" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ca5838d elementor-widget elementor-widget-text-editor" data-id="ca5838d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这代表另一个相同的概念，使用在<strong> x轴</strong>上的平均值(|SHAP值|)的条形图表示。</p>
+<h6 class="translated">力图</h6>
+<p class="translated">我要分析的第二个剧情是<strong>力剧情</strong>。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:heading {"level":4} --><!-- /wp:heading --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">这个情节允许我们把<strong>交代</strong>给一个<strong>单个</strong>模型<strong>预测</strong>模型<strong>。<br/>假设进行如下互动:</strong></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-22d51fe ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="22d51fe" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-15379ff ot-flex-column-vertical" data-id="15379ff" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-2d2d303 elementor-widget elementor-widget-text-editor" data-id="2d2d303" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table style="width: 840px; color: #6d6d6d;">
+<thead>
+<tr>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">is _发布_年份_2020</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">年龄为40岁</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">is_ <strong>电子书</strong></th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">is_ <strong>新到者</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #f0f0f0;">
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_4</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">错误的</td>
+</tr>
+</tbody>
+</table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7d91f78 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7d91f78" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ed12cb7 ot-flex-column-vertical" data-id="ed12cb7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1f0e211 elementor-widget elementor-widget-text-editor" data-id="1f0e211" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">相应的情节将是:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2a4f428 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2a4f428" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-093c654 ot-flex-column-vertical" data-id="093c654" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9267d16 elementor-widget elementor-widget-text-editor" data-id="9267d16" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<figure class="wp-block-image size-large"><img data-attachment-id="3664" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/explanation_prediction_0_with_label_0-1" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?fit=1570%2C362&amp;ssl=1" data-orig-size="1570,362" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="explanation_prediction_0_with_label_0-1" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?fit=300%2C69&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?fit=1024%2C236&amp;ssl=1" loading="lazy" width="1570" height="362" class="wp-image-3664" src="../Images/b70ea098af2021225a96470b7d1410da.png" alt="" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?w=1570&amp;ssl=1 1570w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?resize=300%2C69&amp;ssl=1 300w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?resize=1024%2C236&amp;ssl=1 1024w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?resize=768%2C177&amp;ssl=1 768w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?resize=1536%2C354&amp;ssl=1 1536w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?resize=1080%2C249&amp;ssl=1 1080w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i1.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_0_with_label_0-1.png?fit=712%2C164&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-730776f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="730776f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5404512 ot-flex-column-vertical" data-id="5404512" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ee38b19 elementor-widget elementor-widget-text-editor" data-id="ee38b19" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">从这个情节我们可以看出:</p>
+<ol>
+<li style="list-style-type: none;">
+ 
+<ol>
+<li class="translated"><strong>型号</strong> <strong>输出</strong> <strong>值</strong> : -4.54</li>
+<li class="translated"><strong>基础</strong> <strong>值</strong>:这是在我们不知道当前输出[1]的任何特性的情况下预测的值。</li>
+<li class="translated">每个特性的<strong>影响输出的</strong>。</li>
+</ol>
+</li>
+</ol>
+<p class="translated">特别是，我们可以看到一些红色和蓝色的箭头与每个功能相关联。<br/>每个箭头显示:</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><strong>特征如何影响模型:箭头越大，影响越大。</strong></li>
+<li class="translated"><strong>特征如何影响模型:红色箭头增加模型输出值，而蓝色箭头减少模型输出值。</strong></li>
+</ul>
+</li>
+</ul>
+<p class="translated">在我们展示的情节中，这本书在2020年尚未出版，并且没有[30-50]的目标年龄范围，这一事实对产出产生了积极影响，而不是电子书，不是新上市的书籍，也没有传奇流派，这一事实产生了负面影响。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list {"ordered":true} --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph -->T11】</p>
+<p class="translated">因为我们正在讨论学习排序，所以模型输出代表了这本书的SHAP分数。回答特定查询的所有书籍的分数用于对产品进行排名。因此，如果我们的模型预测:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d68a094 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d68a094" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-511eece ot-flex-column-vertical" data-id="511eece" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-dd083ab elementor-widget elementor-widget-text-editor" data-id="dd083ab" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<table style="width: 840px; color: #6d6d6d;">
+<thead>
+<tr>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">相互作用</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">询问</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center">书</th>
+<th class="has-text-align-center translated" style="border-color: transparent;" data-align="center"><strong> SHAP得分(模型输出)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #f0f0f0;">
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_5</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">雌三醇环戊醚</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">第一本书</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">-2.91</td>
+</tr>
+<tr>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_6</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">雌三醇环戊醚</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">第二本书</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">-4.54</td>
+</tr>
+<tr style="background-color: #f0f0f0;">
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">互动_7</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">雌三醇环戊醚</td>
+<td class="has-text-align-center translated" style="border-color: transparent;" data-align="center">第三本书</td>
+<td class="has-text-align-center" style="border-color: transparent;" data-align="center">-1.85</td>
+</tr>
+</tbody>
+</table>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f7e2637 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f7e2637" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9f827e3 ot-flex-column-vertical" data-id="9f827e3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-04323e0 elementor-widget elementor-widget-text-editor" data-id="04323e0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">对于查询<em> q1 </em>，我们将得到<strong>排名</strong>:</p>
+<ol>
+<li style="list-style-type: none;">
+ 
+<ol>
+<li class="translated">第三册(-1.85)</li>
+<li class="translated">book_1 (-2.91)</li>
+<li class="translated">第二册(-4.54)</li>
+</ol>
+</li>
+</ol>
+<p class="translated">因为-4.54 &lt; -2.91 &lt; -1.85 .</p>
+<p class="translated">An interesting aspect of this plot emerges from the comparison of the outputs for a specific query.<br/>查看每本书在查询中是如何评分的，我们可以检测产品之间在特性值方面的差异。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:list {"ordered":true} --><!-- /wp:list --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph -->T30】</p>
+<p class="translated">如果我们想要先前预测的全局表示，我们可以使用力图的变体:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b32524a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b32524a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f2510ac ot-flex-column-vertical" data-id="f2510ac" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-39a2bcf elementor-widget elementor-widget-text-editor" data-id="39a2bcf" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<figure class="wp-block-image size-large"><img data-attachment-id="3666" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/force_plot_1" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?fit=1205%2C398&amp;ssl=1" data-orig-size="1205,398" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="force_plot_1" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?fit=300%2C99&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?fit=1024%2C338&amp;ssl=1" loading="lazy" width="1205" height="398" class="wp-image-3666" src="../Images/6ead27e84d86a50e43f68c7d73fd6146.png" alt="" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?w=1205&amp;ssl=1 1205w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?resize=300%2C99&amp;ssl=1 300w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?resize=1024%2C338&amp;ssl=1 1024w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?resize=768%2C254&amp;ssl=1 768w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?resize=1080%2C357&amp;ssl=1 1080w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/force_plot_1.png?fit=712%2C235&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5322d57 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5322d57" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c834ece ot-flex-column-vertical" data-id="c834ece" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c6ed58b elementor-widget elementor-widget-text-editor" data-id="c6ed58b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">在这里，我们可以看到之前所做的预测(每次交互一个)垂直放置(旋转90度)并并排放置。</p>
+<h6 class="translated">依赖图</h6>
+<p class="translated">另一个对局部可解释性有用的图是<strong>依赖图</strong>。<br/>该图将选择的特征与另一个特征进行比较，并显示这两个特征是否有<strong>交互</strong> <strong>效果</strong>。</p>
+<p class="translated"><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:heading {"level":4} --><!-- /wp:heading --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph -->T45】</p>
+<p class="translated">作为第一个例子，我在这里报告了一个在经典的UCI成人收入数据集(这是一个预测人们在90年代是否超过50k的分类任务)<a href="https://web.archive.org/web/20220930001359/https://slundberg.github.io/shap/notebooks/plots/dependence_plot.html">【5】</a>上训练的模型的年龄和教育数量之间的相关性图。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a67a9a7 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a67a9a7" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c91a00d ot-flex-column-vertical" data-id="c91a00d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a4de859 elementor-widget elementor-widget-text-editor" data-id="a4de859" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<figure class="wp-block-image aligncenter size-large is-resized"><img data-attachment-id="3743" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/dependence_plot" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/dependence_plot.png?fit=987%2C648&amp;ssl=1" data-orig-size="987,648" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="dependence_plot" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/dependence_plot.png?fit=300%2C197&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/dependence_plot.png?fit=987%2C648&amp;ssl=1" loading="lazy" class="wp-image-3743 aligncenter" src="../Images/ab034893ea367d9d13e34dca1af6a02f.png" alt="" width="585" height="384" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/dependence_plot.png?w=987&amp;ssl=1 987w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/dependence_plot.png?resize=300%2C197&amp;ssl=1 300w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/dependence_plot.png?resize=768%2C504&amp;ssl=1 768w" sizes="(max-width: 585px) 100vw, 585px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/dependence_plot.png?resize=585%2C384&amp;ssl=1"/>
+<p> </p>
+<figcaption>Figure from <a href="https://web.archive.org/web/20220930001359/https://slundberg.github.io/shap/notebooks/plots/dependence_plot.html">[5]</a></figcaption>
+</figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d442649 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d442649" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3cfc9a7 ot-flex-column-vertical" data-id="3cfc9a7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c218ce5 elementor-widget elementor-widget-text-editor" data-id="c218ce5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这里每个<strong>点</strong>对应一个预测。在<strong> x轴</strong>中，我们有<em>年龄</em>，而在<strong> y轴</strong>中，我们有预测的SHAP值(知道该特征的值对该样本预测的模型输出的改变程度)。<br/><strong>颜色</strong>代表<em>教育编号</em>，因此我们可以看到特定的年龄和特定的教育编号对输出的影响是积极的还是消极的。从图中我们可以推断，20岁受教育程度高的人比20岁受教育程度低的人不太可能挣5万多，而50岁受教育程度高的人比50岁受教育程度低的人更有可能挣5万多。这表明教育程度和年龄之间存在交互作用<a href="https://web.archive.org/web/20220930001359/https://slundberg.github.io/shap/notebooks/plots/dependence_plot.html">【5】</a>。</p>
+<p class="translated"><!-- wp:paragraph -->T17<!-- wp:paragraph -->T19】</p>
+<p class="translated">从我们的图书场景中可以看到，这种关系并不总是出现在功能之间，对于功能<em> book_price </em>和<em> is_genre_fantasy </em>:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b5201ab ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b5201ab" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-34684d6 ot-flex-column-vertical" data-id="34684d6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4a4bed9 elementor-widget elementor-widget-text-editor" data-id="4a4bed9" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<figure class="wp-block-image size-large"><img data-attachment-id="3667" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/dependence_plt_book_price_with_is_fantasy" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/dependence_plt_book_price_with_is_fantasy.png?fit=650%2C459&amp;ssl=1" data-orig-size="650,459" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="dependence_plt_book_price_with_is_fantasy" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/dependence_plt_book_price_with_is_fantasy.png?fit=300%2C212&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/dependence_plt_book_price_with_is_fantasy.png?fit=650%2C459&amp;ssl=1" loading="lazy" width="650" height="459" class="wp-image-3667 aligncenter" src="../Images/ed0cc29f2593b60a3e78b0741f3180db.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/dependence_plt_book_price_with_is_fantasy.png?w=650&amp;ssl=1 650w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/dependence_plt_book_price_with_is_fantasy.png?resize=300%2C212&amp;ssl=1 300w" sizes="(max-width: 650px) 100vw, 650px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/dependence_plt_book_price_with_is_fantasy.png?ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f113e6c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f113e6c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5aa9e79 ot-flex-column-vertical" data-id="5aa9e79" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-de9354e elementor-widget elementor-widget-text-editor" data-id="de9354e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 class="translated">决策图</h6>
+<p class="translated">我想介绍的最后一个情节是<strong>决定情节</strong>。</p>
+<p class="translated">该图显示了在决策过程中预测是如何变化的。在<strong> y轴</strong>中，我们按照重要性对特征进行了排序，就像概要图一样。在<strong> x轴</strong>中，我们有模型的输出。</p>
+<p class="translated"><!-- wp:heading {"level":4} --><!-- /wp:heading --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:paragraph --><!-- /wp:paragraph --></p>
+<p class="translated">从图的底部向顶部移动，每个要素的SHAP值将添加到模型的基础值中。这显示了每个特征如何影响整体预测<a href="https://web.archive.org/web/20220930001359/https://slundberg.github.io/shap/notebooks/plots/dependence_plot.html">【5】</a>。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0750f91 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0750f91" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f60aee8 ot-flex-column-vertical" data-id="f60aee8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f5a9fc0 elementor-widget elementor-widget-text-editor" data-id="f5a9fc0" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":3756,"sizeSlug":"large"} -->T41】</p>
+<figure class="wp-block-image size-large"><img data-attachment-id="3756" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/decision_plot-2" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/decision_plot.png?fit=998%2C824&amp;ssl=1" data-orig-size="998,824" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="decision_plot" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/decision_plot.png?fit=300%2C248&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/decision_plot.png?fit=998%2C824&amp;ssl=1" loading="lazy" width="998" height="824" class="wp-image-3756" src="../Images/3adc4454ac2d34206243fbd5457dcf4a.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/decision_plot.png?w=998&amp;ssl=1 998w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/decision_plot.png?resize=300%2C248&amp;ssl=1 300w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/decision_plot.png?resize=768%2C634&amp;ssl=1 768w" sizes="(max-width: 998px) 100vw, 998px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/07/decision_plot.png?ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0b92da4 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0b92da4" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6410891 ot-flex-column-vertical" data-id="6410891" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b417c7b elementor-widget elementor-widget-text-editor" data-id="b417c7b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这里每一行代表一个预测，所以假设考虑这个:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6b5547f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6b5547f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-dc0a7a7 ot-flex-column-vertical" data-id="dc0a7a7" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-cfbbbaf elementor-widget elementor-widget-text-editor" data-id="cfbbbaf" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":3672,"sizeSlug":"large"} --> <!-- /wp:image --></p>
+<figure class="wp-block-image size-large"><img data-attachment-id="3672" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/explanation_prediction_decision_plot" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?fit=1570%2C362&amp;ssl=1" data-orig-size="1570,362" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="explanation_prediction_decision_plot" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?fit=300%2C69&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?fit=1024%2C236&amp;ssl=1" loading="lazy" width="1570" height="362" class="wp-image-3672" src="../Images/d9d5ef4678d308d5f13d151031a53434.png" alt="" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?w=1570&amp;ssl=1 1570w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?resize=300%2C69&amp;ssl=1 300w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?resize=1024%2C236&amp;ssl=1 1024w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?resize=768%2C177&amp;ssl=1 768w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?resize=1536%2C354&amp;ssl=1 1536w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?resize=1080%2C249&amp;ssl=1 1080w" sizes="(max-width: 1000px) 100vw, 1000px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i1.wp.com/sease.io/wp-content/uploads/2020/06/explanation_prediction_decision_plot.png?fit=712%2C164&amp;ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b727f97 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b727f97" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-993f110 ot-flex-column-vertical" data-id="993f110" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1d01146 elementor-widget elementor-widget-text-editor" data-id="1d01146" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">如果我们只画对应线，我们将有:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c3ad336 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c3ad336" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-03374a9 ot-flex-column-vertical" data-id="03374a9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7e80e97 elementor-widget elementor-widget-text-editor" data-id="7e80e97" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><!-- wp:image {"id":3673,"sizeSlug":"large"} -->T45】</p>
+<figure class="wp-block-image size-large"><img data-attachment-id="3673" data-permalink="https://web.archive.org/web/20220930001359/https://sease.io/2020/07/explaining-learning-to-rank-models-with-tree-shap.html/decision_plot_one_prediciton" data-orig-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/decision_plot_one_prediciton.png?fit=998%2C824&amp;ssl=1" data-orig-size="998,824" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="decision_plot_one_prediciton" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/decision_plot_one_prediciton.png?fit=300%2C248&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930001359/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/decision_plot_one_prediciton.png?fit=998%2C824&amp;ssl=1" loading="lazy" width="998" height="824" class="wp-image-3673" src="../Images/b22872c10c56202167d0d78d2bcd52e4.png" alt="" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/decision_plot_one_prediciton.png?w=998&amp;ssl=1 998w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/decision_plot_one_prediciton.png?resize=300%2C248&amp;ssl=1 300w, https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/decision_plot_one_prediciton.png?resize=768%2C634&amp;ssl=1 768w" sizes="(max-width: 998px) 100vw, 998px" data-original-src="https://web.archive.org/web/20220930001359im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/06/decision_plot_one_prediciton.png?ssl=1"/></figure>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b4adb6b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b4adb6b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-59697a4 ot-flex-column-vertical" data-id="59697a4" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f987602 elementor-widget elementor-widget-text-editor" data-id="f987602" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这里，每个特性的值在括号中报告。<br/>从图中我们可以看到<em>为_for_age_40-50 </em>为假，<em>为_author_Asimov </em>为真，<em>为_publishing_year_2020 </em>为真，<em>为_book_genre_in_cart </em> 6和<em> book_reviews </em> 992对模型产生正面影响，而其他特性则产生负面影响。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-83b3a23 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="83b3a23" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f40669b ot-flex-column-vertical" data-id="f40669b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-594e1ce elementor-widget elementor-widget-iheading" data-id="594e1ce" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">赞成的意见</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-82cb355 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="82cb355" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c90ccbd ot-flex-column-vertical" data-id="c90ccbd" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-24e144d elementor-widget elementor-widget-text-editor" data-id="24e144d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我想在这篇文章中强调的是这个工具的有用性。<br/>树SHAP让我们:</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:list --> <!-- /wp:list --></p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">解读<strong>模型<strong>如何通过力和决策剧情使</strong>成为<strong>具体的</strong> <strong>决策</strong>。</strong></li>
+<li class="translated"><strong>比较</strong>属于打印所有相关力图的公共查询的<strong>预测</strong>。因此要进行查询分析。</li>
+<li class="translated">通过概要图了解特征的<strong>相对</strong> <strong>重要性</strong>。</li>
+<li class="translated">查看<strong>中</strong>的值对于<strong>每个</strong> <strong>特征</strong> <strong>如何影响</strong>模型，如果积极或消极，通过摘要情节。</li>
+<li class="translated">了解我们是否有反映我们场景的训练集和模型。</li>
+<li class="translated">分析我们是否正确地存储了所使用的交互，或者是否有任何异常。</li>
+<li class="translated">根据重要性确定哪些功能需要优先改进。</li>
+</ul>
+</li>
+</ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-86da426 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="86da426" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8353278 ot-flex-column-vertical" data-id="8353278" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-71ec92e elementor-widget elementor-widget-iheading" data-id="71ec92e" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">意识到</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-80c1dd5 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="80c1dd5" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-58ccc5b ot-flex-column-vertical" data-id="58ccc5b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8db11ca elementor-widget elementor-widget-text-editor" data-id="8db11ca" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">使用该工具时，我们必须注意几件事:</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:list {"ordered":true} --> <!-- /wp:list --></p>
+<ol>
+<li style="list-style-type: none;">
+ 
+<ol>
+<li class="translated">特征的<strong>重要性</strong>的<strong>度量</strong>是将交互的整体作为一个独特的集合来执行的。交互不被认为是按查询分组的。因此，我们不能直接看到每个查询中的特性的重要性，但是我们必须推断之前与相同查询的所有交互，然后只对它们执行绘图。</li>
+<li class="translated">模型的<strong>输出</strong>不是关联标签。输出只是该查询的产品相关性的度量，但它是从库中生成的值，并不反映我们在训练/测试中使用的相关性标签。尽管如此，如果我们看产品之间的相对相关性，分数代表相同的概念。对于查询1，得分为2的产品相对于同一查询的得分为0的另一产品更相关。</li>
+<li class="translated">从我们上一点所说的，我们必须注意我们如何解释分数。负值并不直接意味着文档不相关。在同一个查询中，我们总是要考虑它与其他产品的关系。</li>
+</ol>
+</li>
+</ol>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-a6bb621 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="a6bb621" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-44acda3 ot-flex-column-vertical" data-id="44acda3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b7fb32a elementor-widget elementor-widget-iheading" data-id="b7fb32a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">未来作品</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-730ed3b ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="730ed3b" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f205393 ot-flex-column-vertical" data-id="f205393" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-29e55d5 elementor-widget elementor-widget-text-editor" data-id="29e55d5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我们还在待办事项列表中添加了Solr中TreeSHAP库的集成。<br/>由于Solr允许使用学习分级模型对文档进行重新分级，因此直接分析平台内部的模型行为可能非常有用。</p>
+<p class="translated">你可以在这里找到第一个公开的jira问题:</p>
+<p class="translated"><!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:paragraph --> <!-- /wp:paragraph --> <!-- wp:list --> <!-- /wp:list --></p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated"><a href="https://web.archive.org/web/20220930001359/https://github.com/slundberg/shap/issues/127">https://github.com/slundberg/shap/issues/127</a></li>
+<li class="translated"><a href="https://web.archive.org/web/20220930001359/https://github.com/slundberg/shap/pull/129">https://github.com/slundberg/shap/pull/129</a></li>
+</ul>
+</li>
+</ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c0063b9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c0063b9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5981754 ot-flex-column-vertical" data-id="5981754" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0154515 elementor-widget elementor-widget-text-editor" data-id="0154515" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<h6 class="translated">参考资料:</h6>
+<p style="padding-left: 40px;" class="translated">斯科特·m·伦德伯格和李秀英。"解释模型预测的统一方法."<em>神经信息处理系统的进展</em>。2017.【1】<br/>为什么树SHAP<a href="https://web.archive.org/web/20220930001359/https://towardsdatascience.com/interpretable-machine-learning-with-xgboost-9ec80d148d27">【3】</a></p>
+<p class="translated">其他有用的链接:</p>
+<p class="translated"><!-- wp:heading {"level":4} --><!-- /wp:heading --><!-- wp:paragraph --><!-- /wp:paragraph --><!-- wp:heading {"level":5} --><!-- /wp:heading --><!-- wp:list -->T12】</p>
+<ul>
+<li style="list-style-type: none;">
+ 
+<ul>
+<li class="translated">决定情节<a href="https://web.archive.org/web/20220930001359/https://slundberg.github.io/shap/notebooks/plots/decision_plot.html">【6】</a></li>
+<li class="translated">全局解释，不是每个查询问题<a href="https://web.archive.org/web/20220930001359/https://github.com/slundberg/shap/issues/570">【7】</a></li>
+</ul>
+</li>
+</ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-5f992c6f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5f992c6f" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4e6b7133 ot-flex-column-vertical" data-id="4e6b7133" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-786ee159 elementor-widget elementor-widget-iheading" data-id="786ee159" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-7bffed2a elementor-widget elementor-widget-text-editor" data-id="7bffed2a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220930001359/https://sease.io/learning-to-rank-training">学习排名</a>和<a href="https://web.archive.org/web/20220930001359/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>培训吗？<br/>我们也提供这些话题的咨询，<a href="https://web.archive.org/web/20220930001359/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9fa3107 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9fa3107" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-037681e ot-flex-column-vertical" data-id="037681e" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-943b963 elementor-widget elementor-widget-iheading" data-id="943b963" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-89a1622 elementor-widget elementor-widget-text-editor" data-id="89a1622" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<div class="elementor-element elementor-element-3057783 elementor-widget elementor-widget-text-editor" data-id="3057783" data-element_type="widget" data-widget_type="text-editor.default">
+<div class="elementor-widget-container">
+<div class="elementor-text-editor elementor-clearfix">
+<p class="translated">你喜欢这篇关于学习用树的形状排列模型的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>
+</div>
+</div>
+</div>
+<div class="elementor-element elementor-element-884d875 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="884d875" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+<div class="elementor-widget-container"><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp">
+<div class="mc4wp-form-fields"> </div>
+</form></div>
+</div>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-5859fa8 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="5859fa8" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220930001359/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664496839"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

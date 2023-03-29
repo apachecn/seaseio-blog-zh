@@ -1,0 +1,610 @@
+<html>
+<head>
+<title>DocValues VS Stored Fields : Apache Solr Features and Performance SmackDown</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">文档值与存储字段:Apache Solr特性和性能问题</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2020/03/docvalues-vs-stored-fields-apache-solr-features-and-performance-smackdown.html#0001-01-01">https://web.archive.org/web/sease.io/2020/03/docvalues-vs-stored-fields-apache-solr-features-and-performance-smackdown.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-8e6a6ef ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="8e6a6ef" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fecd721 ot-flex-column-vertical" data-id="fecd721" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f012133 elementor-widget elementor-widget-text-editor" data-id="f012133" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">这篇博客文章旨在让读者更好地理解Apache Solr中的<b>文档值</b>和<strong>存储的</strong>字段，以便进行可以互换使用的操作。</p><p class="translated">虽然<strong>存储的</strong>字段和<strong>文档值</strong>是为了不同的目的而创建的，但两者都可以用来有效地保存文档字段的值，然后在需要时检索它们。</p><p class="translated">当您定义solr模式时，您可能会问自己是否应该将字段定义为<strong> DocValues </strong>、<strong> Stored </strong>或两者。为了确定这一点，您需要从功能的角度理解应用程序中字段的用途。<br/>如果两种方法都符合你的需求，你应该明白选择其中一种来代替另一种会如何影响搜索引擎的性能和空间使用。</p><p> </p><p class="translated">接下来，我会给出一些工具来分析哪种方法是最好的选择，在哪种情况下是最好的选择。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-09e6fcd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="09e6fcd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-775d91d ot-flex-column-vertical" data-id="775d91d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7172ad0 elementor-widget elementor-widget-iheading" data-id="7172ad0" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">存储字段</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-340912a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="340912a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9713611 ot-flex-column-vertical" data-id="9713611" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b2a872e elementor-widget elementor-widget-text-editor" data-id="b2a872e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img loading="lazy" class="alignleft" src="../Images/c4a2b3a9e255306a8c4a421140cb1ce4.png" sizes="(max-width: 552px) 100vw, 552px" srcset="https://web.archive.org/web/20220929231246im_/https://i1.wp.com/sease.io/wp-content/uploads/2020/02/stored.png?w=552&amp;ssl=1 552w, https://web.archive.org/web/20220929231246im_/https://i1.wp.com/sease.io/wp-content/uploads/2020/02/stored.png?resize=300%2C34&amp;ssl=1 300w" alt="" width="552" height="62" data-recalc-dims="1" data-original-src="https://web.archive.org/web/20220929231246im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/02/stored.png?resize=552%2C62&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fa65ff0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fa65ff0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-04a7c06 ot-flex-column-vertical" data-id="04a7c06" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-80565d1 elementor-widget elementor-widget-text-editor" data-id="80565d1" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">存储字段的主要用途是在查询时返回字段值。您可以按如下方式指定要存储的字段:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b417284 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b417284" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4bedf2a ot-flex-column-vertical" data-id="4bedf2a" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6cfa6b3 elementor-widget elementor-widget-text-editor" data-id="6cfa6b3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><code style="font-family: Menlo, Monaco, 'Courier New', monospace; font-size: 16px; padding: 0px; color: inherit; background-color: transparent; border-radius: 3px;" data-lang="xml">&lt;fieldname="name" type="string" stored="true"/&gt;</code></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-145450f ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="145450f" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-41a6c62 ot-flex-column-vertical" data-id="41a6c62" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-41e0c56 elementor-widget elementor-widget-text-editor" data-id="41e0c56" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">存储的字段以行的方式组织。这意味着，给定一组字段，对于每个文档，这些字段的值被连接在一行中。然后，这些行按照它们的Lucene文档id顺序存储在磁盘上。根据为该文档和数据类型定义的字段数量，每行可能具有不同的大小(例如，字符串或文本字段具有可变的大小)。存储指向每一行的指针，以便快速访问它们。</p><p class="translated">假设您想从Lucene id <b> lid </b>的文档中检索字段A:</p><ol><li style="list-style-type: none;"><ol><li class="translated">找到<b>盖</b>行的地址。</li><li class="translated">读取行中的所有值，直到达到字段a的值。</li><li class="translated">为字段返回一个值。</li></ol></li></ol><p class="translated">第二点在这里至关重要。因为我们只在行的开头有一个指针，所以在最坏的情况下，我们必须读取行中所有存储的值。这意味着返回一行中所有存储的字段的成本应该与只返回一个子集的成本大致相同。这是我们定义solr模式时要考虑的一个重要因素。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-285fdb1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="285fdb1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f2657cb ot-flex-column-vertical" data-id="f2657cb" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7776d57 elementor-widget elementor-widget-iheading" data-id="7776d57" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">存储字段空间占用</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-58a2a49 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="58a2a49" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-211b385 ot-flex-column-vertical" data-id="211b385" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-26cfc52 elementor-widget elementor-widget-text-editor" data-id="26cfc52" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">了解存储字段将占用多少空间是一项困难的任务。事实上，当数据被压缩时，一些因素如数据冗余和分布起着基本的作用。</p><p> </p><p class="translated">通过将LZ4算法应用于如上所述形成的行来进行压缩。LZ4是一种非常快速的压缩算法，具有良好的但不是最佳的压缩比。可以指定两种模式:<strong>最佳_压缩</strong>和<strong>最佳_速度</strong>。虽然<strong> BEST_SPEED </strong>是默认选项，但是为了设置<strong> BEST_COMPRESSION </strong>，您只需要在solrconfig.xml中启用它，如下所示:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c619f33 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c619f33" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-754096b ot-flex-column-vertical" data-id="754096b" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e1a588a elementor-widget elementor-widget-text-editor" data-id="e1a588a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><code style="font-family: Menlo, Monaco, 'Courier New', monospace; padding: 0px; font-size: 16px; color: inherit; background-color: transparent; border-radius: 3px;" data-lang="xml">&lt;codecFactory&gt; <br/> </code> <code style="font-family: Menlo, Monaco, 'Courier New', monospace; padding: 0px; font-size: 16px; color: inherit; background-color: transparent; border-radius: 3px;" data-lang="xml">  &lt;str name="compressionMode"&gt;BEST_COMPRESSION&lt;/str&gt;<br/>&lt;/codecFactory&gt;</code></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ccbd6e1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ccbd6e1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6df7472 ot-flex-column-vertical" data-id="6df7472" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-dedd9a6 elementor-widget elementor-widget-text-editor" data-id="dedd9a6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">该选项仅改变LZ4算法执行的一些参数，降低了性能并提高了压缩比。<br/>关于存储字段压缩，最后要说的是，在同一行中，我们可以找到非常异构的数据，这不是获得最佳压缩比的最佳方案。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c1cb382 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c1cb382" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5d647d3 ot-flex-column-vertical" data-id="5d647d3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8a9ecc1 elementor-widget elementor-widget-iheading" data-id="8a9ecc1" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">文档值</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4f7a208 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4f7a208" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1e01df9 ot-flex-column-vertical" data-id="1e01df9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-4ffcbe8 elementor-widget elementor-widget-text-editor" data-id="4ffcbe8" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img loading="lazy" src="../Images/980d8cbc855a01dce3e9b757ee072570.png" sizes="(max-width: 452px) 100vw, 452px" srcset="https://web.archive.org/web/20220929231246im_/https://i1.wp.com/sease.io/wp-content/uploads/2020/02/docvalues-1.png?w=452&amp;ssl=1 452w, https://web.archive.org/web/20220929231246im_/https://i1.wp.com/sease.io/wp-content/uploads/2020/02/docvalues-1.png?resize=300%2C42&amp;ssl=1 300w" alt="" width="452" height="63" data-recalc-dims="1" data-original-src="https://web.archive.org/web/20220929231246im_/https://i0.wp.com/sease.io/wp-content/uploads/2020/02/docvalues-1.png?resize=452%2C63&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f2761e1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f2761e1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7e12f8f ot-flex-column-vertical" data-id="7e12f8f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-eed9a0c elementor-widget elementor-widget-text-editor" data-id="eed9a0c" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b>引入了文档值</b>来提高一些操作的性能，否则这些操作的成本会非常高:<b>排序</b>、<b>分面</b>和<b>分组。</b>如果这些操作在你的搜索引擎用例中频繁且重要，你真的应该考虑将涉及的字段设置为<strong>文档值</strong>。</p><p class="translated">要启用<b> DocValues </b>，只需设置DocValues属性如下:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-23ca820 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="23ca820" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-79a95b8 ot-flex-column-vertical" data-id="79a95b8" data-element_type="column" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-090b2aa elementor-widget elementor-widget-text-editor" data-id="090b2aa" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p style="padding-left: 40px;" class="translated"><code style="font-family: Menlo, Monaco, 'Courier New', monospace; padding: 0px; font-size: 16px; color: inherit; background-color: transparent; border-radius: 3px;" data-lang="xml">&lt;fieldname="name" type="string" docValues="true"/&gt;</code></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-154f0ac ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="154f0ac" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-ad53a90 ot-flex-column-vertical" data-id="ad53a90" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bb70880 elementor-widget elementor-widget-text-editor" data-id="bb70880" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><b> DocValues </b>可以用来代替存储的字段，以便在查询时检索字段值，但是它们是以列的方式序列化的。需要考虑3种重要的行为差异:</p><ol><li style="list-style-type: none;"><ol><li class="translated">文本字段不能设置为<b>文档值</b>。如果您的字段具有文本类型，并且您想要返回它，您必须将其设置为存储的。</li><li class="translated"><b>多值字段</b>使用<b>不同的</b> <b>顺序</b>返回:当您使用存储字段时，它们以它们被索引的顺序返回(持有数据结构充当<b>列表</b>)。相反，内部启用了docValues的多值字段使用一个<b>集合</b> (SORTED_SET或SORTED_NUMERIC，取决于它们的类型)，这是一个数据结构，<b>对其成员</b>进行预先排序，<b>删除重复项</b>。</li><li class="translated">如果您想要返回fl=*的<b> docvalues </b>，您需要在字段定义中指定它:<b>usedocvaluessastored = " true "</b>(注意这是从模式版本1.6开始的默认值)</li></ol></li></ol><p class="translated">正如预期的那样，字段是按列序列化的。因此，以通用字段A为例，对于集合中的每个文档，我们根据Lucene文档id连续存储字段A的值。请注意，对于某些类型(例如字符串)，每个值都有不同的大小，并且无法预测每个元素需要多少空间。</p><p class="translated">访问文档X的字段A的值可以如下进行:</p><ol><li style="list-style-type: none;"><ol><li class="translated">在字段a的列中找到文档X的地址。</li><li class="translated">读取值并返回它。</li></ol></li></ol><p class="translated">找到正确的地址实际上是一个棘手的操作，原因有二:</p><ul><li style="list-style-type: none;"><ul><li class="translated">对于某些文档，该字段可能为空</li><li class="translated">我们不希望每个<b>文档值</b>都有一个指针，否则太多的空间将只用于指针。</li></ul></li></ul><p class="translated">然而，因为我们可以直接读取感兴趣的值，我们可以想象使用<b> docvalues </b>只读取一个字段值比使用存储的字段更有性能，而读取更多的字段需要重复相同的过程更多次。此外，因为值在内存中很稀疏，所以读取更多的值会导致缓存未命中，这会降低性能。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7582839 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7582839" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f23542f ot-flex-column-vertical" data-id="f23542f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0fe5b8f elementor-widget elementor-widget-iheading" data-id="0fe5b8f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">文档值空间占用</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e018911 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e018911" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4e69a37 ot-flex-column-vertical" data-id="4e69a37" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-dd08747 elementor-widget elementor-widget-text-editor" data-id="dd08747" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">不深究细节，花一些篇幅介绍一下文档的空间占用是值得的。这里的事情比存储字段要复杂一些。根据列的不同，数据以不同的方式存储和压缩。因此，包含数字数据的列的存储和压缩方式不同于包含字符串的列。</p><ul><li style="list-style-type: none;"><ul><li class="translated">数据以列的方式存储，因此同质数据将彼此接近</li><li class="translated">根据数据类型应用专门的压缩。</li></ul></li></ul><p class="translated">由于这些断言，我们可以得出结论，存储<b> docvalues </b>将导致比使用存储字段更有效的空间使用，占用更少的空间。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-42a4221 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="42a4221" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e86c167 ot-flex-column-vertical" data-id="e86c167" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e012b46 elementor-widget elementor-widget-iheading" data-id="e012b46" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">docValues=true和stored=true <br/>会发生什么？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ce3d01c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ce3d01c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-3e13a25 ot-flex-column-vertical" data-id="3e13a25" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-afcf652 elementor-widget elementor-widget-text-editor" data-id="afcf652" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">有人可能想知道:在检索时Solr中会发生什么</p><ol><li style="list-style-type: none;"><ol><li class="translated">fl仅包含存储值</li><li class="translated">fl仅包含文档值(stored=false)</li><li class="translated">fl包含stored和docValues字段的混合？</li></ol></li></ol><p class="translated">由于这两个选项<strong>不是排他的</strong>，在上面的前两个例子中，我们假设一个选项被启用，另一个被禁用。在这种假设下，情况1和2很简单，因为stored和docValues字段是两个不相交集合:在第一种情况下，Solr将使用存储的值，而在第二种情况下，将使用docValues结构。</p><p class="translated">第三种情况有点棘手，因为如上所述，这两个选项都可以启用(即stored="true" docValues="true ")。给你。我们必须在Solr 7之前和之后做一个区分，因为已经引入了一个优化。</p><p class="translated">实际上，与优化本身相比，Solr 7中新的<em> RetrieveFieldOptimizer </em>类创建了一个集中的责任点，未来可以在这里实现进一步的增强。</p><p class="translated">在Solr 7之前，对于要在结果中返回的每个<em> SolrDocument </em>实例，实际负责获取字段值的<em>org . Apache . Solr . response . docsstreamer</em>类会执行</p><ul><li style="list-style-type: none;"><ul><li class="translated">存储的字段(即标记为“已存储”的字段，无论其文档值设置如何)</li><li class="translated">启用文档值的字段</li></ul></li></ul><p class="translated">这是那堂课的一个片段:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-95ee52c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="95ee52c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-763de4c ot-flex-column-vertical" data-id="763de4c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-bdea6cb elementor-widget elementor-widget-text-editor" data-id="bdea6cb" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre>SolrDocument sdoc = null;
+...
+Document doc = docFetcher.doc(id, fnames);
+sdoc = convertLuceneDocToSolrDoc(doc, rctx.getSearcher().getSchema()); 
+
+// decorate the document with non-stored docValues fields
+if (dvFieldsToReturn != null) {
+  docFetcher.decorateDocValueFields(sdoc, id, dvFieldsToReturn);
+}</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ea7e982 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ea7e982" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-db99e0c ot-flex-column-vertical" data-id="db99e0c" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0751786 elementor-widget elementor-widget-text-editor" data-id="0751786" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">相同的代码在Solr 7中看起来“相似”:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9dbf0dd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9dbf0dd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-b7164ab ot-flex-column-vertical" data-id="b7164ab" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-79c322a elementor-widget elementor-widget-text-editor" data-id="79c322a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<pre>if (optimizer.returnStoredFields()) {
+  Document doc = docFetcher.doc(id, optimizer.getStoredFields());
+  // make sure to use the schema from the searcher and not the request (cross-core)
+  sdoc = convertLuceneDocToSolrDoc(doc, rctx.getSearcher().getSchema());
+} else {
+  // no need to get stored fields of the document, see SOLR-5968
+  sdoc = new SolrDocument();
+}
+
+// decorate the document with non-stored docValues fields
+if (optimizer.returnDVFields()) {
+  docFetcher.decorateDocValueFields(sdoc, id, optimizer.getDvFields());
+}</pre>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-23e0241 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="23e0241" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-0232ff6 ot-flex-column-vertical" data-id="0232ff6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a845ed1 elementor-widget elementor-widget-text-editor" data-id="a845ed1" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">但是正如你所看到的，它引入了一个新的优化器(<em>retrievefieldsotimizer)</em>，试图做尽可能最有效的事情。具体来说，如果fl仅包含带有以下选项的<strong>字段</strong></p><ul><li style="list-style-type: none;"><ul><li class="translated">多值=“假”</li><li class="translated">docValues="true "</li></ul></li></ul><p class="translated">不管它们是否被存储，Solr都将从docValues结构中返回存储的值。然而，如果甚至一个字段是docValues=false，Solr将退回到&lt;7 behaviour, that is:</p><ul><li style="list-style-type: none;"><ul><li class="translated">stored value for stored fields</li><li class="translated">docValues structure for docValues enabled fields</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4253d57 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4253d57" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9c5224b ot-flex-column-vertical" data-id="9c5224b" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0ced203 elementor-widget elementor-widget-iheading" data-id="0ced203" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">Benchmarks</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-45bdab1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="45bdab1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-9f2e9e3 ot-flex-column-vertical" data-id="9f2e9e3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b1b71fa elementor-widget elementor-widget-text-editor" data-id="b1b71fa" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">Now that we know our competitors (<strong>存储的</strong> VS <strong> DocValues)，</strong>我们可以探索一个性能对打<strong>。</strong> <br/>我们创建了一个Solr实例，旨在提供一些关于<strong>存储的</strong>字段和<strong>文档值</strong>字段返回的性能数据。</p><p class="translated">这个基准并不意味着是完整的。在某些情况下，事情可能会有所不同。</p><p class="translated">我们以这种方式创建了一个索引:我们已经索引了来自维基百科的一百万个文档。对于我们添加的每个文档:</p><ul><li class="translated">100个随机存储的字符串字段，每个字段15个字符</li><li class="translated">100个随机的<strong>文档值</strong>字符串字段，每个字段15个字符</li></ul><p class="translated">文档和查询集合取自quick wit Github<a href="https://web.archive.org/web/20220929231246/https://github.com/tantivy-search/search-benchmark-game">【1】</a>。我们使用真实的集合来模拟真实的场景。执行细节:</p><ul><li class="translated">CPU: AMD RYZEN 3600</li><li class="translated">内存:32 GB</li><li class="translated">索引大小:9.07 GB</li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-837dc63 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="837dc63" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6a1df70 ot-flex-column-vertical" data-id="6a1df70" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e8a5c7f elementor-widget elementor-widget-text-editor" data-id="e8a5c7f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img class="aligncenter" src="../Images/b43dd83e81fabef7bd7b70db7a56844a.png" data-recalc-dims="1" data-original-src="https://web.archive.org/web/20220929231246im_/https://i0.wp.com/sease.io/wp-content/uploads/2019/11/100.png?ssl=1"/></p><p style="text-align: center;" class="translated">前100名</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4564a5a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4564a5a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fe56eaf ot-flex-column-vertical" data-id="fe56eaf" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0707ff7 elementor-widget elementor-widget-text-editor" data-id="0707ff7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img loading="lazy" class="aligncenter" src="../Images/8237bb2eebb3762c4328ea9194670aa1.png" sizes="(max-width: 640px) 100vw, 640px" srcset="https://web.archive.org/web/20220929231246im_/https://i0.wp.com/sease.io/wp-content/uploads/2019/11/200.png?w=640&amp;ssl=1 640w, https://web.archive.org/web/20220929231246im_/https://i0.wp.com/sease.io/wp-content/uploads/2019/11/200.png?resize=300%2C225&amp;ssl=1 300w" alt="" width="640" height="480" data-recalc-dims="1" data-original-src="https://web.archive.org/web/20220929231246im_/https://i0.wp.com/sease.io/wp-content/uploads/2019/11/200.png?resize=640%2C480&amp;ssl=1"/></p><p style="text-align: center;" class="translated">前200名</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3a969ee ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3a969ee" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-708d9bd ot-flex-column-vertical" data-id="708d9bd" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-551aee3 elementor-widget elementor-widget-text-editor" data-id="551aee3" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">可能会注意到，如果使用<strong>文档值</strong>，检索大量字段会导致性能明显下降。相反，(几乎)令人惊讶的是，通过返回少于20个字段，<strong> DocValues </strong>比存储的字段执行得更好，并且随着返回的字段数量的增加，这种差异变得很小。这是因为主存储器中的<strong>文档值</strong>得到了更好的管理。请求9个<strong>文档值</strong>字段和1个存储字段平均需要6.86个查询时间(多于返回10个存储字段)。此外，上面的图表显示，查询时间随着返回的字段数线性增加。这使得针对<strong>文档值</strong>使用存储字段的加速变得可预测。</p><p class="translated">总之，使用<strong> DocValues </strong>从性能角度来看有几个好处(分面、排序和分组),如果只使用少量<strong> DocValues </strong>字段而不使用store字段，它们甚至可以加速字段检索。此外，<strong> DocValues </strong>可能比存储的字段使用更少的空间。如果用例需要返回大量的字段，那么使用存储字段是可行的方法。</p><p class="translated">实验可以通过使用solr配置和python脚本来复制。git存储库只包含一小部分用于基准测试的数据样本。<a href="https://web.archive.org/web/20220929231246/https://github.com/SeaseLtd/solr-field-retrieval-benchmark">【2】</a></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-1559ef97 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="1559ef97" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-4d8395d2 ot-flex-column-vertical" data-id="4d8395d2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-51783a9d elementor-widget elementor-widget-iheading" data-id="51783a9d" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-58ecaee6 elementor-widget elementor-widget-text-editor" data-id="58ecaee6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我有没有提到我们做<a href="https://web.archive.org/web/20220929231246/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220929231246/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training"> Elasticsearch初学者</a>培训？<br/>我们也提供这些主题的咨询，<a href="https://web.archive.org/web/20220929231246/https://sease.io/contacts">如果你想让你的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-976eb25 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="976eb25" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-75c0bc6 ot-flex-column-vertical" data-id="75c0bc6" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b0c1dea elementor-widget elementor-widget-iheading" data-id="b0c1dea" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-03be838 elementor-widget elementor-widget-text-editor" data-id="03be838" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这篇关于文档值和存储字段的文章吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-0207536 elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="0207536" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220929231246/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664493166"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

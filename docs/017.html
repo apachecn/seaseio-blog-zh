@@ -1,0 +1,482 @@
+<html>
+<head>
+<title>Rated Ranking Evaluator: Help the poor (Search Engineer)</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">评级排名评价者:帮助穷人(搜索工程师)</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2018/07/rated-ranking-evaluator.html#0001-01-01">https://web.archive.org/web/sease.io/2018/07/rated-ranking-evaluator.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-3a2b957 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3a2b957" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-602a1ac ot-flex-column-vertical" data-id="602a1ac" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ae5b4fa elementor-widget elementor-widget-text-editor" data-id="ae5b4fa" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">软件工程师总是被要求向他的客户提供关于可交付产品质量的具体证据。搜索工程师处理这种通用软件质量的专门化，它被称为搜索质量。</p><p class="translated">什么是搜索质量？为什么它在搜索基础设施中如此重要？毕竟，“软件质量”应该是无所不包的，它应该总是包括一切(实际上是这样)，但是当我们处理搜索系统时，质量是一个非常抽象的术语，很难预先定义。</p><p class="translated">搜索基础设施的功能正确性(假设正确性是影响系统质量的唯一因素——它不是——自然与人的判断和观点相关联，不幸的是，我们知道人们的观点可能不同。</p><p class="translated">将从搜索系统中获得价值的业务涉众可以属于不同的类别，可以有不同的期望，并且他们可以对期望的系统正确性有不同的想法。</p><p class="translated">在这种情况下，搜索工程师在选择方面面临许多挑战，最后，他必须提供关于这些选择的功能覆盖的具体证据。</p><p class="translated">这就是我们开发分级评定员(以下简称RRE)的背景。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e37b7a0 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e37b7a0" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-fcb788a ot-flex-column-vertical" data-id="fcb788a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-61da72f elementor-widget elementor-widget-iheading" data-id="61da72f" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">这是什么？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-17ac5c1 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="17ac5c1" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-035783f ot-flex-column-vertical" data-id="035783f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b249db4 elementor-widget elementor-widget-text-editor" data-id="b249db4" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">评级评估器(RRE)<a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator">【1】</a>是一个搜索质量评估工具，用于评估来自搜索基础设施的结果的质量。</p><p class="translated">这有助于搜索工程师的日常工作。你是搜索工程师吗？您是否正在调整/实施/更改/配置搜索基础架构？你想有什么东西给你一个证据来证明变化之间的改进吗？RRE可以帮你一把。</p><p class="translated">RRE将搜索系统满足用户信息需求的程度正式化，在“技术”层面，将丰富的树状域模型与几个评估指标相结合，但也在“功能”层面，提供可以针对商业利益相关者的人类可读输出。</p><p class="translated">它鼓励在搜索系统的开发和演变过程中采用增量/迭代/不可变的方法:假设我们从x.y版本开始我们的系统:当需要对其配置应用一些相关的更改时，而不是对x.y应用更改，最好克隆它并将那些更改应用到新的全新版本。</p><p class="translated">通过这种方式，RRE将对所有可用版本执行评估过程，它将提供后续版本之间的差异/趋势，因此您可以立即获得系统在相关性方面的精细画面。</p><p class="translated">这篇文章只是对RRE的一个简要总结。你可以在项目Wiki<a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki">【2】</a>中找到更详细的信息。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-fa8a74e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="fa8a74e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-8f142f8 ot-flex-column-vertical" data-id="8f142f8" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f2fb750 elementor-widget elementor-widget-iheading" data-id="f2fb750" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">简而言之，我能从RRE得到什么？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-2dd985c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="2dd985c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-df6814f ot-flex-column-vertical" data-id="df6814f" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-a56458a elementor-widget elementor-widget-text-editor" data-id="a56458a" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">您可以将RRE配置为项目构建周期的复合部分。这意味着，每次触发构建时，都会执行一个评估过程。</p><p class="translated">RRE并不局限于一个给定的搜索平台:它提供了一个迷你框架<a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/Search%20Platform%20Framework">【3】</a>用于插入不同的搜索平台。目前我们有两个可用的绑定:Apache Solr和elastic search<a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/Supported%20Versions">【4】</a>。</p><p class="translated">输出评估数据将可用:</p><ul><li style="list-style-type: none;"><ul><li class="translated">作为<strong> JSON文件</strong>:进一步阐述</li><li class="translated">作为<strong>电子表格</strong>:用于将评估结果交付给其他人(如商业利益相关者)</li><li class="translated">在<strong> Web控制台</strong><a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/RRE%20Server">【5】</a>中，指标及其值会实时刷新(在每次构建之后)</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4218ade ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4218ade" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-f9f7201 ot-flex-column-vertical" data-id="f9f7201" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0497e37 elementor-widget elementor-widget-text-editor" data-id="0497e37" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="891" data-permalink="https://web.archive.org/web/20220930005630/https://sease.io/2018/07/rated-ranking-evaluator.html/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192" data-orig-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=2546%2C1137&amp;ssl=1" data-orig-size="2546,1137" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="42096917-edefdd50-7bb6-11e8-9d1a-21356b453192" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=300%2C134&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=1024%2C457&amp;ssl=1" loading="lazy" class="wp-image-891 alignnone" src="../Images/677e7810c320b0e9382d7d7f6fe36e7c.png" alt="" width="461" height="206" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?w=2546&amp;ssl=1 2546w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=300%2C134&amp;ssl=1 300w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=768%2C343&amp;ssl=1 768w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=1024%2C457&amp;ssl=1 1024w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=1080%2C482&amp;ssl=1 1080w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?w=2000&amp;ssl=1 2000w" sizes="(max-width: 461px) 100vw, 461px" data-original-src="https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=461%2C206&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-9164bcf ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="9164bcf" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-630e1a3 ot-flex-column-vertical" data-id="630e1a3" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-202157a elementor-widget elementor-widget-iheading" data-id="202157a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">它是如何工作的</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d7c1b88 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d7c1b88" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e6ac500 ot-flex-column-vertical" data-id="e6ac500" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-c1a131e elementor-widget elementor-widget-text-editor" data-id="c1a131e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">RRE提供了一个丰富的、复合的、树状的领域模型<a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/Domain%20Model">【6】</a>，其中的评估概念可以在不同的层次上看到。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-58a0e80 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="58a0e80" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a1fbdba ot-flex-column-vertical" data-id="a1fbdba" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-47a2ad7 elementor-widget elementor-widget-text-editor" data-id="47a2ad7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="894" data-permalink="https://web.archive.org/web/20220930005630/https://sease.io/2018/07/rated-ranking-evaluator.html/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2" data-orig-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?fit=1281%2C932&amp;ssl=1" data-orig-size="1281,932" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="RRE Domain Model" data-image-description="&lt;p&gt;RRE Domain Model&lt;/p&gt;&#10;" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?fit=300%2C218&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?fit=1024%2C745&amp;ssl=1" loading="lazy" class="wp-image-894 alignnone" src="../Images/de9d25f76605a9d18ce06afcad5d2071.png" alt="RRE Domain Model" width="469" height="341" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?w=1281&amp;ssl=1 1281w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?resize=300%2C218&amp;ssl=1 300w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?resize=768%2C559&amp;ssl=1 768w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?resize=1024%2C745&amp;ssl=1 1024w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?resize=1080%2C786&amp;ssl=1 1080w" sizes="(max-width: 469px) 100vw, 469px" data-original-src="https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42093124-8e89a2a2-7bab-11e8-8f7c-8c4c917b91f2.png?resize=469%2C341&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-3300be6 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="3300be6" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7ed8143 ot-flex-column-vertical" data-id="7ed8143" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-f0bb5b7 elementor-widget elementor-widget-text-editor" data-id="f0bb5b7" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">顶层的<strong>评估</strong>只是嵌套实体的容器。注意，所有的实体关系都是一对多的<strong/>。在这种情况下，<strong>语料库</strong>被定义为测试数据集。RRE将使用它来执行评估过程；在一个评估过程中，您可以拥有多个数据集。</p><p class="translated">主题是信息需求:它从最终用户的角度定义了功能需求。在一个主题中，我们可以有几个查询，它们表达了相同的需求，但更接近于技术层。RRE在中间提供了进一步的抽象:查询组。<strong>查询组</strong>是一组应该产生相同结果的查询(因此与相同的判断集相关联)。</p><p class="translated">查询是RRE领域模型的技术叶子，它被进一步分解成几个角度，每个角度对应我们系统的一个可用版本。当然，查询本身是一个单独的实体，但是在评估会话期间，它的具体执行会发生几次，每次针对一个可用版本。这是因为RRE需要衡量所有版本的搜索结果(即查询执行)。</p><p class="translated">对于每个版本，我们最终都会有一个或多个指标，这取决于配置。最后但同样重要的是，即使度量是在查询/版本级别计算的，RRE也将在更高的级别聚合这些值(参见图中的垂直虚线)，因此域模型中的每个实体/级别将提供所有可用度量的聚合视角(即，我可能对给定查询的NDCG感兴趣，或者我可以只在主题级别停止我的分析)。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-f31def8 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="f31def8" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-7251848 ot-flex-column-vertical" data-id="7251848" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-ea15aad elementor-widget elementor-widget-iheading" data-id="ea15aad" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">投入</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-324133c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="324133c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6943fd1 ot-flex-column-vertical" data-id="6943fd1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-7651cc5 elementor-widget elementor-widget-text-editor" data-id="7651cc5" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">为了执行评估流程，RRE需要以下东西:</p><ul><li style="list-style-type: none;"><ul><li class="translated">一个或多个<strong>语料库</strong> / <strong>测试集</strong><a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/What%20We%20Need%20To%20Provide#corpus">【7】</a>:这些是特定领域的代表性数据集，将用于填充和查询目标搜索平台</li><li class="translated">一个或多个<strong>配置集</strong><a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/What%20We%20Need%20To%20Provide#configuration-sets">【8】</a>:虽然没有什么反对拥有一个单一的配置，但是至少需要两个版本，以便提供评估措施之间的比较。</li><li class="translated">一个或多个<strong>评级集</strong><a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/What%20We%20Need%20To%20Provide#ratings">【9】</a>:这是根据每个查询组的相关文档定义判断的地方。</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4f53bf2 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4f53bf2" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e312220 ot-flex-column-vertical" data-id="e312220" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-37deb13 elementor-widget elementor-widget-iheading" data-id="37deb13" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">输出</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e3e799e ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e3e799e" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c8d70cf ot-flex-column-vertical" data-id="c8d70cf" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-33ff183 elementor-widget elementor-widget-text-editor" data-id="33ff183" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">RRE的具体输出取决于它运行的运行时容器。RRE核心本身只是一个库，所以当在项目中以编程方式使用时，它输出一组对应于上述域模型的对象。</p><p class="translated">当它作为Maven插件使用时，主要以JSON格式<a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator/wiki/The%20Evaluation%20Output">【10】</a>输出相同的结构。这些数据然后被用于产生进一步的输出，比如电子表格。同样的有效载荷可以发送到另一个名为RRE服务器的模块，它提供了一个基于AngularJS的web控制台，可以自动刷新。</p><p class="translated">当我们围绕某个问题进行内部迭代/尝试时，RRE控制台非常有用，这通常需要非常短的<em>编辑并立即检查</em>周期。想象一下，如果你的桌子上有几个显示器:第一个是你最喜欢的IDE，你可以在那里修改东西，运行构建。第二个是RRE控制台(见下文)。每次构建完成后，只需在控制台上看一下，就可以立即得到您所做更改的反馈。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7d05181 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7d05181" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1cfc6e1 ot-flex-column-vertical" data-id="1cfc6e1" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1fe2acf elementor-widget elementor-widget-text-editor" data-id="1fe2acf" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="902" data-permalink="https://web.archive.org/web/20220930005630/https://sease.io/2018/07/rated-ranking-evaluator.html/rre-spreadsheet" data-orig-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?fit=1958%2C414&amp;ssl=1" data-orig-size="1958,414" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="rre-spreadsheet" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?fit=300%2C63&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?fit=1024%2C217&amp;ssl=1" loading="lazy" class="alignnone wp-image-902" src="../Images/ecafc38b85fbc2f12d94ddd5749a9866.png" alt="" width="600" height="126" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?w=1958&amp;ssl=1 1958w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=300%2C63&amp;ssl=1 300w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=768%2C162&amp;ssl=1 768w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=1024%2C217&amp;ssl=1 1024w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=1080%2C228&amp;ssl=1 1080w" sizes="(max-width: 600px) 100vw, 600px" data-original-src="https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/rre-spreadsheet.png?resize=600%2C126&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7f58d95 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7f58d95" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-80e4614 ot-flex-column-vertical" data-id="80e4614" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-956924d elementor-widget elementor-widget-text-editor" data-id="956924d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><img data-attachment-id="891" data-permalink="https://web.archive.org/web/20220930005630/https://sease.io/2018/07/rated-ranking-evaluator.html/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192" data-orig-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=2546%2C1137&amp;ssl=1" data-orig-size="2546,1137" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="42096917-edefdd50-7bb6-11e8-9d1a-21356b453192" data-image-description="" data-image-caption="" data-medium-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=300%2C134&amp;ssl=1" data-large-file="https://web.archive.org/web/20220930005630/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?fit=1024%2C457&amp;ssl=1" loading="lazy" class=" wp-image-891 alignnone" src="../Images/9f9757fcc472f57069528c8218788034.png" alt="" width="598" height="267" data-recalc-dims="1" srcset="https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?w=2546&amp;ssl=1 2546w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=300%2C134&amp;ssl=1 300w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=768%2C343&amp;ssl=1 768w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=1024%2C457&amp;ssl=1 1024w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=1080%2C482&amp;ssl=1 1080w, https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?w=2000&amp;ssl=1 2000w" sizes="(max-width: 598px) 100vw, 598px" data-original-src="https://web.archive.org/web/20220930005630im_/https://i0.wp.com/sease.io/wp-content/uploads/2018/07/42096917-edefdd50-7bb6-11e8-9d1a-21356b453192.png?resize=598%2C267&amp;ssl=1"/></p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e0b4096 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e0b4096" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2879361 ot-flex-column-vertical" data-id="2879361" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-e6ef905 elementor-widget elementor-widget-iheading" data-id="e6ef905" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">我能从哪里开始？</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-646f4b9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="646f4b9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-dc2effe ot-flex-column-vertical" data-id="dc2effe" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-43a581f elementor-widget elementor-widget-text-editor" data-id="43a581f" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">Github中的项目资源库<a href="https://web.archive.org/web/20220930005630/https://github.com/SeaseLtd/rated-ranking-evaluator">【1】</a>提供了您需要的一切:关于它如何工作以及如何快速开始使用RRE的详细文档。</p><p class="translated">如果您需要帮助，请随时联系我们！我们感谢任何反馈，建议，最后但同样重要的是，贡献。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ee8125d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ee8125d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-5abd2fe ot-flex-column-vertical" data-id="5abd2fe" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-557f43c elementor-widget elementor-widget-iheading" data-id="557f43c" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">未来作品</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-b3fc18d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="b3fc18d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-af33812 ot-flex-column-vertical" data-id="af33812" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-12d8781 elementor-widget elementor-widget-text-editor" data-id="12d8781" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">可想而知，这个话题是相当庞大的。我们有很多关于平台进化的有趣想法。</p><p class="translated">以下是一些例子:</p><ul><li style="list-style-type: none;"><ul><li class="translated">与一些工具集成，用于建立相关性判断。这可能是一些用户界面或一个更复杂的用户交互收集器<a href="https://web.archive.org/web/20220930005630/https://www.slideshare.net/AndreaGazzarini/search-quality-evaluation-a-developer-perspective/30">【11】</a>(它将在计算的在线指标如点击率和销售率的基础上自动生成评级集)</li><li class="translated">詹金斯插件<a href="https://web.archive.org/web/20220930005630/https://www.slideshare.net/AndreaGazzarini/search-quality-evaluation-a-developer-perspective/31">【12】</a>:为了更好地将RRE集成到流行的CI工具中</li><li class="translated">Gradle插件</li><li class="translated">Apache Solr等级评估API<a href="https://web.archive.org/web/20220930005630/https://www.slideshare.net/AndreaGazzarini/search-quality-evaluation-a-developer-perspective/32">【13】</a>:使用RRE核心，我们可以在Solr中实现一个等级评估端点，类似于Elasticsearch中提供的等级评估API<a href="https://web.archive.org/web/20220930005630/https://www.elastic.co/guide/en/elasticsearch/reference/6.3/search-rank-eval.html">【14】</a></li><li class="translated">？？？其他？热烈欢迎任何建议</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-bb1474d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="bb1474d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-730340a ot-flex-column-vertical" data-id="730340a" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-0c71178 elementor-widget elementor-widget-iheading" data-id="0c71178" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h6 class="main-heading translated">相关链接</h6>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-917be4a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="917be4a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c7524b2 ot-flex-column-vertical" data-id="c7524b2" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-b8f829d elementor-widget elementor-widget-text-editor" data-id="b8f829d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul><li class="translated">我们在伦敦Apache Solr/Lucene会议上演讲的幻灯片</li><li class="translated">亚麻对伦敦会议的精彩总结<a href="https://web.archive.org/web/20220930005630/http://www.flax.co.uk/blog/2018/06/29/lucene-solr-london-search-quality-testing-and-search-procurement">【16】</a></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-6a8f2857 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="6a8f2857" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-be6b6fe ot-flex-column-vertical" data-id="be6b6fe" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5e98ab2b elementor-widget elementor-widget-iheading" data-id="5e98ab2b" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-677fbe29 elementor-widget elementor-widget-text-editor" data-id="677fbe29" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220930005630/https://sease.io/training/search-quality-evaluation-trainings/search-quality-evaluation-training">搜索质量评估</a>和<a href="https://web.archive.org/web/20220930005630/https://sease.io/training/search-relevance-training/search-relevance-training-solr">搜索相关性</a>培训吗？<br/>我们还提供关于这些主题的咨询，<a href="https://web.archive.org/web/20220930005630/https://sease.io/contacts">如果您想让您的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-0e29e90 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="0e29e90" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-731be29 ot-flex-column-vertical" data-id="731be29" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-1a561ec elementor-widget elementor-widget-iheading" data-id="1a561ec" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-a217799 elementor-widget elementor-widget-text-editor" data-id="a217799" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这个关于评级评估员的帖子吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-df115ac elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="df115ac" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220930005630/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664499390"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>

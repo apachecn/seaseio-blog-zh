@@ -1,0 +1,215 @@
+<html>
+<head>
+<title>SolrCloud Leader Election Failing</title>
+<link href="../Styles/Style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="translated">SolrCloud领导人选举失败</h1>
+<blockquote>原文：<a href="https://web.archive.org/web/sease.io/2018/05/solrcloud-leader-election-failing.html#0001-01-01">https://web.archive.org/web/sease.io/2018/05/solrcloud-leader-election-failing.html#0001-01-01</a></blockquote>
+									<section class="elementor-section elementor-top-section elementor-element elementor-element-5687df9 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="5687df9" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-c1efa57 ot-flex-column-vertical" data-id="c1efa57" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-6dc5f33 elementor-widget elementor-widget-text-editor" data-id="6dc5f33" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">目前(Solr 7.3.0 ) SolrCloud是Apache Solr的一个可靠而稳定的分布式架构。但是它并不完美，失败时有发生。<br/>这篇lightning博客文章将提供一些实用的技巧，当一个集合的一个特定碎片因没有领导者而停止工作，情况陷入僵局时，可以遵循这些技巧。<br/>以下Solr版本遇到了以下问题:</p><ul><li style="list-style-type: none;"><ul><li>4.10.2</li><li>5.4.0</li></ul></li></ul><p class="translated">解决问题的步骤可能包括与动物园管理员团队的人工互动<a href="https://web.archive.org/web/20220930011150/https://lucene.apache.org/solr/guide/7_3/command-line-utilities.html">【1】</a>。<br/>以下步骤摘自Solr用户邮件列表<a href="https://web.archive.org/web/20220930011150/http://lucene.472066.n3.nabble.com/Node-not-recovering-leader-elections-not-occuring-td4287819.html">【2】</a>的一个有趣的线索和该领域的实践经验。特别要感谢Jeff Wartes的建议，这些建议在很多情况下对我很有用。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c8663eb ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c8663eb" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-cbe82fd ot-flex-column-vertical" data-id="cbe82fd" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-d4aea9a elementor-widget elementor-widget-iheading" data-id="d4aea9a" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">问题</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-ef63c4a ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="ef63c4a" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-296c540 ot-flex-column-vertical" data-id="296c540" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-8902c29 elementor-widget elementor-widget-text-editor" data-id="8902c29" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<ul><li style="list-style-type: none;"><ul><li class="translated">集合中一个分片的所有节点都已启动并运行</li><li class="translated">碎片没有领袖</li><li class="translated">所有节点都处于“正在恢复”/“恢复失败”状态</li><li class="translated">搜索停止，这种情况持续了许多分钟(&gt; 5分钟)</li></ul></li></ul>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-d19901d ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="d19901d" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-e738dfa ot-flex-column-vertical" data-id="e738dfa" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-65f4aaa elementor-widget elementor-widget-iheading" data-id="65f4aaa" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        <h2 class="main-heading translated">解决办法</h2>	    </div>
+	    		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-4a7e110 ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="4a7e110" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-abfbe69 ot-flex-column-vertical" data-id="abfbe69" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-54ee3d6 elementor-widget elementor-widget-text-editor" data-id="54ee3d6" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">发生这种问题的一种可能的解释是，当Zookeeper clusterstate的节点本地版本与集中式Zookeeper集群状态发生偏离时。<br/>领导者选举失败的一个可能原因是Zookeeper故障:例如，您在某段时间内失去了&gt; =50%的集合节点或集合节点之间的连接(这是我直接试验的场景)<br/>这个故障，即使后来得到解决，也会给Zookeeper文件系统带来损坏。<br/>某些SolrCloud集合可能会保持不一致的状态。</p><p class="translated">可能需要从Zookeeper中手动删除损坏的文件:<br/>让我们从:</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-c9b9bcd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="c9b9bcd" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-a50f08d ot-flex-column-vertical" data-id="a50f08d" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9f9b77e elementor-widget elementor-widget-text-editor" data-id="9f9b77e" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated"><strong> <em>集合/ &lt;集合&gt;/leader _ elect/shard&lt;x&gt;/election</em><br/></strong>一个健康的SolrCloud集群呈现的core_nodeX与shard的副本总数一样多。<br/>您不希望这里出现重复或缺失的节点。<br/>如果你很难获得一个合理的选举，你可以尝试删除编号最低的条目(以及任何编号较低的重复条目)，并尝试再次聚焦选举。随后可能用编号最低的条目重新启动节点。</p><p class="translated"><em> <strong>集合/ &lt;集合&gt;/leader/shard&lt;x&gt;</strong></em><br/>确保该文件夹存在，并且具有作为领导者的预期副本。</p><p class="translated"><em> <strong>集合/ &lt;集合&gt;/leader _ initiated _ recovery</strong></em><br/>该文件夹也可以提供信息，这表示*leader*认为不同步的副本，通常是由于更新请求失败。</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-e8ff54c ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="e8ff54c" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-d871578 ot-flex-column-vertical" data-id="d871578" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-51879cc elementor-widget elementor-widget-text-editor" data-id="51879cc" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">完成上述验证后，有几个集合API端点可能会有用:</p>
+<p class="translated">力领袖选举<br/><em><strong>/管理/收藏？action = force leader&amp;collection =&lt;collection name&gt;&amp;shard =&lt;shard name&gt;</strong></em></p>
+<p class="translated">强制领袖再平衡<br/><strong><em>/管理/收藏？action = rebalance leaders&amp;collection = collection name</em>T9】</strong></p>
+<p class="translated"><strong>注意:</strong>重新平衡所有领导者将影响所有碎片</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-7fbfb6fd ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="7fbfb6fd" data-element_type="section" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-2b9ea5a9 ot-flex-column-vertical" data-id="2b9ea5a9" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-5ef09393 elementor-widget elementor-widget-iheading" data-id="5ef09393" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// our service</span>
+	        <h2 class="main-heading translated">不要脸的塞给我们培训和服务！</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-79683b6b elementor-widget elementor-widget-text-editor" data-id="79683b6b" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">我提到过我们做<a href="https://web.archive.org/web/20220930011150/https://sease.io/training/apache-solr-training/apache-solr-beginner-training"> Apache Solr初学者</a>和<a href="https://web.archive.org/web/20220930011150/https://sease.io/training/elasticsearch-trainings/elasticsearch-beginner-training">elastic search初学者</a>培训吗？<br/>我们还提供关于这些主题的咨询，<a href="https://web.archive.org/web/20220930011150/https://sease.io/contacts">如果您想让您的搜索引擎更上一层楼，请联系</a>！</p>					</div>
+						</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+				<section class="elementor-section elementor-top-section elementor-element elementor-element-35b63ced ot-traditional elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-id="35b63ced" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-default">
+							<div class="elementor-row">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-1a30cc15 ot-flex-column-vertical" data-id="1a30cc15" data-element_type="column">
+			<div class="elementor-column-wrap elementor-element-populated">
+							<div class="elementor-widget-wrap">
+						<div class="elementor-element elementor-element-9d90f58 elementor-widget elementor-widget-iheading" data-id="9d90f58" data-element_type="widget" data-widget_type="iheading.default">
+				<div class="elementor-widget-container">
+					<div class="ot-heading">
+	        	            <span>// STAY ALWAYS UP TO DATE</span>
+	        <h2 class="main-heading translated">订阅我们的时事通讯</h2>	    </div>
+	    		</div>
+				</div>
+				<div class="elementor-element elementor-element-4378d826 elementor-widget elementor-widget-text-editor" data-id="4378d826" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+								<div class="elementor-text-editor elementor-clearfix">
+				<p class="translated">你喜欢这个关于SolrCloud领袖选举失败的帖子吗？不要忘记订阅我们的时事通讯，以便随时了解信息检索世界的最新动态！</p>					</div>
+						</div>
+				</div>
+				<div class="elementor-element elementor-element-4548666a elementor-widget elementor-widget-wp-widget-mc4wp_form_widget" data-id="4548666a" data-element_type="widget" data-widget_type="wp-widget-mc4wp_form_widget.default">
+				<div class="elementor-widget-container">
+			<script>(function() {
+	window.mc4wp = window.mc4wp || {
+		listeners: [],
+		forms: {
+			on: function(evt, cb) {
+				window.mc4wp.listeners.push(
+					{
+						event   : evt,
+						callback: cb
+					}
+				);
+			}
+		}
+	}
+})();
+</script><!-- Mailchimp for WordPress v4.8.8 - https://wordpress.org/plugins/mailchimp-for-wp/ --><form id="mc4wp-form-1" class="mc4wp-form mc4wp-form-1343" method="post" data-id="1343" data-name="Sease Mailchimp"><div class="mc4wp-form-fields">
+<div class="subscribe-inner-form">
+	<input type="email" name="EMAIL" placeholder="Your Email" required=""/>
+	<button type="submit" class="subscribe-btn-icon"><i class="flaticon-telegram"/></button>
+</div>	
+
+<p class="translated"><label> <input name="AGREE_TO_TERMS" type="checkbox" value="1" required=""/> <a href="https://web.archive.org/web/20220930011150/https://sease.io/privacy-policy" target="_blank">我已经阅读并同意隐私政策</a> </label></p></div><label style="display: none !important;">Leave this field empty if you're human: <input type="text" name="_mc4wp_honeypot" value="" tabindex="-1" autocomplete="off"/></label><input type="hidden" name="_mc4wp_timestamp" value="1664500310"/><input type="hidden" name="_mc4wp_form_id" value="1343"/><input type="hidden" name="_mc4wp_form_element_id" value="mc4wp-form-1"/><div class="mc4wp-response"/></form><!-- / Mailchimp for WordPress Plugin -->		</div>
+				</div>
+						</div>
+					</div>
+		</div>
+								</div>
+					</div>
+		</section>
+									    
+</body>
+</html>
